@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Manifest & Web App Meta Tags -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#4F46E5">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+
+    <title>FinanceFlow - Gerenciamento Financeiro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        dark: '#1F2937',
+                        light: '#F9FAFB'
+                    }
+                }
+            }
+        }
+    </script>
+
+
+    <style>
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 50;
+                height: 100vh;
+                top: 0;
+                left: 0;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0,0,0,0.5);
+                z-index: 40;
+            }
+            
+            .overlay.open {
+                display: block;
+            }
+        }
+        
+        .job-history-modal {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .job-item {
+            transition: all 0.2s ease;
+        }
+        
+        .job-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-white w-64 border-r border-gray-200 flex flex-col">
+            <div class="p-4 flex items-center justify-between border-b border-gray-200">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-wallet text-primary text-2xl"></i>
+                    <h1 class="text-xl font-bold text-dark">FinanceFlow</h1>
+                </div>
+                <button id="close-sidebar" class="md:hidden text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg bg-primary text-white">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#custos-mensais" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                    <i class="fas fa-receipt"></i>
+                    <span>Custos Mensais</span>
+                </a>
+                <a href="#equipamentos" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                    <i class="fas fa-laptop"></i>
+                    <span>Itens de Trabalho</span>
+                </a>
+                <a href="#rotina" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Rotina de Trabalho</span>
+                </a>
+                <a href="#calculadora" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                    <i class="fas fa-calculator"></i>
+                    <span>Calculadora de Jobs</span>
+                </a>
+                <div class="pt-4 border-t border-gray-200">
+                    <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog"></i>
+                        <span>Configurações</span>
+                    </a>
+                </div>
+            </nav>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-dark">Usuário</p>
+                        <p class="text-sm text-gray-500">Premium</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile overlay -->
+        <div id="overlay" class="overlay"></div>
+        
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top navigation -->
+            <header class="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <button id="open-sidebar" class="md:hidden text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 class="text-xl font-bold text-dark">Dashboard</h2>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="save-data" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700" title="Salvar dados">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button id="reset-data" class="p-2 rounded-full hover:bg-gray-100 text-red-500 hover:text-red-700" title="Resetar dados">
+                        <i class="fas fa-rotate-left"></i>
+                    </button>
+                    <button class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <button class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+                </div>
+            </header>
+            
+            <!-- Main content area -->
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <!-- Dashboard Overview -->
+                <section id="dashboard" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Custos Mensais</p>
+                                    <h3 class="text-2xl font-bold text-dark mt-1">R$ <span id="total-custos">0,00</span></h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-blue-50 text-primary">
+                                    <i class="fas fa-receipt text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Valor Equipamentos</p>
+                                    <h3 class="text-2xl font-bold text-dark mt-1">R$ <span id="total-equipamentos">0,00</span></h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-green-50 text-secondary">
+                                    <i class="fas fa-laptop text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Valor Hora</p>
+                                    <h3 class="text-2xl font-bold text-dark mt-1">R$ <span id="valor-hora">0,00</span></h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-purple-50 text-purple-600">
+                                    <i class="fas fa-clock text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-gray-500">Total de Jobs</p>
+                                    <h3 class="text-2xl font-bold text-dark mt-1">R$ <span id="total-jobs">0,00</span></h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-yellow-50 text-yellow-600">
+                                    <i class="fas fa-briefcase text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-dark">Distribuição de Custos</h3>
+                                <button class="text-sm text-primary hover:underline">Ver todos</button>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="costsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-dark">Últimos Jobs Calculados</h3>
+                                <button id="view-job-history" class="text-sm text-primary hover:underline">Ver histórico</button>
+                            </div>
+                            <div id="recent-jobs-list" class="space-y-3">
+                                <!-- Jobs serão adicionados aqui dinamicamente -->
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-briefcase text-3xl mb-2"></i>
+                                    <p>Nenhum job calculado ainda</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Custos Mensais Section -->
+                <section id="custos-mensais" class="mt-12 space-y-6 hidden fade-in">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-dark">Custos Mensais</h2>
+                        <button id="add-expense" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Adicionar Despesa</span>
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="grid grid-cols-12 gap-4 font-medium text-gray-500">
+                                <div class="col-span-5">Descrição</div>
+                                <div class="col-span-3">Categoria</div>
+                                <div class="col-span-2 text-right">Valor</div>
+                                <div class="col-span-2 text-center">Ações</div>
+                            </div>
+                        </div>
+                        <div id="expenses-list" class="divide-y divide-gray-200">
+                            <!-- Expenses will be added here dynamically -->
+                        </div>
+                        <div class="p-4 border-t border-gray-200 bg-gray-50">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-gray-700">Total Mensal:</span>
+                                <span class="font-bold text-xl text-dark">R$ <span id="monthly-total">0,00</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Add Expense Modal -->
+                    <div id="expense-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold text-dark">Adicionar Despesa</h3>
+                                <button id="close-expense-modal" class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <form id="expense-form" class="space-y-4">
+                                <div>
+                                    <label for="expense-description" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                                    <input type="text" id="expense-description" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                </div>
+                                <div>
+                                    <label for="expense-category" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                                    <select id="expense-category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                        <option value="Moradia">Moradia</option>
+                                        <option value="Alimentação">Alimentação</option>
+                                        <option value="Transporte">Transporte</option>
+                                        <option value="Saúde">Saúde</option>
+                                        <option value="Lazer">Lazer</option>
+                                        <option value="Educação">Educação</option>
+                                        <option value="Outros">Outros</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="expense-value" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
+                                    <input type="number" step="0.01" id="expense-value" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                </div>
+                                <div class="flex justify-end space-x-3 pt-4">
+                                    <button type="button" id="cancel-expense" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
+                                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">Salvar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Equipamentos Section -->
+                <section id="equipamentos" class="mt-12 space-y-6 hidden fade-in">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-dark">Itens de Trabalho</h2>
+                        <button id="add-equipment" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Adicionar Item</span>
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="grid grid-cols-12 gap-4 font-medium text-gray-500">
+                                <div class="col-span-6">Descrição</div>
+                                <div class="col-span-3">Categoria</div>
+                                <div class="col-span-2 text-right">Valor</div>
+                                <div class="col-span-1 text-center">Ações</div>
+                            </div>
+                        </div>
+                        <div id="equipment-list" class="divide-y divide-gray-200">
+                            <!-- Equipment will be added here dynamically -->
+                        </div>
+                        <div class="p-4 border-t border-gray-200 bg-gray-50">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-gray-700">Total em Equipamentos:</span>
+                                <span class="font-bold text-xl text-dark">R$ <span id="equipment-total">0,00</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Add Equipment Modal -->
+                    <div id="equipment-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold text-dark">Adicionar Item</h3>
+                                <button id="close-equipment-modal" class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <form id="equipment-form" class="space-y-4">
+                                <div>
+                                    <label for="equipment-description" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                                    <input type="text" id="equipment-description" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                </div>
+                                <div>
+                                    <label for="equipment-category" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                                    <select id="equipment-category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                        <option value="Hardware">Hardware</option>
+                                        <option value="Software">Software</option>
+                                        <option value="Mobília">Mobília</option>
+                                        <option value="Outros">Outros</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="equipment-value" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
+                                    <input type="number" step="0.01" id="equipment-value" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                </div>
+                                <div class="flex justify-end space-x-3 pt-4">
+                                    <button type="button" id="cancel-equipment" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
+                                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">Salvar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Rotina de Trabalho Section -->
+                <section id="rotina" class="mt-12 space-y-6 hidden fade-in">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-dark">Rotina de Trabalho</h2>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <form id="routine-form" class="space-y-6">
+                            <div>
+                                <label for="desired-salary" class="block text-sm font-medium text-gray-700 mb-1">Salário Desejado (R$)</label>
+                                <input type="number" step="0.01" id="desired-salary" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                            </div>
+                            <div>
+                                <label for="work-days" class="block text-sm font-medium text-gray-700 mb-1">Dias de Trabalho por Mês</label>
+                                <input type="number" id="work-days" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                            </div>
+                            <div>
+                                <label for="daily-hours" class="block text-sm font-medium text-gray-700 mb-1">Horas de Trabalho por Dia</label>
+                                <input type="number" id="daily-hours" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                            </div>
+                            <div class="pt-2">
+                                <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark w-full">Calcular</button>
+                            </div>
+                        </form>
+                        
+                        <div id="routine-results" class="mt-8 space-y-4 hidden">
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium text-blue-700">Valor por Dia:</span>
+                                    <span class="font-bold text-xl text-blue-900">R$ <span id="daily-value">0,00</span></span>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-green-50 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium text-green-700">Valor por Hora:</span>
+                                    <span class="font-bold text-xl text-green-900">R$ <span id="hourly-value">0,00</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Calculadora de Jobs Section -->
+                <section id="calculadora" class="mt-12 space-y-6 hidden fade-in">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-dark">Calculadora de Jobs</h2>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <form id="job-calculator-form" class="space-y-6">
+                            <div>
+                                <label for="job-description" class="block text-sm font-medium text-gray-700 mb-1">Descrição do Job</label>
+                                <input type="text" id="job-description" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="logistics-cost" class="block text-sm font-medium text-gray-700 mb-1">Logística (R$)</label>
+                                    <input type="number" step="0.01" id="logistics-cost" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                </div>
+                                <div>
+                                    <label for="equipment-cost" class="block text-sm font-medium text-gray-700 mb-1">Equipamentos (R$)</label>
+                                    <input type="number" step="0.01" id="equipment-cost" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                </div>
+                                <div>
+                                    <label for="assistance-cost" class="block text-sm font-medium text-gray-700 mb-1">Assistência (R$)</label>
+                                    <input type="number" step="0.01" id="assistance-cost" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="estimated-hours" class="block text-sm font-medium text-gray-700 mb-1">Horas Estimadas</label>
+                                    <input type="number" id="estimated-hours" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                </div>
+                                <div>
+                                    <label for="difficulty-level" class="block text-sm font-medium text-gray-700 mb-1">Nível de Dificuldade</label>
+                                    <select id="difficulty-level" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                        <option value="1">Fácil</option>
+                                        <option value="1.25" selected>Médio</option>
+                                        <option value="1.5">Difícil</option>
+                                        <option value="2">Muito Difícil</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="discount-percentage" class="block text-sm font-medium text-gray-700 mb-1">Desconto (%)</label>
+                                <input type="number" id="discount-percentage" value="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                            </div>
+                            
+                            <div class="pt-2">
+                                <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark w-full">Calcular</button>
+                            </div>
+                        </form>
+                        
+                        <div id="job-results" class="mt-8 space-y-4 hidden">
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium text-gray-700">Custos Totais:</span>
+                                    <span class="font-bold text-dark">R$ <span id="total-costs">0,00</span></span>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium text-blue-700">Valor do Serviço:</span>
+                                    <span class="font-bold text-xl text-blue-900">R$ <span id="service-value">0,00</span></span>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-green-50 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium text-green-700">Valor com Desconto:</span>
+                                    <span class="font-bold text-xl text-green-900">R$ <span id="final-value">0,00</span></span>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-purple-50 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium text-purple-700">Margem de Lucro:</span>
+                                    <span class="font-bold text-xl text-purple-900">R$ <span id="profit-margin">0,00</span></span>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-yellow-50 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium text-yellow-700">Trabalhos na Calculadora:</span>
+                                    <span class="font-bold text-xl text-yellow-900"><span id="jobs-count">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Job History Modal -->
+    <div id="job-history-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-6 w-full max-w-2xl job-history-modal">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-dark">Histórico de Jobs</h3>
+                <button id="close-job-history-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="job-history-list" class="space-y-3">
+                <!-- Jobs will be listed here -->
+            </div>
+            <div class="mt-4 flex justify-between items-center border-t border-gray-200 pt-4">
+                <span class="font-medium text-gray-700">Total:</span>
+                <span class="font-bold text-xl text-dark">R$ <span id="job-history-total">0,00</span></span>
+            </div>
+            <div class="mt-4 flex justify-end">
+                <button id="clear-job-history" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Limpar Histórico</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // DOM Elements
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('overlay');
+        const openSidebarBtn = document.getElementById('open-sidebar');
+        const closeSidebarBtn = document.getElementById('close-sidebar');
+        const saveDataBtn = document.getElementById('save-data');
+        const resetDataBtn = document.getElementById('reset-data');
+        const viewJobHistoryBtn = document.getElementById('view-job-history');
+        const jobHistoryModal = document.getElementById('job-history-modal');
+        const closeJobHistoryModalBtn = document.getElementById('close-job-history-modal');
+        const clearJobHistoryBtn = document.getElementById('clear-job-history');
+        
+        // Navigation links
+        const navLinks = document.querySelectorAll('nav a');
+        const sections = {
+            dashboard: document.getElementById('dashboard'),
+            custosMensais: document.getElementById('custos-mensais'),
+            equipamentos: document.getElementById('equipamentos'),
+            rotina: document.getElementById('rotina'),
+            calculadora: document.getElementById('calculadora')
+        };
+        
+        // Data storage
+        let appData = {
+            expenses: [],
+            equipments: [],
+            routine: {},
+            jobs: []
+        };
+        
+        // Load data from localStorage
+        function loadData() {
+            const savedData = localStorage.getItem('financeFlowData');
+            if (savedData) {
+                appData = JSON.parse(savedData);
+                
+                if (appData.expenses.length > 0) {
+                    expenses = [...appData.expenses];
+                    renderExpenses();
+                }
+                
+                if (appData.equipments.length > 0) {
+                    equipments = [...appData.equipments];
+                    renderEquipments();
+                }
+                
+                if (appData.routine.desiredSalary) {
+                    document.getElementById('desired-salary').value = appData.routine.desiredSalary;
+                    document.getElementById('work-days').value = appData.routine.workDays;
+                    document.getElementById('daily-hours').value = appData.routine.dailyHours;
+                    
+                    // Trigger calculation if all fields are present
+                    if (appData.routine.desiredSalary && appData.routine.workDays && appData.routine.dailyHours) {
+                        calculateRoutineValues();
+                    }
+                }
+                
+                updateDashboard();
+                renderRecentJobs();
+            }
+        }
+        
+        // Save data to localStorage
+        function saveData() {
+            appData.expenses = [...expenses];
+            appData.equipments = [...equipments];
+            
+            // Save routine data if calculated
+            if (routineResults && !routineResults.classList.contains('hidden')) {
+                appData.routine = {
+                    desiredSalary: parseFloat(document.getElementById('desired-salary').value),
+                    workDays: parseInt(document.getElementById('work-days').value),
+                    dailyHours: parseInt(document.getElementById('daily-hours').value),
+                    dailyValue: parseFloat(document.getElementById('daily-value').textContent),
+                    hourlyValue: parseFloat(document.getElementById('hourly-value').textContent)
+                };
+            }
+            
+            localStorage.setItem('financeFlowData', JSON.stringify(appData));
+            
+            // Show success message
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2';
+            notification.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>Dados salvos com sucesso!</span>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+        
+        // Toggle sidebar on mobile
+        openSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.add('open');
+            overlay.classList.add('open');
+        });
+        
+        closeSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        });
+        
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        });
+        
+        // Navigation
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = link.getAttribute('href').substring(1);
+                
+                // Hide all sections
+                Object.values(sections).forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                // Show target section
+                if (target === '') {
+                    sections.dashboard.classList.remove('hidden');
+                } else {
+                    document.getElementById(target).classList.remove('hidden');
+                }
+                
+                // Close sidebar on mobile
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+                
+                // Update active link
+                navLinks.forEach(navLink => {
+                    navLink.classList.remove('bg-primary', 'text-white');
+                    navLink.classList.add('text-gray-700', 'hover:bg-gray-100');
+                });
+                
+                link.classList.remove('text-gray-700', 'hover:bg-gray-100');
+                link.classList.add('bg-primary', 'text-white');
+            });
+        });
+        
+        // Save data button
+        saveDataBtn.addEventListener('click', saveData);
+        
+        // Reset data button
+        resetDataBtn.addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja apagar todos os dados salvos?')) {
+                localStorage.removeItem('financeFlowData');
+                location.reload();
+            }
+        });
+
+        // Job History Modal
+        viewJobHistoryBtn.addEventListener('click', () => {
+            renderJobHistory();
+            jobHistoryModal.classList.remove('hidden');
+        });
+
+        closeJobHistoryModalBtn.addEventListener('click', () => {
+            jobHistoryModal.classList.add('hidden');
+        });
+
+        clearJobHistoryBtn.addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja limpar todo o histórico de jobs?')) {
+                appData.jobs = [];
+                saveData();
+                renderJobHistory();
+                renderRecentJobs();
+                updateDashboard();
+            }
+        });
+
+        // Render recent jobs (3 most recent)
+        function renderRecentJobs() {
+            const recentJobsList = document.getElementById('recent-jobs-list');
+            recentJobsList.innerHTML = '';
+            
+            if (appData.jobs.length === 0) {
+                recentJobsList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-briefcase text-3xl mb-2"></i>
+                        <p>Nenhum job calculado ainda</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Get last 3 jobs
+            const recentJobs = appData.jobs.slice(-3).reverse();
+            
+            recentJobs.forEach(job => {
+                const jobElement = document.createElement('div');
+                jobElement.className = 'bg-gray-50 p-4 rounded-lg job-item';
+                jobElement.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-medium text-dark">${job.description}</h4>
+                            <p class="text-sm text-gray-500">${job.date}</p>
+                        </div>
+                        <span class="font-bold text-dark">R$ ${job.value.toFixed(2)}</span>
+                    </div>
+                    <div class="mt-2 flex justify-between items-center text-sm">
+                        <span class="text-green-600">Lucro: R$ ${job.profit.toFixed(2)}</span>
+                        <span class="text-gray-500">${job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) + '%' : '0%'} de margem</span>
+                    </div>
+                `;
+                recentJobsList.appendChild(jobElement);
+            });
+        }
+
+        // Render full job history
+        function renderJobHistory() {
+            const jobHistoryList = document.getElementById('job-history-list');
+            jobHistoryList.innerHTML = '';
+            
+            if (appData.jobs.length === 0) {
+                jobHistoryList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-briefcase text-3xl mb-2"></i>
+                        <p>Nenhum job no histórico</p>
+                    </div>
+                `;
+                document.getElementById('job-history-total').textContent = '0,00';
+                return;
+            }
+            
+            // Sort jobs by date (newest first)
+            const sortedJobs = [...appData.jobs].sort((a, b) => {
+                const dateA = new Date(a.date.split('/').reverse().join('-'));
+                const dateB = new Date(b.date.split('/').reverse().join('-'));
+                return dateB - dateA;
+            });
+            
+            let totalValue = 0;
+            
+            sortedJobs.forEach(job => {
+                totalValue += job.value;
+                
+                const jobElement = document.createElement('div');
+                jobElement.className = 'bg-gray-50 p-4 rounded-lg job-item';
+                jobElement.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-medium text-dark">${job.description}</h4>
+                            <p class="text-sm text-gray-500">${job.date}</p>
+                        </div>
+                        <span class="font-bold text-dark">R$ ${job.value.toFixed(2)}</span>
+                    </div>
+                    <div class="mt-2 flex justify-between items-center text-sm">
+                        <span class="text-green-600">Lucro: R$ ${job.profit.toFixed(2)}</span>
+                        <span class="text-gray-500">${job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) + '%' : '0%'} de margem</span>
+                    </div>
+                `;
+                jobHistoryList.appendChild(jobElement);
+            });
+            
+            document.getElementById('job-history-total').textContent = totalValue.toFixed(2);
+        }
+        
+        // Initialize Chart
+        const costsChartCtx = document.getElementById('costsChart').getContext('2d');
+        let costsChart = new Chart(costsChartCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Moradia', 'Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Outros'],
+                datasets: [{
+                    data: [1200, 800, 400, 300, 200, 100],
+                    backgroundColor: [
+                        '#4F46E5',
+                        '#10B981',
+                        '#F59E0B',
+                        '#EF4444',
+                        '#8B5CF6',
+                        '#64748B'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += 'R$ ' + context.raw.toFixed(2);
+                                return label;
+                            }
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+        
+        // Update chart with current expenses data
+        function updateChart() {
+            const categories = ['Moradia', 'Alimentação', 'Transporte', 'Saúde', 'Lazer', 'Outros'];
+            const data = categories.map(category => {
+                return expenses
+                    .filter(expense => expense.category === category)
+                    .reduce((sum, expense) => sum + expense.value, 0);
+            });
+            
+            costsChart.data.datasets[0].data = data;
+            costsChart.update();
+        }
+        
+        // Custos Mensais functionality
+        const expenseModal = document.getElementById('expense-modal');
+        const addExpenseBtn = document.getElementById('add-expense');
+        const closeExpenseModalBtn = document.getElementById('close-expense-modal');
+        const cancelExpenseBtn = document.getElementById('cancel-expense');
+        const expenseForm = document.getElementById('expense-form');
+        const expensesList = document.getElementById('expenses-list');
+        const monthlyTotal = document.getElementById('monthly-total');
+        
+        let expenses = [];
+        
+        function renderExpenses() {
+            expensesList.innerHTML = '';
+            let total = 0;
+            
+            expenses.forEach(expense => {
+                total += expense.value;
+                
+                const expenseElement = document.createElement('div');
+                expenseElement.className = 'grid grid-cols-12 gap-4 p-4 items-center';
+                expenseElement.innerHTML = `
+                    <div class="col-span-5 font-medium text-dark">${expense.description}</div>
+                    <div class="col-span-3">
+                        <span class="px-3 py-1 rounded-full text-xs ${getCategoryColor(expense.category)}">${expense.category}</span>
+                    </div>
+                    <div class="col-span-2 text-right font-medium text-dark">R$ ${expense.value.toFixed(2)}</div>
+                    <div class="col-span-2 flex justify-center space-x-2">
+                        <button class="edit-expense p-2 text-blue-500 hover:text-blue-700" data-id="${expense.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-expense p-2 text-red-500 hover:text-red-700" data-id="${expense.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                expensesList.appendChild(expenseElement);
+            });
+            
+            monthlyTotal.textContent = total.toFixed(2);
+            updateDashboard();
+            updateChart();
+        }
+        
+        function getCategoryColor(category) {
+            const colors = {
+                'Moradia': 'bg-blue-100 text-blue-800',
+                'Alimentação': 'bg-green-100 text-green-800',
+                'Transporte': 'bg-yellow-100 text-yellow-800',
+                'Saúde': 'bg-red-100 text-red-800',
+                'Lazer': 'bg-purple-100 text-purple-800',
+                'Educação': 'bg-indigo-100 text-indigo-800',
+                'Outros': 'bg-gray-100 text-gray-800'
+            };
+            return colors[category] || 'bg-gray-100 text-gray-800';
+        }
+        
+        addExpenseBtn.addEventListener('click', () => {
+            expenseForm.reset();
+            expenseForm.dataset.id = '';
+            expenseModal.classList.remove('hidden');
+        });
+        
+        closeExpenseModalBtn.addEventListener('click', () => {
+            expenseModal.classList.add('hidden');
+        });
+        
+        cancelExpenseBtn.addEventListener('click', () => {
+            expenseModal.classList.add('hidden');
+        });
+        
+        expenseForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const id = expenseForm.dataset.id ? parseInt(expenseForm.dataset.id) : Date.now();
+            const description = document.getElementById('expense-description').value;
+            const category = document.getElementById('expense-category').value;
+            const value = parseFloat(document.getElementById('expense-value').value);
+            
+            if (!description || isNaN(value)) {
+                alert('Por favor, preencha todos os campos corretamente.');
+                return;
+            }
+            
+            const expense = { id, description, category, value };
+            
+            if (expenseForm.dataset.id) {
+                // Update existing expense
+                const index = expenses.findIndex(e => e.id === id);
+                if (index !== -1) {
+                    expenses[index] = expense;
+                }
+            } else {
+                // Add new expense
+                expenses.push(expense);
+            }
+            
+            renderExpenses();
+            expenseModal.classList.add('hidden');
+            saveData();
+        });
+        
+        expensesList.addEventListener('click', (e) => {
+            if (e.target.closest('.edit-expense')) {
+                const id = parseInt(e.target.closest('.edit-expense').dataset.id);
+                const expense = expenses.find(e => e.id === id);
+                
+                if (expense) {
+                    document.getElementById('expense-description').value = expense.description;
+                    document.getElementById('expense-category').value = expense.category;
+                    document.getElementById('expense-value').value = expense.value;
+                    expenseForm.dataset.id = expense.id;
+                    
+                    expenseModal.classList.remove('hidden');
+                }
+            }
+            
+            if (e.target.closest('.delete-expense')) {
+                const id = parseInt(e.target.closest('.delete-expense').dataset.id);
+                if (confirm('Tem certeza que deseja excluir esta despesa?')) {
+                    expenses = expenses.filter(e => e.id !== id);
+                    renderExpenses();
+                    saveData();
+                }
+            }
+        });
+        
+        // Equipamentos functionality
+        const equipmentModal = document.getElementById('equipment-modal');
+        const addEquipmentBtn = document.getElementById('add-equipment');
+        const closeEquipmentModalBtn = document.getElementById('close-equipment-modal');
+        const cancelEquipmentBtn = document.getElementById('cancel-equipment');
+        const equipmentForm = document.getElementById('equipment-form');
+        const equipmentList = document.getElementById('equipment-list');
+        const equipmentTotal = document.getElementById('equipment-total');
+        
+        let equipments = [];
+        
+        function renderEquipments() {
+            equipmentList.innerHTML = '';
+            let total = 0;
+            
+            equipments.forEach(equipment => {
+                total += equipment.value;
+                
+                const equipmentElement = document.createElement('div');
+                equipmentElement.className = 'grid grid-cols-12 gap-4 p-4 items-center';
+                equipmentElement.innerHTML = `
+                    <div class="col-span-6 font-medium text-dark">${equipment.description}</div>
+                    <div class="col-span-3">
+                        <span class="px-3 py-1 rounded-full text-xs ${getEquipmentCategoryColor(equipment.category)}">${equipment.category}</span>
+                    </div>
+                    <div class="col-span-2 text-right font-medium text-dark">R$ ${equipment.value.toFixed(2)}</div>
+                    <div class="col-span-1 flex justify-center">
+                        <button class="delete-equipment p-2 text-red-500 hover:text-red-700" data-id="${equipment.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                equipmentList.appendChild(equipmentElement);
+            });
+            
+            equipmentTotal.textContent = total.toFixed(2);
+            updateDashboard();
+        }
+        
+        function getEquipmentCategoryColor(category) {
+            const colors = {
+                'Hardware': 'bg-blue-100 text-blue-800',
+                'Software': 'bg-green-100 text-green-800',
+                'Mobília': 'bg-purple-100 text-purple-800',
+                'Outros': 'bg-gray-100 text-gray-800'
+            };
+            return colors[category] || 'bg-gray-100 text-gray-800';
+        }
+        
+        addEquipmentBtn.addEventListener('click', () => {
+            equipmentForm.reset();
+            equipmentForm.dataset.id = '';
+            equipmentModal.classList.remove('hidden');
+        });
+        
+        closeEquipmentModalBtn.addEventListener('click', () => {
+            equipmentModal.classList.add('hidden');
+        });
+        
+        cancelEquipmentBtn.addEventListener('click', () => {
+            equipmentModal.classList.add('hidden');
+        });
+        
+        equipmentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const id = equipmentForm.dataset.id ? parseInt(equipmentForm.dataset.id) : Date.now();
+            const description = document.getElementById('equipment-description').value;
+            const category = document.getElementById('equipment-category').value;
+            const value = parseFloat(document.getElementById('equipment-value').value);
+            
+            if (!description || isNaN(value)) {
+                alert('Por favor, preencha todos os campos corretamente.');
+                return;
+            }
+            
+            const equipment = { id, description, category, value };
+            
+            if (equipmentForm.dataset.id) {
+                // Update existing equipment
+                const index = equipments.findIndex(e => e.id === id);
+                if (index !== -1) {
+                    equipments[index] = equipment;
+                }
+            } else {
+                // Add new equipment
+                equipments.push(equipment);
+            }
+            
+            renderEquipments();
+            equipmentModal.classList.add('hidden');
+            saveData();
+        });
+        
+        equipmentList.addEventListener('click', (e) => {
+            if (e.target.closest('.delete-equipment')) {
+                const id = parseInt(e.target.closest('.delete-equipment').dataset.id);
+                if (confirm('Tem certeza que deseja excluir este item?')) {
+                    equipments = equipments.filter(e => e.id !== id);
+                    renderEquipments();
+                    saveData();
+                }
+            }
+        });
+        
+        // Rotina de Trabalho functionality
+        const routineForm = document.getElementById('routine-form');
+        const routineResults = document.getElementById('routine-results');
+        const dailyValue = document.getElementById('daily-value');
+        const hourlyValue = document.getElementById('hourly-value');
+        
+        function calculateRoutineValues() {
+            const desiredSalary = parseFloat(document.getElementById('desired-salary').value);
+            const workDays = parseInt(document.getElementById('work-days').value);
+            const dailyHours = parseInt(document.getElementById('daily-hours').value);
+            
+            if (isNaN(desiredSalary) || isNaN(workDays) || isNaN(dailyHours)) {
+                alert('Por favor, preencha todos os campos corretamente.');
+                return;
+            }
+            
+            const daily = desiredSalary / workDays;
+            const hourly = daily / dailyHours;
+            
+            dailyValue.textContent = daily.toFixed(2);
+            hourlyValue.textContent = hourly.toFixed(2);
+            
+            routineResults.classList.remove('hidden');
+            
+            // Update dashboard
+            updateDashboard();
+            saveData();
+        }
+        
+        routineForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            calculateRoutineValues();
+        });
+        
+        // Calculadora de Jobs functionality
+        const jobCalculatorForm = document.getElementById('job-calculator-form');
+        const jobResults = document.getElementById('job-results');
+        const totalCosts = document.getElementById('total-costs');
+        const serviceValue = document.getElementById('service-value');
+        const finalValue = document.getElementById('final-value');
+        const profitMargin = document.getElementById('profit-margin');
+        
+        jobCalculatorForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const logisticsCost = parseFloat(document.getElementById('logistics-cost').value) || 0;
+            const equipmentCost = parseFloat(document.getElementById('equipment-cost').value) || 0;
+            const assistanceCost = parseFloat(document.getElementById('assistance-cost').value) || 0;
+            const estimatedHours = parseFloat(document.getElementById('estimated-hours').value) || 0;
+            const difficultyLevel = parseFloat(document.getElementById('difficulty-level').value);
+            const discountPercentage = parseFloat(document.getElementById('discount-percentage').value) || 0;
+            
+            const hourlyRate = parseFloat(document.getElementById('hourly-value').textContent) || 0;
+            
+            if (hourlyRate === 0) {
+                alert('Por favor, calcule primeiro seu valor por hora na seção "Rotina de Trabalho".');
+                return;
+            }
+            
+            const totalDirectCosts = logisticsCost + equipmentCost + assistanceCost;
+            const serviceCost = estimatedHours * hourlyRate * difficultyLevel;
+            const totalBeforeDiscount = totalDirectCosts + serviceCost;
+            const discountAmount = totalBeforeDiscount * (discountPercentage / 100);
+            const totalWithDiscount = totalBeforeDiscount - discountAmount;
+            const profit = totalWithDiscount - totalDirectCosts;
+            
+            totalCosts.textContent = totalDirectCosts.toFixed(2);
+            serviceValue.textContent = serviceCost.toFixed(2);
+            finalValue.textContent = totalWithDiscount.toFixed(2);
+            profitMargin.textContent = profit.toFixed(2);
+            
+            jobResults.classList.remove('hidden');
+            
+            // Update dashboard
+            updateDashboard();
+            
+            // Save job to history
+            const jobDescription = document.getElementById('job-description').value || 'Job sem descrição';
+            const job = {
+                description: jobDescription,
+                date: new Date().toLocaleDateString('pt-BR'),
+                value: totalWithDiscount,
+                profit: profit
+            };
+            
+            appData.jobs.push(job);
+            saveData();
+            renderRecentJobs();
+            updateDashboard();
+            
+            // Update jobs count
+            document.getElementById('jobs-count').textContent = appData.jobs.length;
+        });
+        
+        // Calculate total of all jobs
+        function calculateTotalJobs() {
+            const total = appData.jobs.reduce((sum, job) => sum + job.value, 0);
+            document.getElementById('total-jobs').textContent = total.toFixed(2);
+        }
+        
+        // Update dashboard with all current values
+        function updateDashboard() {
+            // Update expenses total
+            const totalExpenses = expenses.reduce((sum, expense) => sum + expense.value, 0);
+            document.getElementById('total-custos').textContent = totalExpenses.toFixed(2);
+            
+            // Update equipment total
+            const totalEquipments = equipments.reduce((sum, equipment) => sum + equipment.value, 0);
+            document.getElementById('total-equipamentos').textContent = totalEquipments.toFixed(2);
+            
+            // Update hourly rate if calculated
+            if (routineResults && !routineResults.classList.contains('hidden')) {
+                const hourlyRate = parseFloat(document.getElementById('hourly-value').textContent);
+                document.getElementById('valor-hora').textContent = hourlyRate.toFixed(2);
+            }
+            
+            // Update total jobs
+            calculateTotalJobs();
+            
+            // Update jobs count
+            document.getElementById('jobs-count').textContent = appData.jobs.length;
+        }
+        
+        // Initialize the app
+     
+        loadData();
+        renderExpenses();
+        renderEquipments();
+        renderRecentJobs();
+        updateDashboard();
+    </script>
+</body>
+</html>
