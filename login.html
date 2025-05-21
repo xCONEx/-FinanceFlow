@@ -8,12 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-
-
-
     <style>
         .auth-container {
             background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
@@ -22,13 +16,6 @@
             backdrop-filter: blur(10px);
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .input-field {
-            transition: all 0.3s ease;
-        }
-        .input-field:focus-within {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
         }
         .btn-google {
             transition: all 0.3s ease;
@@ -48,150 +35,22 @@
 </head>
 <body class="min-h-screen flex items-center justify-center auth-container p-4">
     <div class="auth-card rounded-2xl shadow-xl overflow-hidden w-full max-w-md fade-in">
-        <!-- Tabs -->
-        <div class="flex bg-white bg-opacity-20">
-            <button id="login-tab" class="flex-1 py-4 font-medium text-white border-b-2 border-primary">Login</button>
-            <button id="register-tab" class="flex-1 py-4 font-medium text-white border-b-2 border-transparent">Criar Conta</button>
-        </div>
-        
-        <!-- Login Form -->
-        <div id="login-form" class="p-8 bg-white">
+        <div class="p-8 bg-white">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Bem-vindo de volta</h1>
-                <p class="text-gray-600">Acesse sua conta para continuar</p>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Bem-vindo ao FinanceFlow</h1>
+                <p class="text-gray-600">Faça login com sua conta Google para continuar</p>
             </div>
             
-            <form id="login-email-form" class="space-y-6">
-                <div class="input-field">
-                    <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-envelope text-gray-400"></i>
-                        </div>
-                        <input type="email" id="login-email" required class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="seu@email.com">
-                    </div>
-                </div>
-                
-                <div class="input-field">
-                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-lock text-gray-400"></i>
-                        </div>
-                        <input type="password" id="login-password" required class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="••••••••">
-                    </div>
-                </div>
-                
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input id="remember-me" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
-                        <label for="remember-me" class="ml-2 block text-sm text-gray-700">Lembrar-me</label>
-                    </div>
-                    <a href="#" class="text-sm text-primary hover:underline">Esqueceu a senha?</a>
-                </div>
-                
-                <button type="submit" class="w-full py-3 px-4 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition duration-200">
-                    Entrar
-                </button>
-                
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">Ou continue com</span>
-                    </div>
-                </div>
-                
-                <button type="button" onclick="signInWithGoogle()" class="btn-google w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 flex items-center justify-center space-x-3">
+            <div class="space-y-6">
+                <button id="google-login" class="btn-google w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 flex items-center justify-center space-x-3">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" class="h-5 w-5">
-                    <span>Google</span>
+                    <span>Continuar com Google</span>
                 </button>
                 
                 <div class="text-center text-sm text-gray-500">
-                    Não tem uma conta? <button type="button" class="text-primary hover:underline switch-to-register">Cadastre-se</button>
+                    Ao continuar, você concorda com nossos <a href="#" class="text-primary hover:underline">Termos de Serviço</a> e <a href="#" class="text-primary hover:underline">Política de Privacidade</a>
                 </div>
-            </form>
-        </div>
-        
-        <!-- Register Form (hidden by default) -->
-        <div id="register-form" class="p-8 bg-white hidden">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Crie sua conta</h1>
-                <p class="text-gray-600">Preencha os campos abaixo para se registrar</p>
             </div>
-            
-            <form id="register-email-form" class="space-y-6">
-                <div class="input-field">
-                    <label for="register-name" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-user text-gray-400"></i>
-                        </div>
-                        <input type="text" id="register-name" required class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="Seu nome">
-                    </div>
-                </div>
-                
-                <div class="input-field">
-                    <label for="register-email" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-envelope text-gray-400"></i>
-                        </div>
-                        <input type="email" id="register-email" required class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="seu@email.com">
-                    </div>
-                </div>
-                
-                <div class="input-field">
-                    <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-lock text-gray-400"></i>
-                        </div>
-                        <input type="password" id="register-password" required class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="••••••••">
-                    </div>
-                    <p class="mt-1 text-xs text-gray-500">Mínimo de 6 caracteres</p>
-                </div>
-                
-                <div class="input-field">
-                    <label for="register-confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Senha</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-lock text-gray-400"></i>
-                        </div>
-                        <input type="password" id="register-confirm-password" required class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="••••••••">
-                    </div>
-                </div>
-                
-                <div class="flex items-center">
-                    <input id="terms" type="checkbox" required class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
-                    <label for="terms" class="ml-2 block text-sm text-gray-700">
-                        Eu concordo com os <a href="#" class="text-primary hover:underline">Termos de Serviço</a> e <a href="#" class="text-primary hover:underline">Política de Privacidade</a>
-                    </label>
-                </div>
-                
-                <button type="submit" class="w-full py-3 px-4 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition duration-200">
-                    Criar Conta
-                </button>
-                
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">Ou cadastre-se com</span>
-                    </div>
-                </div>
-                
-                <button type="button" id="google-register" class="btn-google w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 flex items-center justify-center space-x-3">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" class="h-5 w-5">
-                    <span>Google</span>
-                </button>
-                
-                <div class="text-center text-sm text-gray-500">
-                    Já tem uma conta? <button type="button" class="text-primary hover:underline switch-to-login">Faça login</button>
-                </div>
-            </form>
         </div>
     </div>
 
@@ -203,24 +62,9 @@
         </div>
     </div>
 
-    <!-- Error Modal -->
-    <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-red-500">Erro</h3>
-                <button id="close-error-modal" class="text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <p id="error-message" class="text-gray-700 mb-4">Mensagem de erro aqui</p>
-            <button id="confirm-error" class="w-full py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-dark">
-                OK
-            </button>
-        </div>
-    </div>
-
     <script>
         // Firebase Configuration
+  // Configuração do Firebase do projeto do Yuri
   const firebaseConfig = {
     apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
     authDomain: "financeflow-e0fae.firebaseapp.com",
@@ -233,47 +77,11 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        //const db = firebase.firestore();
         const provider = new firebase.auth.GoogleAuthProvider();
 
         // DOM Elements
-        const loginTab = document.getElementById('login-tab');
-        const registerTab = document.getElementById('register-tab');
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
         const googleLoginBtn = document.getElementById('google-login');
-        const googleRegisterBtn = document.getElementById('google-register');
         const loadingOverlay = document.getElementById('loading-overlay');
-        const errorModal = document.getElementById('error-modal');
-        const errorMessage = document.getElementById('error-message');
-        const closeErrorModal = document.getElementById('close-error-modal');
-        const confirmError = document.getElementById('confirm-error');
-        const switchToRegister = document.querySelectorAll('.switch-to-register');
-        const switchToLogin = document.querySelectorAll('.switch-to-login');
-
-        // Switch between login and register forms
-        function showLoginForm() {
-            loginTab.classList.add('border-primary');
-            loginTab.classList.remove('border-transparent');
-            registerTab.classList.add('border-transparent');
-            registerTab.classList.remove('border-primary');
-            loginForm.classList.remove('hidden');
-            registerForm.classList.add('hidden');
-        }
-
-        function showRegisterForm() {
-            registerTab.classList.add('border-primary');
-            registerTab.classList.remove('border-transparent');
-            loginTab.classList.add('border-transparent');
-            loginTab.classList.remove('border-primary');
-            registerForm.classList.remove('hidden');
-            loginForm.classList.add('hidden');
-        }
-
-        loginTab.addEventListener('click', showLoginForm);
-        registerTab.addEventListener('click', showRegisterForm);
-        switchToRegister.forEach(btn => btn.addEventListener('click', showRegisterForm));
-        switchToLogin.forEach(btn => btn.addEventListener('click', showLoginForm));
 
         // Show loading overlay
         function showLoading() {
@@ -285,142 +93,54 @@
             loadingOverlay.classList.add('hidden');
         }
 
-        // Show error modal
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorModal.classList.remove('hidden');
+        // Save user data to localStorage
+        function saveUserData(user) {
+            const userData = {
+                uid: user.uid,
+                displayName: user.displayName,
+                email: user.email,
+                photoURL: user.photoURL,
+                lastLogin: new Date().toISOString()
+            };
+            localStorage.setItem('userData', JSON.stringify(userData));
         }
 
-        // Hide error modal
-        function hideError() {
-            errorModal.classList.add('hidden');
+        // Get user data from localStorage
+        function getUserData() {
+            const userData = localStorage.getItem('userData');
+            return userData ? JSON.parse(userData) : null;
         }
-
-        closeErrorModal.addEventListener('click', hideError);
-        confirmError.addEventListener('click', hideError);
-
-        // Email/Password Login
-        document.getElementById('login-email-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            showLoading();
-            
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-                // Login successful - redirect to app
-                window.location.href = 'app.html';
-            } catch (error) {
-                hideLoading();
-                showError(getErrorMessage(error.code));
-            }
-        });
-
-        // Email/Password Registration
-        document.getElementById('register-email-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            showLoading();
-            
-            const name = document.getElementById('register-name').value;
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
-            const confirmPassword = document.getElementById('register-confirm-password').value;
-            
-            if (password !== confirmPassword) {
-                hideLoading();
-                showError('As senhas não coincidem.');
-                return;
-            }
-            
-            try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                // Update user profile with name
-                await userCredential.user.updateProfile({
-                    displayName: name
-                });
-                // Registration successful - redirect to app
-                window.location.href = 'app.html';
-            } catch (error) {
-                hideLoading();
-                showError(getErrorMessage(error.code));
-            }
-        });
 
         // Google Authentication
-async function signInWithGoogle() {
-    showLoading();
-    try {
-        const result = await auth.signInWithPopup(provider);
-        const user = result.user;
-
-        // UID do usuário
-        const uid = user.uid;
-
-        // Referência ao documento no Firestore
-        const userRef = db.collection("usuarios").doc(uid);
-        const docSnap = await userRef.get();
-
-        if (docSnap.exists) {
-            // Dados encontrados na nuvem
-            const cloudData = docSnap.data();
-            localStorage.setItem('financeFlowData', JSON.stringify(cloudData));
-            console.log("☁️ Dados carregados da nuvem.");
-        } else {
-            // Nenhum dado ainda — criar com estrutura padrão
-            const initialData = {
-                expenses: [],
-                equipments: [],
-                routine: {},
-                jobs: []
-            };
-            await userRef.set(initialData);
-            localStorage.setItem('financeFlowData', JSON.stringify(initialData));
-            console.log("☁️ Novo usuário criado na nuvem.");
+        async function signInWithGoogle() {
+            showLoading();
+            try {
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                
+                // Save user data locally
+                saveUserData(user);
+                
+                // Redirect to app
+                window.location.href = 'app.html';
+            } catch (error) {
+                hideLoading();
+                console.error('Erro na autenticação:', error);
+                alert('Erro ao fazer login com Google. Por favor, tente novamente.');
+            }
         }
-
-        // Redirecionar
-        window.location.href = 'app.html';
-
-    } catch (error) {
-        hideLoading();
-        showError(getErrorMessage(error.code));
-    }
-}
-
 
         googleLoginBtn.addEventListener('click', signInWithGoogle);
-        googleRegisterBtn.addEventListener('click', signInWithGoogle);
 
-        // Error message mapping
-        function getErrorMessage(errorCode) {
-            const messages = {
-                'auth/invalid-email': 'E-mail inválido.',
-                'auth/user-disabled': 'Esta conta foi desativada.',
-                'auth/user-not-found': 'Nenhuma conta encontrada com este e-mail.',
-                'auth/wrong-password': 'Senha incorreta.',
-                'auth/email-already-in-use': 'Este e-mail já está em uso.',
-                'auth/operation-not-allowed': 'Operação não permitida.',
-                'auth/weak-password': 'A senha deve ter no mínimo 6 caracteres.',
-                'auth/too-many-requests': 'Muitas tentativas. Tente novamente mais tarde.',
-                'auth/account-exists-with-different-credential': 'Este e-mail já está associado a outra conta.',
-                'auth/popup-closed-by-user': 'A janela de autenticação foi fechada.',
-                'auth/cancelled-popup-request': 'Autenticação cancelada.',
-                'auth/network-request-failed': 'Erro de conexão. Verifique sua internet.'
-            };
-            
-            return messages[errorCode] || 'Ocorreu um erro. Por favor, tente novamente.';
-        }
-
-        // Check if user is already logged in
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // User is signed in, redirect to app
-                window.location.href = 'index.html';
+        // Check if user is already logged in locally
+        window.addEventListener('DOMContentLoaded', () => {
+            const userData = getUserData();
+            if (userData) {
+                // User data exists locally, you could automatically log them in
+                // or show their information
+                console.log('Usuário encontrado no localStorage:', userData);
             }
         });
     </script>
-
-    
 </body>
 </html>
