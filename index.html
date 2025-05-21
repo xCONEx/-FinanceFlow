@@ -174,7 +174,7 @@
                     <span>Calculadora de Jobs</span>
                 </a>
                 <div class="pt-4 border-t border-gray-200">
-                    <a href="#" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                    <a href="#configuracoes" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100">
                         <i class="fas fa-cog"></i>
                         <span>Configurações</span>
                     </a>
@@ -208,28 +208,31 @@
                 </div>
                 <div class="flex items-center space-x-4">
 
-                    <!-- Botões de Exportar e Importar -->
-<button id="export-data" class="p-2 rounded-full hover:bg-gray-100 text-green-500 hover:text-green-700" title="Exportar dados">
-  <i class="fas fa-download"></i>
-</button>
+                    <!-- Botões de Exportar e Importar 
 
-<label for="import-data" class="p-2 rounded-full hover:bg-gray-100 text-blue-500 hover:text-blue-700 cursor-pointer" title="Importar dados">
-  <i class="fas fa-upload"></i>
-  <input type="file" id="import-data" accept=".json" class="hidden">
-</label>
+                    <button id="export-data" class="p-2 rounded-full hover:bg-gray-100 text-green-500 hover:text-green-700" title="Exportar dados">
+                     <i class="fas fa-download"></i>
+                    </button>
+
+                    <label for="import-data" class="p-2 rounded-full hover:bg-gray-100 text-blue-500 hover:text-blue-700 cursor-pointer" title="Importar dados">
+                     <i class="fas fa-upload"></i>
+                     <input type="file" id="import-data" accept=".json" class="hidden">
+                    </label>
 
                     <button id="save-data" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700" title="Salvar dados">
                         <i class="fas fa-save"></i>
                     </button>
                     <button id="reset-data" class="p-2 rounded-full hover:bg-gray-100 text-red-500 hover:text-red-700" title="Resetar dados">
                         <i class="fas fa-rotate-left"></i>
-                    </button>
-                   <button id="open-notify" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700" title="Notificações">
-  <i class="fas fa-bell"></i>
-</button>
+                    </button> -->
 
 
-                    <button id="open-help" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700" title="Ajuda">
+                   <button id="open-notify" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-green-700" title="Notificações">
+                <i class="fas fa-bell"></i>
+                 </button>
+
+
+                    <button id="open-help" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-red-700" title="Ajuda">
                      <i class="fas fa-question-circle"></i>
                     </button>
 
@@ -507,6 +510,8 @@
                     </div>
                 </section>
                 
+
+
                     <!-- Calculadora de Jobs Section -->
                 <section id="calculadora" class="mt-12 space-y-6 hidden fade-in">
                     <div class="flex items-center justify-between">
@@ -595,6 +600,49 @@
                         </div>
                     </div>
                 </section>
+
+               <!-- Aba de Configurações - FinanceFlow -->
+
+               <section id="configuracoes" class="mt-12 space-y-6 hidden fade-in">
+                  
+  <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-dark">Configurações</h2>
+                    </div>
+                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+
+  <!-- Botões -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+    <button id="save-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300">
+      <i class="fas fa-save text-primary"></i>
+      Salvar dados
+    </button>
+    <button id="export-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300">
+      <i class="fas fa-download text-green-500"></i>
+      Exportar dados
+    </button>
+    <label for="import-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 cursor-pointer">
+      <i class="fas fa-upload text-blue-500"></i>
+      Importar dados
+      <input type="file" id="import-data" accept=".json" class="hidden">
+    </label>
+    <button id="reset-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300">
+      <i class="fas fa-trash-alt text-red-500"></i>
+      Resetar tudo
+    </button>
+  </div>
+
+  <!-- Sobre o App -->
+  <div class="pt-6 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+    <p><strong>📱 FinanceFlow</strong> — Sistema de gestão e precificação para audiovisual</p>
+    <p>🛠️ Desenvolvido por <strong>Yuri Adriel</strong></p>
+    <p>🔢 Versão: <span class="text-primary font-semibold">1.0.0</span></p>
+    <p>📸 Instagram: <a href="https://instagram.com/euyuriadriel" target="_blank" class="text-primary hover:underline">@euyuriadriel</a></p>
+  
+</div>
+</div>
+</section>
+
+
             </main>
         </div>
     </div>
@@ -623,6 +671,25 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+
+
+document.getElementById('export-data-settings')?.addEventListener('click', () => {
+  const data = JSON.stringify(appData, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'financeflow-dados.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+
+
+
 
         function formatCurrencyInput(input) {
   let value = input.value.replace(/\D/g, '');
@@ -658,7 +725,9 @@ document.querySelectorAll('input.currency-format').forEach(input => {
             custosMensais: document.getElementById('custos-mensais'),
             equipamentos: document.getElementById('equipamentos'),
             rotina: document.getElementById('rotina'),
-            calculadora: document.getElementById('calculadora')
+            calculadora: document.getElementById('calculadora'),
+            configuracoes: document.getElementById('configuracoes')
+            
         };
         
         // Data storage
@@ -793,6 +862,8 @@ document.querySelectorAll('input.currency-format').forEach(input => {
                 location.reload();
             }
         });
+
+    
 
         // Exportar dados para .json
 document.getElementById('export-data').addEventListener('click', () => {
