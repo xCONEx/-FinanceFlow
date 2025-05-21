@@ -10,6 +10,10 @@
 <meta name="theme-color" content="#4F46E5">
 <link rel="apple-touch-icon" href="icon-192.png">
 
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
 
     <title>FinanceFlow - Gerenciamento Financeiro</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -96,6 +100,46 @@
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
+
+
+    <!-- Modal de Ajuda -->
+<div id="help-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex justify-center items-center px-4">
+  <div class="bg-white p-6 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-lg">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-dark">Como usar o FinanceFlow</h2>
+      <button id="close-help" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+    </div>
+    <ul class="text-sm text-gray-700 space-y-2">
+      <li>✅ Preencha seus <strong>custos mensais</strong></li>
+      <li>🛠️ Adicione seus <strong>equipamentos</strong></li>
+      <li>🕒 Configure sua <strong>rotina de trabalho</strong></li>
+      <li>💼 Use a <strong>calculadora de jobs</strong> para orçar projetos</li>
+      <li>💾 Salve, exporte e importe seus dados</li>
+    </ul>
+    <div class="mt-4 text-right">
+      <a href="https://seulink.com" target="_blank" class="text-primary hover:underline text-sm">Ver tutorial completo</a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Notificações -->
+<div id="notify-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex justify-center items-center px-4">
+  <div class="bg-white p-6 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-lg">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold text-dark">Novidades</h2>
+      <button id="close-notify" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+    </div>
+    <ul class="text-sm text-gray-700 space-y-2">
+      <li>✨ Agora você pode exportar e importar seus dados!</li>
+      <li>📊 Total de Jobs adicionado ao Dashboard</li>
+      <li>🧠 Em breve: login com nuvem e backup automático</li>
+      <li>🎓 Curso sobre precificação audiovisual em breve</li>
+    </ul>
+  </div>
+</div>
+
+
+
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div class="sidebar bg-white w-64 border-r border-gray-200 flex flex-col">
@@ -142,8 +186,8 @@
                         <i class="fas fa-user"></i>
                     </div>
                     <div>
-                        <p class="font-medium text-dark">Usuário</p>
-                        <p class="text-sm text-gray-500">Premium</p>
+                        <p class="font-medium text-dark">Yuri Adriel</p>
+                        <p class="text-sm text-gray-500">CEO</p>
                     </div>
                 </div>
             </div>
@@ -163,18 +207,33 @@
                     <h2 class="text-xl font-bold text-dark">Dashboard</h2>
                 </div>
                 <div class="flex items-center space-x-4">
+
+                    <!-- Botões de Exportar e Importar -->
+<button id="export-data" class="p-2 rounded-full hover:bg-gray-100 text-green-500 hover:text-green-700" title="Exportar dados">
+  <i class="fas fa-download"></i>
+</button>
+
+<label for="import-data" class="p-2 rounded-full hover:bg-gray-100 text-blue-500 hover:text-blue-700 cursor-pointer" title="Importar dados">
+  <i class="fas fa-upload"></i>
+  <input type="file" id="import-data" accept=".json" class="hidden">
+</label>
+
                     <button id="save-data" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700" title="Salvar dados">
                         <i class="fas fa-save"></i>
                     </button>
                     <button id="reset-data" class="p-2 rounded-full hover:bg-gray-100 text-red-500 hover:text-red-700" title="Resetar dados">
                         <i class="fas fa-rotate-left"></i>
                     </button>
-                    <button class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700">
-                        <i class="fas fa-bell"></i>
+                   <button id="open-notify" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700" title="Notificações">
+  <i class="fas fa-bell"></i>
+</button>
+
+
+                    <button id="open-help" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700" title="Ajuda">
+                     <i class="fas fa-question-circle"></i>
                     </button>
-                    <button class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700">
-                        <i class="fas fa-question-circle"></i>
-                    </button>
+
+
                 </div>
             </header>
             
@@ -233,7 +292,7 @@
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="font-bold text-dark">Distribuição de Custos</h3>
-                                <button class="text-sm text-primary hover:underline">Ver todos</button>
+                                
                             </div>
                             <div class="chart-container">
                                 <canvas id="costsChart"></canvas>
@@ -253,6 +312,14 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mt-6">
+  <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Evolução Mensal</h2>
+  <canvas id="graficoEvolucao" height="120"></canvas>
+</div>
+
+
+
                 </section>
                 
                 <!-- Custos Mensais Section -->
@@ -322,6 +389,8 @@
                             </form>
                         </div>
                     </div>
+
+
                 </section>
                 
                 <!-- Equipamentos Section -->
@@ -371,9 +440,12 @@
                                 <div>
                                     <label for="equipment-category" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
                                     <select id="equipment-category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                        <option value="Câmera">Câmera</option>
+                                        <option value="Lente">Lente</option>
                                         <option value="Hardware">Hardware</option>
                                         <option value="Software">Software</option>
-                                        <option value="Mobília">Mobília</option>
+                                        <option value="Iluminação">Iluminação</option>
+                                        <option value="Audio">Audio</option>
                                         <option value="Outros">Outros</option>
                                     </select>
                                 </div>
@@ -703,6 +775,41 @@
             }
         });
 
+        // Exportar dados para .json
+document.getElementById('export-data').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(appData, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'financeflow-dados.json';
+  link.click();
+  
+  URL.revokeObjectURL(url);
+});
+
+// Importar dados de .json
+document.getElementById('import-data').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const importedData = JSON.parse(event.target.result);
+      appData = importedData;
+      localStorage.setItem('financeFlowData', JSON.stringify(appData));
+      updateDashboard();
+      alert('✅ Dados importados com sucesso!');
+    } catch (err) {
+      alert('❌ Erro ao importar o arquivo. Verifique se está no formato correto.');
+    }
+  };
+  reader.readAsText(file);
+});
+
+
+
         // Job History Modal
         viewJobHistoryBtn.addEventListener('click', () => {
             renderJobHistory();
@@ -1020,6 +1127,7 @@
                     </div>
                     <div class="col-span-2 text-right font-medium text-dark">R$ ${equipment.value.toFixed(2)}</div>
                     <div class="col-span-1 flex justify-center">
+
                         <button class="delete-equipment p-2 text-red-500 hover:text-red-700" data-id="${equipment.id}">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -1035,11 +1143,15 @@
         
         function getEquipmentCategoryColor(category) {
             const colors = {
-                'Hardware': 'bg-blue-100 text-blue-800',
+                'Câmera': 'bg-blue-100 text-blue-800',
+                'Lente': 'bg-red-100 text-red-800',
+                'Hardware': 'bg-pink-100 text-pink-800',
                 'Software': 'bg-green-100 text-green-800',
-                'Mobília': 'bg-purple-100 text-purple-800',
+                'Iluminação': 'bg-yellow-100 text-yellow-800',
+                'Audio': 'bg-purple-100 text-purple-800',
                 'Outros': 'bg-gray-100 text-gray-800'
             };
+
             return colors[category] || 'bg-gray-100 text-gray-800';
         }
         
@@ -1133,6 +1245,7 @@
             calculateRoutineValues();
         });
         
+
         // Calculadora de Jobs functionality
         const jobCalculatorForm = document.getElementById('job-calculator-form');
         const jobResults = document.getElementById('job-results');
@@ -1228,7 +1341,79 @@
         renderExpenses();
         renderEquipments();
         renderRecentJobs();
+        gerarGraficoEvolucao();
         updateDashboard();
-    </script>
+
+        // Ajuda
+const helpBtn = document.getElementById('open-help');
+const helpModal = document.getElementById('help-modal');
+const closeHelp = document.getElementById('close-help');
+
+helpBtn?.addEventListener('click', () => helpModal.classList.remove('hidden'));
+closeHelp?.addEventListener('click', () => helpModal.classList.add('hidden'));
+
+// Notificações
+const notifyBtn = document.getElementById('open-notify');
+const notifyModal = document.getElementById('notify-modal');
+const closeNotify = document.getElementById('close-notify');
+
+notifyBtn?.addEventListener('click', () => notifyModal.classList.remove('hidden'));
+closeNotify?.addEventListener('click', () => notifyModal.classList.add('hidden'));
+
+
+
+function agruparFaturamentoPorMes(jobs) {
+  const resultado = {};
+
+  jobs.forEach(job => {
+    const data = new Date(job.date);
+    const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`; // Ex: "2024-05"
+    resultado[chave] = (resultado[chave] || 0) + (parseFloat(job.value) || 0);
+  });
+
+  return resultado;
+}
+
+function gerarGraficoEvolucao() {
+  const ctx = document.getElementById('graficoEvolucao');
+  if (!ctx || !appData.jobs) return;
+
+  const agrupado = agruparFaturamentoPorMes(appData.jobs);
+
+  const labels = Object.keys(agrupado).sort(); // ordena por mês
+  const valores = labels.map(label => agrupado[label]);
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels.map(label => {
+        const [ano, mes] = label.split('-');
+        return `${mes}/${ano}`;
+      }),
+      datasets: [{
+        label: 'Faturamento (R$)',
+        data: valores,
+        backgroundColor: '#4F46E5'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => `R$ ${ctx.raw.toFixed(2)}` } }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+
+</script>
+
+
+
+
 </body>
 </html>
