@@ -8,6 +8,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+
+
     <style>
         .auth-container {
             background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
@@ -97,7 +103,7 @@
                     </div>
                 </div>
                 
-                <button type="button" id="google-login" class="btn-google w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 flex items-center justify-center space-x-3">
+                <button type="button" onclick="signInWithGoogle()" class="btn-google w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 flex items-center justify-center space-x-3">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo" class="h-5 w-5">
                     <span>Google</span>
                 </button>
@@ -215,18 +221,19 @@
 
     <script>
         // Firebase Configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
-  authDomain: "financeflow-e0fae.firebaseapp.com",
-  projectId: "financeflow-e0fae",
-  storageBucket: "financeflow-e0fae.firebasestorage.app",
-  messagingSenderId: "970984329138",
-  appId: "1:970984329138:web:429a185b8bab1971991eab"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
+    authDomain: "financeflow-e0fae.firebaseapp.com",
+    projectId: "financeflow-e0fae",
+    storageBucket: "financeflow-e0fae.firebasestorage.app",
+    messagingSenderId: "970984329138",
+    appId: "1:970984329138:web:429a185b8bab1971991eab"
+  };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        //const db = firebase.firestore();
         const provider = new firebase.auth.GoogleAuthProvider();
 
         // DOM Elements
@@ -341,17 +348,46 @@ const firebaseConfig = {
         });
 
         // Google Authentication
-        async function signInWithGoogle() {
-            showLoading();
-            try {
-                await auth.signInWithPopup(provider);
-                // Authentication successful - redirect to app
-                window.location.href = 'app.html';
-            } catch (error) {
-                hideLoading();
-                showError(getErrorMessage(error.code));
-            }
+async function signInWithGoogle() {
+    showLoading();
+    try {
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+
+        // UID do usuário
+        const uid = user.uid;
+
+        // Referência ao documento no Firestore
+        const userRef = db.collection("usuarios").doc(uid);
+        const docSnap = await userRef.get();
+
+        if (docSnap.exists) {
+            // Dados encontrados na nuvem
+            const cloudData = docSnap.data();
+            localStorage.setItem('financeFlowData', JSON.stringify(cloudData));
+            console.log("☁️ Dados carregados da nuvem.");
+        } else {
+            // Nenhum dado ainda — criar com estrutura padrão
+            const initialData = {
+                expenses: [],
+                equipments: [],
+                routine: {},
+                jobs: []
+            };
+            await userRef.set(initialData);
+            localStorage.setItem('financeFlowData', JSON.stringify(initialData));
+            console.log("☁️ Novo usuário criado na nuvem.");
         }
+
+        // Redirecionar
+        window.location.href = 'app.html';
+
+    } catch (error) {
+        hideLoading();
+        showError(getErrorMessage(error.code));
+    }
+}
+
 
         googleLoginBtn.addEventListener('click', signInWithGoogle);
         googleRegisterBtn.addEventListener('click', signInWithGoogle);
@@ -380,9 +416,11 @@ const firebaseConfig = {
         auth.onAuthStateChanged((user) => {
             if (user) {
                 // User is signed in, redirect to app
-                window.location.href = '/index.html';
+                window.location.href = 'index.html';
             }
         });
     </script>
+
+    
 </body>
 </html>
