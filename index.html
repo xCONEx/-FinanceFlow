@@ -21,6 +21,14 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
+<!-- Supabase -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+  const supabase = supabase.createClient('https://SEU-PROJETO.supabase.co', 'SUA-CHAVE-PUBLICA');
+</script>
+
+
 
     <title>FinanceFlow - Gerenciamento Financeiro</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -734,6 +742,20 @@ importInput?.addEventListener("change", async (event) => {
     try {
       const data = JSON.parse(e.target.result);
       localStorage.setItem("financeFlowData", JSON.stringify(data));
+// Obter dados do Firebase
+const userData = JSON.parse(localStorage.getItem('userData'));
+if (userData?.uid) {
+  supabase
+    .from('usuarios_dados')
+    .upsert([{ uid: userData.uid, dados: appData }], { onConflict: ['uid'] })
+    .then(({ data, error }) => {
+      if (error) {
+        console.error('Erro ao salvar no Supabase:', error);
+      } else {
+        console.log('Dados salvos na nuvem via Supabase!', data);
+      }
+    });
+}
 
       const user = auth.currentUser;
       if (user) {
@@ -861,6 +883,30 @@ document.querySelectorAll('input.currency-format').forEach(input => {
             }
         }
         
+        async function carregarDadosSupabase() {
+  const userData = JSON.parse(localStorage.getItem('userData'));
+  if (userData?.uid) {
+    const { data, error } = await supabase
+      .from('usuarios_dados')
+      .select('dados')
+      .eq('uid', userData.uid)
+      .single();
+
+    if (data) {
+      appData = data.dados;
+      localStorage.setItem('financeFlowData', JSON.stringify(appData));
+      loadData();
+      console.log('Dados carregados do Supabase!');
+    } else {
+      console.warn('Nenhum dado encontrado para este usuário.');
+    }
+  }
+}
+
+// Chamar após login
+carregarDadosSupabase();
+
+
         // Save data to localStorage
         function saveData() {
             appData.expenses = [...expenses];
@@ -1733,6 +1779,7 @@ document.getElementById("logout-btn")?.addEventListener("click", () => {
 
 </script>
 
+
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 <script>
   // Espera o Firebase estar pronto
@@ -1759,6 +1806,7 @@ document.getElementById("logout-btn")?.addEventListener("click", () => {
     }
   });
 </script>
+
 
 
 <!-- Toast de confirmação -->
