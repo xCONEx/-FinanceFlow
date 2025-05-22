@@ -1677,12 +1677,13 @@ onAuthStateChanged(auth, async (user) => {
     userPhoto.src = user.photoURL;
     userPhoto.classList.remove("hidden");
 
-    // 🔁 Buscar dados da nuvem ou salvar os locais
     const userRef = doc(db, "usuarios", user.uid);
     const docSnap = await getDoc(userRef);
 
     if (docSnap.exists()) {
-      localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
+      const cloudData = docSnap.data();
+      localStorage.setItem("financeFlowData", JSON.stringify(cloudData));
+      location.reload(); // 🔁 força o app a carregar com os dados atualizados
     } else {
       const local = localStorage.getItem("financeFlowData") || "{}";
       await setDoc(userRef, JSON.parse(local));
@@ -1692,6 +1693,7 @@ onAuthStateChanged(auth, async (user) => {
     userPhoto.classList.add("hidden");
   }
 });
+
 
 // ✅ Logout
 logoutBtn?.addEventListener("click", () => {
