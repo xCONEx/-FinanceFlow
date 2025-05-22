@@ -47,7 +47,7 @@
             </div>
             
             <div class="space-y-6">
-                <button id="login-google" class="btn-google w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 flex items-center justify-center space-x-3">
+                <button id="google-login" class="btn-google w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 flex items-center justify-center space-x-3">
                     <img src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-1024.png" alt="Google logo" class="h-5 w-5">
                     <span>Continuar com Google</span>
                 </button>
@@ -170,7 +170,7 @@
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
-    const loginBtn = document.getElementById("login-google");
+    const loginBtn = document.getElementById("google-login");
     const loading = document.getElementById("loading-overlay");
 
     loginBtn?.addEventListener("click", async () => {
