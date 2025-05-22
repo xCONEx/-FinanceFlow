@@ -1565,30 +1565,6 @@ function gerarGraficoEvolucao() {
 
 </script>
 
-<script>
-  firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-      // Mostrar dados do usuário
-      document.getElementById('user-name').textContent = user.displayName || user.email;
-      const photo = document.getElementById('user-photo');
-      if (user.photoURL) {
-        photo.src = user.photoURL;
-        photo.classList.remove('hidden');
-      }
-
-      // Botão de logout
-      document.getElementById('logout-btn').addEventListener('click', () => {
-        firebase.auth().signOut().then(() => {
-          localStorage.removeItem('financeFlowData'); // limpa os dados
-          window.location.href = 'login.html'; // redireciona
-        });
-      });
-    } else {
-      // Se não logado, redireciona pro login
-      window.location.href = 'login.html';
-    }
-  });
-</script>
 
 <script>
   function showToast(message, type = 'success') {
@@ -1620,6 +1596,62 @@ function gerarGraficoEvolucao() {
 
 
 
+</script>
+
+
+<!-- Firebase Login e Logout -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
+  authDomain: "financeflow-e0fae.firebaseapp.com",
+  projectId: "financeflow-e0fae",
+  storageBucket: "financeflow-e0fae.firebasestorage.app",
+  messagingSenderId: "970984329138",
+  appId: "1:970984329138:web:429a185b8bab1971991eab"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const userName = document.getElementById("user-name");
+const userPhoto = document.getElementById("user-photo");
+const logoutBtn = document.getElementById("logout-btn");
+
+// ✅ Verifica se usuário está logado
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    userName.textContent = user.displayName || "Usuário";
+    userPhoto.src = user.photoURL;
+    userPhoto.classList.remove("hidden");
+
+    // 🔁 Buscar dados da nuvem ou salvar os locais
+    const userRef = doc(db, "usuarios", user.uid);
+    const docSnap = await getDoc(userRef);
+
+    if (docSnap.exists()) {
+      localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
+    } else {
+      const local = localStorage.getItem("financeFlowData") || "{}";
+      await setDoc(userRef, JSON.parse(local));
+    }
+  } else {
+    userName.textContent = "Fazer login";
+    userPhoto.classList.add("hidden");
+  }
+});
+
+// ✅ Logout
+logoutBtn?.addEventListener("click", () => {
+  signOut(auth).then(() => {
+    localStorage.clear();
+    window.location.href = "login.html";
+  });
+});
 </script>
 
 
