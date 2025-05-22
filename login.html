@@ -11,8 +11,6 @@
 
      <!-- FontAwesome -->
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
-
     <style>
         .auth-container {
             background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
@@ -47,7 +45,7 @@
             </div>
             
             <div class="space-y-6">
-                <button id="login-google" class="btn-google w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 flex items-center justify-center space-x-3">
+                <button id="google-login" class="btn-google w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 flex items-center justify-center space-x-3">
                     <img src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-1024.png" alt="Google logo" class="h-5 w-5">
                     <span>Continuar com Google</span>
                 </button>
@@ -69,7 +67,6 @@
         </div>
     </div>
 
-<!-- 
     <script>
         // Firebase Configuration
   // Configuração do Firebase do projeto do Yuri
@@ -149,58 +146,6 @@
                 console.log('Usuário encontrado no localStorage:', userData);
             }
         });
-    </script> --> 
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
-    authDomain: "financeflow-e0fae.firebaseapp.com",
-    projectId: "financeflow-e0fae",
-    storageBucket: "financeflow-e0fae.firebasestorage.app",
-    messagingSenderId: "970984329138",
-    appId: "1:970984329138:web:429a185b8bab1971991eab"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const provider = new GoogleAuthProvider();
-
-  const loginBtn = document.getElementById("login-google");
-
-  loginBtn?.addEventListener("click", async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      if (!user) return;
-
-      const ref = doc(db, "usuarios", user.uid);
-      const docSnap = await getDoc(ref);
-
-      if (docSnap.exists()) {
-        localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
-      } else {
-        const emptyData = { jobs: [], expenses: [], equipments: [], routine: {} };
-        await setDoc(ref, emptyData);
-        localStorage.setItem("financeFlowData", JSON.stringify(emptyData));
-      }
-
-      // Redirecionar para o app
-      window.location.href = "index.html";
-
-    } catch (error) {
-      console.error("Erro ao logar com o Google:", error);
-      alert("Erro ao entrar com o Google.");
-    }
-  });
-</script>
-
-
-
+    </script>
 </body>
 </html>
