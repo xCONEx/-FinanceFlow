@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-
 
      <!-- FontAwesome -->
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -119,7 +117,7 @@
         }
 
         // Google Authentication
-async function signInWithGoogle() {
+        async function signInWithGoogle() {
     showLoading();
     try {
         const result = await auth.signInWithPopup(provider);
@@ -156,7 +154,21 @@ async function signInWithGoogle() {
         console.error('Erro na autenticação:', error);
         alert('Erro ao fazer login com Google. Por favor, tente novamente.');
     }
-};
+}
+
+        googleLoginBtn.addEventListener('click', signInWithGoogle);
+
+        // Check if user is already logged in locally
+        window.addEventListener('DOMContentLoaded', () => {
+            const userData = getUserData();
+            if (userData) {
+                // User data exists locally, you could automatically log them in
+                // or show their information
+                console.log('Usuário encontrado no localStorage:', userData);
+            }
+        });
+
+        
     </script>
 </body>
 </html>
