@@ -29,6 +29,62 @@
 </script>
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+  const supabase = supabase.createClient(
+    'https://jkovpbfdeqntuxuykpqf.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imprb3ZwYmZkZXFudHV4dXlrcHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5Mzc4MjcsImV4cCI6MjA2MzUxMzgyN30.3DJv4_FncopcGhk1bfZrWpBgL1YuSyC3aL6VoeliB4o'
+  );
+</script>
+
+
+<script>
+let appData = {
+  expenses: [],
+  equipments: [],
+  routine: {},
+  jobs: []
+};
+
+async function verificarLogin() {
+  const { data: { session }, error } = await supabase.auth.getSession();
+
+  if (!session) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const user = session.user;
+
+  // Mostrar nome e foto
+  document.getElementById('user-name').textContent = user.user_metadata.full_name;
+  document.getElementById('user-photo').src = user.user_metadata.avatar_url;
+  document.getElementById('user-photo').classList.remove('hidden');
+
+  carregarDadosSupabase(user.id);
+}
+
+async function carregarDadosSupabase(uid) {
+  const { data, error } = await supabase
+    .from('usuarios_dados')
+    .select('dados')
+    .eq('uid', uid)
+    .single();
+
+  if (data?.dados) {
+    appData = data.dados;
+    localStorage.setItem('financeFlowData', JSON.stringify(appData));
+    loadData();
+    console.log('Dados carregados do Supabase');
+  } else {
+    console.log('Nenhum dado salvo ainda.');
+  }
+}
+
+verificarLogin();
+</script>
+
+
 
     <title>FinanceFlow - Gerenciamento Financeiro</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1001,6 +1057,23 @@ carregarDadosSupabase();
         });
 
     
+    // Salvar também no Supabase
+const { data: { session } } = await supabase.auth.getSession();
+const uid = session?.user?.id;
+
+if (uid) {
+  const { error } = await supabase
+    .from('usuarios_dados')
+    .upsert([{ uid: uid, dados: appData }], { onConflict: ['uid'] });
+
+  if (error) {
+    console.error('Erro ao salvar no Supabase:', error.message);
+  } else {
+    console.log('Dados salvos na nuvem via Supabase!');
+  }
+}
+
+
 
         // Exportar dados para .json
 document.getElementById('export-data').addEventListener('click', () => {
