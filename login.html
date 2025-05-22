@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinanceFlow - Login</title>
+    <title>Login • FinanceFlow</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -62,85 +62,59 @@
         </div>
     </div>
 
-    <script>
-        // Firebase Configuration
-  // Configuração do Firebase do projeto do Yuri
-  const firebaseConfig = {
-    apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
-    authDomain: "financeflow-e0fae.firebaseapp.com",
-    projectId: "financeflow-e0fae",
-    storageBucket: "financeflow-e0fae.firebasestorage.app",
-    messagingSenderId: "970984329138",
-    appId: "1:970984329138:web:429a185b8bab1971991eab"
-  };
+ <!-- Firebase SDKs e script de login -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const provider = new firebase.auth.GoogleAuthProvider();
+    const firebaseConfig = {
+      apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
+      authDomain: "financeflow-e0fae.firebaseapp.com",
+      projectId: "financeflow-e0fae",
+      storageBucket: "financeflow-e0fae.firebasestorage.app",
+      messagingSenderId: "970984329138",
+      appId: "1:970984329138:web:429a185b8bab1971991eab"
+    };
 
-        // DOM Elements
-        const googleLoginBtn = document.getElementById('google-login');
-        const loadingOverlay = document.getElementById('loading-overlay');
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
 
-        // Show loading overlay
-        function showLoading() {
-            loadingOverlay.classList.remove('hidden');
-        }
+    document.getElementById("login-google")?.addEventListener("click", async () => {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
 
-        // Hide loading overlay
-        function hideLoading() {
-            loadingOverlay.classList.add('hidden');
-        }
+        if (user) {
+          const ref = doc(db, "usuarios", user.uid);
+          const docSnap = await getDoc(ref);
 
-        // Save user data to localStorage
-        function saveUserData(user) {
-            const userData = {
-                uid: user.uid,
-                displayName: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL,
-                lastLogin: new Date().toISOString()
+          if (docSnap.exists()) {
+            localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
+          } else {
+            const initialData = {
+              jobs: [],
+              expenses: [],
+              equipments: [],
+              routine: {}
             };
-            localStorage.setItem('userData', JSON.stringify(userData));
+            await setDoc(ref, initialData);
+            localStorage.setItem("financeFlowData", JSON.stringify(initialData));
+          }
+
+          window.location.href = "index.html";
         }
 
-        // Get user data from localStorage
-        function getUserData() {
-            const userData = localStorage.getItem('userData');
-            return userData ? JSON.parse(userData) : null;
-        }
+      } catch (error) {
+        console.error("Erro no login:", error);
+        alert("Erro ao fazer login com o Google");
+      }
+    });
+  </script>
 
-        // Google Authentication
-        async function signInWithGoogle() {
-            showLoading();
-            try {
-                const result = await auth.signInWithPopup(provider);
-                const user = result.user;
-                
-                // Save user data locally
-                saveUserData(user);
-                
-                // Redirect to app
-                window.location.href = 'index.html';
-            } catch (error) {
-                hideLoading();
-                console.error('Erro na autenticação:', error);
-                alert('Erro ao fazer login com Google. Por favor, tente novamente.');
-            }
-        }
-
-        googleLoginBtn.addEventListener('click', signInWithGoogle);
-
-        // Check if user is already logged in locally
-        window.addEventListener('DOMContentLoaded', () => {
-            const userData = getUserData();
-            if (userData) {
-                // User data exists locally, you could automatically log them in
-                // or show their information
-                console.log('Usuário encontrado no localStorage:', userData);
-            }
-        });
-    </script>
+  <!-- Font Awesome for Google Icon -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>
