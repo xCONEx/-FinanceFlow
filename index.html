@@ -1647,61 +1647,89 @@ function gerarGraficoEvolucao() {
 </script>
 
 
-<!-- Firebase Login e Logout -->
+
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
-  authDomain: "financeflow-e0fae.firebaseapp.com",
-  projectId: "financeflow-e0fae",
-  storageBucket: "financeflow-e0fae.firebasestorage.app",
-  messagingSenderId: "970984329138",
-  appId: "1:970984329138:web:429a185b8bab1971991eab"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
+    authDomain: "financeflow-e0fae.firebaseapp.com",
+    projectId: "financeflow-e0fae",
+    storageBucket: "financeflow-e0fae.firebasestorage.app",
+    messagingSenderId: "970984329138",
+    appId: "1:970984329138:web:429a185b8bab1971991eab"
+  };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
 
-const userName = document.getElementById("user-name");
-const userPhoto = document.getElementById("user-photo");
-const logoutBtn = document.getElementById("logout-btn");
+  const loginBtn = document.getElementById("login-btn");
+  const logoutBtn = document.getElementById("logout-btn");
+  const userName = document.getElementById("user-name");
+  const userPhoto = document.getElementById("user-photo");
 
-// ✅ Verifica se usuário está logado
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    userName.textContent = user.displayName || "Usuário";
-    userPhoto.src = user.photoURL;
-    userPhoto.classList.remove("hidden");
+  // Clique para logar
+  loginBtn?.addEventListener("click", async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-    const userRef = doc(db, "usuarios", user.uid);
-    const docSnap = await getDoc(userRef);
+      if (user) {
+        const ref = doc(db, "usuarios", user.uid);
+        const docSnap = await getDoc(ref);
 
-    if (docSnap.exists()) {
-      const cloudData = docSnap.data();
-      localStorage.setItem("financeFlowData", JSON.stringify(cloudData));
-      location.reload(); // 🔁 força o app a carregar com os dados atualizados
-    } else {
-      const local = localStorage.getItem("financeFlowData") || "{}";
-      await setDoc(userRef, JSON.parse(local));
+        if (docSnap.exists()) {
+          // 🔁 Substitui dados locais pelos da nuvem
+          localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
+        } else {
+          // Se não existe, salva dados locais ou cria vazio
+          const localData = JSON.parse(localStorage.getItem("financeFlowData")) || {
+            jobs: [],
+            expenses: [],
+            equipments: [],
+            routine: {}
+          };
+          await setDoc(ref, localData);
+        }
+
+        // Recarrega a página após login + sync
+        location.href = "index.html";
+      }
+
+    } catch (e) {
+      alert("Erro ao logar.");
+      console.error(e);
     }
-  } else {
-    userName.textContent = "Fazer login";
-    userPhoto.classList.add("hidden");
-  }
-});
-
-
-// ✅ Logout
-logoutBtn?.addEventListener("click", () => {
-  signOut(auth).then(() => {
-    localStorage.clear();
-    window.location.href = "login.html";
   });
-});
+
+  // Verifica sessão ativa
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      if (userName) userName.textContent = user.displayName || "Usuário";
+      if (userPhoto && user.photoURL) {
+        userPhoto.src = user.photoURL;
+        userPhoto.classList.remove("hidden");
+      }
+      loginBtn?.classList.add("hidden");
+      logoutBtn?.classList.remove("hidden");
+    } else {
+      if (userName) userName.textContent = "Fazer login";
+      userPhoto?.classList.add("hidden");
+      loginBtn?.classList.remove("hidden");
+      logoutBtn?.classList.add("hidden");
+    }
+  });
+
+  logoutBtn?.addEventListener("click", async () => {
+    await signOut(auth);
+    localStorage.removeItem("financeFlowData");
+    location.href = "login.html";
+  });
 </script>
 
 
