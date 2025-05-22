@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
 
      <!-- FontAwesome -->
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -117,35 +119,44 @@
         }
 
         // Google Authentication
-        async function signInWithGoogle() {
-            showLoading();
-            try {
-                const result = await auth.signInWithPopup(provider);
-                const user = result.user;
-                
-                // Save user data locally
-                saveUserData(user);
-                
-                // Redirect to app
-                window.location.href = 'index.html';
-            } catch (error) {
-                hideLoading();
-                console.error('Erro na autenticação:', error);
-                alert('Erro ao fazer login com Google. Por favor, tente novamente.');
-            }
+async function signInWithGoogle() {
+    showLoading();
+    try {
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+
+        // Salva dados básicos (nome, email etc.)
+        saveUserData(user);
+
+        // 🔁 Firebase Firestore (compatível com compat)
+        const db = firebase.firestore();
+        const userRef = db.collection("usuarios").doc(user.uid);
+        const docSnap = await userRef.get();
+
+        if (docSnap.exists) {
+            // Salvar dados da nuvem localmente
+            const cloudData = docSnap.data();
+            localStorage.setItem("financeFlowData", JSON.stringify(cloudData));
+        } else {
+            // Criar dados padrão e salvar na nuvem
+            const defaultData = {
+                jobs: [],
+                expenses: [],
+                equipments: [],
+                routine: {}
+            };
+            await userRef.set(defaultData);
+            localStorage.setItem("financeFlowData", JSON.stringify(defaultData));
         }
 
-        googleLoginBtn.addEventListener('click', signInWithGoogle);
-
-        // Check if user is already logged in locally
-        window.addEventListener('DOMContentLoaded', () => {
-            const userData = getUserData();
-            if (userData) {
-                // User data exists locally, you could automatically log them in
-                // or show their information
-                console.log('Usuário encontrado no localStorage:', userData);
-            }
-        });
+        // Redireciona para o app
+        window.location.href = 'index.html';
+    } catch (error) {
+        hideLoading();
+        console.error('Erro na autenticação:', error);
+        alert('Erro ao fazer login com Google. Por favor, tente novamente.');
+    }
+});
     </script>
 </body>
 </html>
