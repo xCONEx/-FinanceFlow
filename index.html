@@ -1733,6 +1733,32 @@ document.getElementById("logout-btn")?.addEventListener("click", () => {
 
 </script>
 
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script>
+  // Espera o Firebase estar pronto
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+      const db = firebase.firestore();
+      const ref = db.collection("usuarios").doc(user.uid);
+      const docSnap = await ref.get();
+
+      if (docSnap.exists) {
+        localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
+      } else {
+        const defaultData = {
+          jobs: [],
+          expenses: [],
+          equipments: [],
+          routine: {}
+        };
+        await ref.set(defaultData);
+        localStorage.setItem("financeFlowData", JSON.stringify(defaultData));
+      }
+
+      location.reload(); // Força o app a recarregar com os dados sincronizados
+    }
+  });
+</script>
 
 
 <!-- Toast de confirmação -->
