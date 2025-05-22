@@ -118,43 +118,22 @@
 
         // Google Authentication
         async function signInWithGoogle() {
-    showLoading();
-    try {
-        const result = await auth.signInWithPopup(provider);
-        const user = result.user;
-
-        // Salva dados básicos (nome, email etc.)
-        saveUserData(user);
-
-        // 🔁 Firebase Firestore (compatível com compat)
-        const db = firebase.firestore();
-        const userRef = db.collection("usuarios").doc(user.uid);
-        const docSnap = await userRef.get();
-
-        if (docSnap.exists) {
-            // Salvar dados da nuvem localmente
-            const cloudData = docSnap.data();
-            localStorage.setItem("financeFlowData", JSON.stringify(cloudData));
-        } else {
-            // Criar dados padrão e salvar na nuvem
-            const defaultData = {
-                jobs: [],
-                expenses: [],
-                equipments: [],
-                routine: {}
-            };
-            await userRef.set(defaultData);
-            localStorage.setItem("financeFlowData", JSON.stringify(defaultData));
+            showLoading();
+            try {
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                
+                // Save user data locally
+                saveUserData(user);
+                
+                // Redirect to app
+                window.location.href = 'index.html';
+            } catch (error) {
+                hideLoading();
+                console.error('Erro na autenticação:', error);
+                alert('Erro ao fazer login com Google. Por favor, tente novamente.');
+            }
         }
-
-        // Redireciona para o app
-        window.location.href = 'index.html';
-    } catch (error) {
-        hideLoading();
-        console.error('Erro na autenticação:', error);
-        alert('Erro ao fazer login com Google. Por favor, tente novamente.');
-    }
-}
 
         googleLoginBtn.addEventListener('click', signInWithGoogle);
 
@@ -167,7 +146,6 @@
                 console.log('Usuário encontrado no localStorage:', userData);
             }
         });
-
         
     </script>
 </body>
