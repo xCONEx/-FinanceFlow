@@ -1640,7 +1640,7 @@ function gerarGraficoEvolucao() {
       window.location.href = "login.html";
     }
   }); 
-  
+
   document.getElementById("logout-btn")?.addEventListener("click", () => {
   window.location.href = "login.html";
 });
@@ -1649,6 +1649,40 @@ function gerarGraficoEvolucao() {
 
 </script>
 
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
+    authDomain: "financeflow-e0fae.firebaseapp.com",
+    projectId: "financeflow-e0fae",
+    storageBucket: "financeflow-e0fae.firebasestorage.app",
+    messagingSenderId: "970984329138",
+    appId: "1:970984329138:web:429a185b8bab1971991eab"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    const ref = doc(db, "usuarios", user.uid);
+    const docSnap = await getDoc(ref);
+
+    if (docSnap.exists()) {
+      localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
+      location.reload(); // força o app a usar os dados sincronizados
+    }
+  });
+</script>
 
 
 
