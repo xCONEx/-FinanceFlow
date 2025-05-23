@@ -948,7 +948,7 @@ document.getElementById('import-data').addEventListener('change', (e) => {
       const importedData = JSON.parse(event.target.result);
       appData = importedData;
       localStorage.setItem('financeFlowData', JSON.stringify(appData));
-      localStorage.removeItem("syncedFromCloud");
+      //localStorage.removeItem("syncedFromCloud");
       updateDashboard();
       alert('✅ Dados importados com sucesso!');
     } catch (err) {
