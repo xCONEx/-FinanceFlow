@@ -1730,6 +1730,7 @@ onAuthStateChanged(auth, async (user) => {
   });
 </script> 
 
+<!--
 <script type="module">
   import { auth, db } from './firebase.js';
   import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
@@ -1777,7 +1778,7 @@ onAuthStateChanged(auth, async (user) => {
       alert("Erro ao importar os dados.");
     }
   });
-</script>
+</script> --> 
 
 
 
@@ -1801,41 +1802,57 @@ onAuthStateChanged(auth, async (user) => {
 
 <script type="module">
   import { auth, db } from './firebase.js';
+  import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-  let currentUser = null;
+  window.currentUser = null;
+  window.db = db;
 
-  // Detecta usuário logado
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      currentUser = user;
+      window.currentUser = user;
+    } else {
+      console.warn("Usuário não autenticado.");
     }
   });
 
-  // Botão "Salvar" envia dados para a nuvem
-  document.getElementById("save-data")?.addEventListener("click", async () => {
-    const dados = JSON.parse(localStorage.getItem("financeFlowData")) || {
-      jobs: [],
-      expenses: [],
-      equipments: [],
-      routine: {}
-    };
-
-    if (!currentUser) {
-      alert("Você precisa estar logado para salvar na nuvem.");
-      return;
-    }
-
+  // Salvar dados ao clicar no botão
+  document.getElementById("save-data")?.addEventListener("click", () => {
     try {
-      await setDoc(doc(db, "usuarios", currentUser.uid), dados);
-      console.log("Dados salvos na nuvem com sucesso.");
-      alert("✅ Dados salvos na nuvem!", "success");
+      appData.expenses = [...expenses];
+      appData.equipments = [...equipments];
+
+      if (routineResults && !routineResults.classList.contains('hidden')) {
+        appData.routine = {
+          desiredSalary: parseFloat(document.getElementById('desired-salary').value),
+          workDays: parseInt(document.getElementById('work-days').value),
+          dailyHours: parseInt(document.getElementById('daily-hours').value),
+          dailyValue: parseFloat(document.getElementById('daily-value').textContent),
+          hourlyValue: parseFloat(document.getElementById('hourly-value').textContent)
+        };
+      }
+
+      localStorage.setItem("financeFlowData", JSON.stringify(appData));
+
+      if (window.currentUser && window.db) {
+        const ref = doc(window.db, "usuarios", window.currentUser.uid);
+        setDoc(ref, appData)
+          .then(() => {
+            console.log("✅ Dados salvos na nuvem.");
+            showToast("✅ Dados salvos na nuvem!", "success");
+          })
+          .catch((err) => {
+            console.error("Erro ao salvar na nuvem:", err);
+            showToast("❌ Erro ao salvar na nuvem!", "error");
+          });
+      }
     } catch (err) {
-      console.error("Erro ao salvar dados na nuvem:", err);
-      alert("❌ Erro ao salvar na nuvem!", "error");
+      console.error("❌ Erro em saveData():", err);
+      alert("Erro: " + err.message);
     }
   });
 </script>
+
 
 <script> function showToast(message, type = "success") {
   const toast = document.createElement("div");
