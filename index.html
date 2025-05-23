@@ -831,6 +831,7 @@ document.querySelectorAll('input.currency-format').forEach(input => {
         }
         
 
+
         // Save data to localStorage
         function saveData() {
             appData.expenses = [...expenses];
@@ -849,6 +850,14 @@ document.querySelectorAll('input.currency-format').forEach(input => {
             
             localStorage.setItem('financeFlowData', JSON.stringify(appData));
             
+              // 🔥 Salvar na nuvem (Firestore)
+  if (window.currentUser && window.db) {
+    const userRef = doc(window.db, "usuarios", window.currentUser.uid);
+    setDoc(userRef, appData)
+      .then(() => console.log("🔥 Dados salvos na nuvem com sucesso"))
+      .catch((error) => console.error("❌ Erro ao salvar no Firestore:", error));
+  }
+
             // Show success message
             const notification = document.createElement('div');
             notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2';
@@ -1756,6 +1765,26 @@ onAuthStateChanged(auth, async (user) => {
     } catch (err) {
       console.error("Erro ao importar:", err);
       alert("Erro ao importar os dados.");
+    }
+  });
+</script>
+
+
+
+<script type="module">
+  import { auth, db } from './firebase.js';
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+  import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+  window.db = db; // Deixa acessível globalmente
+  window.currentUser = null;
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.currentUser = user;
+    } else {
+      window.location.href = "login.html";
     }
   });
 </script>
