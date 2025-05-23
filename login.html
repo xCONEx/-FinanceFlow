@@ -24,7 +24,8 @@
   </div>
 
   <!-- FontAwesome -->
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 
   <!-- Firebase Login -->
 
@@ -76,8 +77,8 @@
 
         window.location.href = "index.html";
       } catch (err) {
-  console.error("Erro ao fazer login com Google:", err);
-  alert("Erro ao entrar com Google: " + err.code + " – " + err.message);
+            console.error("Erro ao fazer login com Google:", err);
+            alert("Erro ao entrar com Google: " + err.message);
     } finally {
         overlay.classList.add("hidden");
       }
