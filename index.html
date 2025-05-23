@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#4F46E5" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <script src="https://cdn.tailwindcss.com"></script>
-  
+
   <script>
     tailwind.config = {
       theme: {
@@ -635,7 +635,7 @@
 
   <!-- Botões -->
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-    <button id="save-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300">
+    <button id="save-data" onclick="saveData()" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300">
       <i class="fas fa-save text-primary"></i>
       Salvar dados
     </button>
@@ -1626,9 +1626,40 @@ function gerarGraficoEvolucao() {
     document.getElementById("logout-btn")?.addEventListener("click", () => {
       signOut(auth).then(() => window.location.href = "login.html");
     });
+
+    window.saveData = async function () {
+  try {
+    appData.expenses = [...expenses];
+    appData.equipments = [...equipments];
+    
+    if (routineResults && !routineResults.classList.contains('hidden')) {
+      appData.routine = {
+        desiredSalary: parseFloat(document.getElementById('desired-salary').value),
+        workDays: parseInt(document.getElementById('work-days').value),
+        dailyHours: parseInt(document.getElementById('daily-hours').value),
+        dailyValue: parseFloat(document.getElementById('daily-value').textContent),
+        hourlyValue: parseFloat(document.getElementById('hourly-value').textContent)
+      };
+    }
+
+    localStorage.setItem("financeFlowData", JSON.stringify(appData));
+
+    if (window.currentUser && window.db) {
+      const ref = doc(window.db, "usuarios", window.currentUser.uid);
+      await setDoc(ref, appData);
+      console.log("✅ Dados salvos na nuvem.");
+    }
+  } catch (err) {
+    console.error("❌ Erro em saveData():", err);
+    alert("Erro ao salvar: " + err.message);
+  }
+};
+
+
+
   </script>
 
-  <!-- Exemplo de função de salvar dados corrigida -->
+  <!-- Exemplo de função de salvar dados corrigida 
   <script>
     async function saveData() {
       try {
@@ -1647,6 +1678,8 @@ function gerarGraficoEvolucao() {
         console.error("Erro ao salvar na nuvem:", err);
       }
     }
-  </script>
+  </script> --> 
+
+
 </body>
 </html>
