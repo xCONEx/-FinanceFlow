@@ -1624,7 +1624,7 @@ function gerarGraficoEvolucao() {
 
 </script>
 
-
+<!-- 
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
@@ -1662,6 +1662,40 @@ onAuthStateChanged(auth, async (user) => {
 
 
 </script>
+  --> 
+
+<script type="module">
+  import { auth, db } from './firebase.js';
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    // Evita re-sync se já tiver feito
+    if (localStorage.getItem("syncedFromCloud")) return;
+
+    try {
+      const ref = doc(db, "usuarios", user.uid);
+      const snapshot = await getDoc(ref);
+
+      if (snapshot.exists()) {
+        const cloudData = snapshot.data();
+        localStorage.setItem("financeFlowData", JSON.stringify(cloudData));
+        localStorage.setItem("syncedFromCloud", "true");
+        location.reload(); // recarrega com dados sincronizados
+      } else {
+        console.warn("Nenhum dado encontrado na nuvem para este usuário.");
+      }
+    } catch (err) {
+      console.error("Erro ao buscar dados da nuvem:", err);
+    }
+  });
+</script>
+
 
 
 
