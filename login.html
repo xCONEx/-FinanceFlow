@@ -1,154 +1,84 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinanceFlow - Login</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-
-
-
-     <!-- FontAwesome -->
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    <style>
-        .auth-container {
-            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
-        }
-        .auth-card {
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .btn-google {
-            transition: all 0.3s ease;
-        }
-        .btn-google:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login • FinanceFlow</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen flex items-center justify-center auth-container p-4">
-    <div class="auth-card rounded-2xl shadow-xl overflow-hidden w-full max-w-md fade-in">
-        <div class="p-8 bg-white">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Bem-vindo ao FinanceFlow</h1>
-                <p class="text-gray-600">Faça login com sua conta Google para continuar</p>
-            </div>
-            
-            <div class="space-y-6">
-                <button id="google-login" class="btn-google w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 flex items-center justify-center space-x-3">
-                    <img src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-1024.png" alt="Google logo" class="h-5 w-5">
-                    <span>Continuar com Google</span>
-                </button>
-                
-                <div class="text-center text-sm text-gray-500">
-                    Ao continuar, você concorda com nossos <a href="#" class="text-primary hover:underline">Termos de Serviço</a> e <a href="#" class="text-primary hover:underline">Política de Privacidade</a>
-                    <p class="mt-4 text-sm text-gray-500">Seus dados serão sincronizados automaticamente com a nuvem após login.</p>
+<body class="bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center min-h-screen">
+
+  <div class="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">Entrar no FinanceFlow</h1>
+    <p class="text-sm text-gray-500 mb-6">Conecte com sua conta Google para sincronizar seus dados.</p>
+    <button id="login-google" class="w-full py-3 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center justify-center gap-2">
+      <i class="fab fa-google"></i>
+      Entrar com Google
+    </button>
+    <p class="mt-4 text-sm text-gray-400">Seus dados são salvos automaticamente na nuvem ☁️</p>
   </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-6 rounded-lg shadow-xl flex items-center space-x-4">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <span class="text-gray-800">Autenticando...</span>
-        </div>
-    </div>
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <span class="text-white text-lg">Autenticando...</span>
+  </div>
 
-    <script>
-        // Firebase Configuration
-  // Configuração do Firebase do projeto do Yuri
-  const firebaseConfig = {
-    apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
-    authDomain: "financeflow-e0fae.firebaseapp.com",
-    projectId: "financeflow-e0fae",
-    storageBucket: "financeflow-e0fae.firebasestorage.app",
-    messagingSenderId: "970984329138",
-    appId: "1:970984329138:web:429a185b8bab1971991eab"
-  };
+  <!-- FontAwesome -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const provider = new firebase.auth.GoogleAuthProvider();
+  <!-- Firebase Login -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // DOM Elements
-        const googleLoginBtn = document.getElementById('google-login');
-        const loadingOverlay = document.getElementById('loading-overlay');
+    const firebaseConfig = {
+      apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
+      authDomain: "financeflow-e0fae.firebaseapp.com",
+      projectId: "financeflow-e0fae",
+      storageBucket: "financeflow-e0fae.firebasestorage.app",
+      messagingSenderId: "970984329138",
+      appId: "1:970984329138:web:429a185b8bab1971991eab"
+    };
 
-        // Show loading overlay
-        function showLoading() {
-            loadingOverlay.classList.remove('hidden');
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    const btn = document.getElementById("login-google");
+    const overlay = document.getElementById("loading-overlay");
+
+    btn?.addEventListener("click", async () => {
+      overlay.classList.remove("hidden");
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        const ref = doc(db, "usuarios", user.uid);
+        const docSnap = await getDoc(ref);
+
+        if (docSnap.exists()) {
+          localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
+        } else {
+          const emptyData = {
+            jobs: [],
+            expenses: [],
+            equipments: [],
+            routine: {}
+          };
+          await setDoc(ref, emptyData);
+          localStorage.setItem("financeFlowData", JSON.stringify(emptyData));
         }
 
-        // Hide loading overlay
-        function hideLoading() {
-            loadingOverlay.classList.add('hidden');
-        }
-
-        // Save user data to localStorage
-        function saveUserData(user) {
-            const userData = {
-                uid: user.uid,
-                displayName: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL,
-                lastLogin: new Date().toISOString()
-            };
-            localStorage.setItem('userData', JSON.stringify(userData));
-        }
-
-        // Get user data from localStorage
-        function getUserData() {
-            const userData = localStorage.getItem('userData');
-            return userData ? JSON.parse(userData) : null;
-        }
-
-        // Google Authentication
-        async function signInWithGoogle() {
-            showLoading();
-            try {
-                const result = await auth.signInWithPopup(provider);
-                const user = result.user;
-                
-                // Save user data locally
-                saveUserData(user);
-                
-                // Redirect to app
-                window.location.href = 'index.html';
-            } catch (error) {
-                hideLoading();
-                console.error('Erro na autenticação:', error);
-                alert('Erro ao fazer login com Google. Por favor, tente novamente.');
-            }
-        }
-
-        googleLoginBtn.addEventListener('click', signInWithGoogle);
-
-        // Check if user is already logged in locally
-        window.addEventListener('DOMContentLoaded', () => {
-            const userData = getUserData();
-            if (userData) {
-                // User data exists locally, you could automatically log them in
-                // or show their information
-                console.log('Usuário encontrado no localStorage:', userData);
-            }
-        });
-        
-    </script>
+        window.location.href = "index.html";
+      } catch (err) {
+        console.error("Erro ao fazer login:", err);
+        alert("Erro ao entrar com Google.");
+      } finally {
+        overlay.classList.add("hidden");
+      }
+    });
+  </script>
 </body>
 </html>
