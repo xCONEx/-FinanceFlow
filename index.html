@@ -832,46 +832,54 @@ document.querySelectorAll('input.currency-format').forEach(input => {
         
 
 
-        // Save data to localStorage
-        function saveData() {
-            appData.expenses = [...expenses];
-            appData.equipments = [...equipments];
-            
-            // Save routine data if calculated
-            if (routineResults && !routineResults.classList.contains('hidden')) {
-                appData.routine = {
-                    desiredSalary: parseFloat(document.getElementById('desired-salary').value),
-                    workDays: parseInt(document.getElementById('work-days').value),
-                    dailyHours: parseInt(document.getElementById('daily-hours').value),
-                    dailyValue: parseFloat(document.getElementById('daily-value').textContent),
-                    hourlyValue: parseFloat(document.getElementById('hourly-value').textContent)
-                };
-            }
-            
-            localStorage.setItem('financeFlowData', JSON.stringify(appData));
-            
-              // 🔥 Salvar na nuvem (Firestore)
-  if (window.currentUser && window.db) {
-    const userRef = doc(window.db, "usuarios", window.currentUser.uid);
-    setDoc(userRef, appData)
-      .then(() => console.log("🔥 Dados salvos na nuvem com sucesso"))
-      .catch((error) => console.error("❌ Erro ao salvar no Firestore:", error));
-  }
+function saveData() {
+  try {
+    appData.expenses = [...expenses];
+    appData.equipments = [...equipments];
 
-            // Show success message
-            const notification = document.createElement('div');
-            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2';
-            notification.innerHTML = `
-                <i class="fas fa-check-circle"></i>
-                <span>Dados salvos com sucesso!</span>
-            `;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
-                setTimeout(() => notification.remove(), 300);
-            }, 2000);
-        }
+    if (routineResults && !routineResults.classList.contains('hidden')) {
+      appData.routine = {
+        desiredSalary: parseFloat(document.getElementById('desired-salary').value),
+        workDays: parseInt(document.getElementById('work-days').value),
+        dailyHours: parseInt(document.getElementById('daily-hours').value),
+        dailyValue: parseFloat(document.getElementById('daily-value').textContent),
+        hourlyValue: parseFloat(document.getElementById('hourly-value').textContent)
+      };
+    }
+
+    // Salvar no localStorage
+    localStorage.setItem('financeFlowData', JSON.stringify(appData));
+
+    // Salvar na nuvem (Firestore)
+    if (window.currentUser && window.db) {
+      const userRef = doc(window.db, "usuarios", window.currentUser.uid);
+      setDoc(userRef, appData)
+        .then(() => {
+          console.log("✅ Dados salvos na nuvem.");
+          showToast("✅ Dados salvos na nuvem!", "success");
+        })
+        .catch((error) => {
+          console.error("Erro ao salvar dados na nuvem:", error);
+          showToast("❌ Erro ao salvar na nuvem!", "error");
+        });
+    }
+
+    // Notificação visual local
+    const notification = document.createElement('div');
+    notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2';
+    notification.innerHTML = `<i class="fas fa-check-circle"></i><span>Dados salvos com sucesso!</span>`;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+      setTimeout(() => notification.remove(), 300);
+    }, 2000);
+  } catch (err) {
+    console.error("❌ Erro em saveData():", err);
+    alert("Erro ao salvar: " + err.message);
+  }
+}
+
         
         // Toggle sidebar on mobile
         openSidebarBtn.addEventListener('click', () => {
