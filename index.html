@@ -1,31 +1,59 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FinanceFlow</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link rel="manifest" href="manifest.json" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#4F46E5" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
-  <script src="https://cdn.tailwindcss.com"></script>
+<html lang="pt-BR" class="">
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#4F46E5',
-            secondary: '#10B981',
-            dark: '#1F2937',
-            light: '#F9FAFB'
-          }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Manifest & Web App Meta Tags -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+
+<meta name="theme-color" content="#4F46E5">
+
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<!-- 
+<script type="module">
+  import { auth, db, provider } from './firebase.js';
+
+  // Exemplo: fazer login
+  import { signInWithPopup } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+  document.getElementById("login-google").addEventListener("click", async () => {
+    const result = await signInWithPopup(auth, provider);
+    console.log(result.user);
+  });
+</script> --> 
+
+
+
+    <title>FinanceFlow - Gerenciamento Financeiro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        dark: '#1F2937',
+                        light: '#F9FAFB',
+                        darkMode: 'class'
+                    }
+                }
+            }
         }
-      }
-    }
-  </script>
+    </script>
+
 
 
     <style>
@@ -404,7 +432,7 @@
                                 </div>
                                 <div>
                                     <label for="expense-value" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
-                                   <input type="text" id="expense-value" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                   <input type="text" id="expense-value" class="currency-format w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
 
 
                                 </div>
@@ -1576,70 +1604,273 @@ function gerarGraficoEvolucao() {
 
 
 
- <!-- Firebase -->
+<!-- Verificação Firebase -->
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
+    authDomain: "financeflow-e0fae.firebaseapp.com",
+    projectId: "financeflow-e0fae",
+    storageBucket: "financeflow-e0fae.firebasestorage.app",
+    messagingSenderId: "970984329138",
+    appId: "1:970984329138:web:429a185b8bab1971991eab"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, (user) => {
+    const userName = document.getElementById("user-name");
+    const userPhoto = document.getElementById("user-photo");
+
+
+    if (user) {
+      if (userName) userName.textContent = user.displayName || user.email;
+      if (userPhoto && user.photoURL) {
+        userPhoto.src = user.photoURL;
+        userPhoto.classList.remove("hidden");
+      }
+    } else {
+      window.location.href = "login.html";
+    }
+  }); 
+
+  document.getElementById("logout-btn")?.addEventListener("click", () => {
+      //localStorage.removeItem("syncedFromCloud");
+  window.location.href = "login.html";
+});
+
+
+let currentUser = null;
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+  }
+});
+
+
+
+</script>
+
+
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
-      authDomain: "financeflow-e0fae.firebaseapp.com",
-      projectId: "financeflow-e0fae",
-      storageBucket: "financeflow-e0fae.appspot.com",
-      messagingSenderId: "970984329138",
-      appId: "1:970984329138:web:429a185b8bab1971991eab"
-    };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    window.db = db;
-    window.currentUser = null;
+  const firebaseConfig = {
+    apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
+    authDomain: "financeflow-e0fae.firebaseapp.com",
+    projectId: "financeflow-e0fae",
+    storageBucket: "financeflow-e0fae.firebasestorage.app",
+    messagingSenderId: "970984329138",
+    appId: "1:970984329138:web:429a185b8bab1971991eab"
+  };
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        window.currentUser = user;
-        document.getElementById("user-name").textContent = `Logado como: ${user.displayName || user.email}`;
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-        const ref = doc(db, "usuarios", user.uid);
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-          const data = snap.data();
-          localStorage.setItem("financeFlowData", JSON.stringify(data));
-          calculateTotalJobs(data.jobs || []);
-        }
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return window.location.href = "login.html";
+  if (localStorage.getItem("syncedFromCloud")) return;
+
+  const ref = doc(db, "usuarios", user.uid);
+  const docSnap = await getDoc(ref);
+
+  if (docSnap.exists()) {
+    const cloudData = docSnap.data();
+    localStorage.setItem("financeFlowData", JSON.stringify(cloudData));
+    localStorage.setItem("syncedFromCloud", "true");
+    location.reload();
+  }
+});
+
+
+
+
+</script>
+  
+
+<script type="module">
+  import { auth, db } from './firebase.js';
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    // Evita re-sync se já tiver feito
+    if (localStorage.getItem("syncedFromCloud")) return;
+
+    try {
+      const ref = doc(db, "usuarios", user.uid);
+      const snapshot = await getDoc(ref);
+
+      if (snapshot.exists()) {
+        const cloudData = snapshot.data();
+        localStorage.setItem("financeFlowData", JSON.stringify(cloudData));
+        localStorage.setItem("syncedFromCloud", "true");
+        location.reload(); // recarrega com dados sincronizados
       } else {
-        window.location.href = "login.html";
+        console.warn("Nenhum dado encontrado na nuvem para este usuário.");
       }
-    });
-
-    function calculateTotalJobs(jobs = []) {
-      const total = jobs.reduce((sum, job) => sum + (parseFloat(job.valor) || 0), 0);
-      document.getElementById("total-jobs").textContent = `Total de Jobs: ${jobs.length}`;
-      document.getElementById("total-faturado").textContent = `Total Faturado: R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+    } catch (err) {
+      console.error("Erro ao buscar dados da nuvem:", err);
     }
+  });
+</script> 
 
-    window.saveData = async function () {
-      try {
-        const appData = {
-          jobs: [],  // Substitua com os dados reais da aplicação
-          expenses: [],
-          equipments: [],
-          routine: {}
-        };
-        localStorage.setItem("financeFlowData", JSON.stringify(appData));
-        if (window.currentUser && window.db) {
-          const ref = doc(window.db, "usuarios", window.currentUser.uid);
-          await setDoc(ref, appData);
-          console.log("✅ Dados salvos na nuvem.");
-          alert("✅ Dados salvos na nuvem.");
+<!--
+<script type="module">
+  import { auth, db } from './firebase.js';
+  import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+  let currentUser;
+
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+  });
+
+  document.getElementById("importar-dados-btn")?.addEventListener("click", async () => {
+    try {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json";
+
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const text = await file.text();
+        const dadosImportados = JSON.parse(text);
+
+        // Salva localmente
+        localStorage.setItem("financeFlowData", JSON.stringify(dadosImportados));
+        localStorage.setItem("syncedFromCloud", "true");
+
+        // Salva na nuvem
+        if (currentUser) {
+          await setDoc(doc(db, "usuarios", currentUser.uid), dadosImportados);
+          showToast("Dados importados e salvos na nuvem!", "success");
+        } else {
+          showToast("Usuário não autenticado. Dados não foram salvos na nuvem.", "error");
         }
-      } catch (err) {
-        console.error("❌ Erro em saveData():", err);
-        alert("Erro ao salvar: " + err.message);
-      }
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      };
+
+      input.click();
+    } catch (err) {
+      console.error("Erro ao importar:", err);
+      alert("Erro ao importar os dados.");
     }
-  </script>
+  });
+</script> --> 
+
+
+
+<script type="module">
+  import { auth, db } from './firebase.js';
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+
+  window.db = db; // Deixa acessível globalmente
+  window.currentUser = null;
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.currentUser = user;
+    } else {
+      window.location.href = "login.html";
+    }
+  });
+</script>
+
+
+<script type="module">
+  import { auth, db } from './firebase.js';
+  import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+  window.currentUser = null;
+  window.db = db;
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.currentUser = user;
+    } else {
+      console.warn("Usuário não autenticado.");
+    }
+  });
+
+  // Salvar dados ao clicar no botão
+  document.getElementById("save-data")?.addEventListener("click", () => {
+    try {
+      appData.expenses = [...expenses];
+      appData.equipments = [...equipments];
+
+      if (routineResults && !routineResults.classList.contains('hidden')) {
+        appData.routine = {
+          desiredSalary: parseFloat(document.getElementById('desired-salary').value),
+          workDays: parseInt(document.getElementById('work-days').value),
+          dailyHours: parseInt(document.getElementById('daily-hours').value),
+          dailyValue: parseFloat(document.getElementById('daily-value').textContent),
+          hourlyValue: parseFloat(document.getElementById('hourly-value').textContent)
+        };
+      }
+
+      localStorage.setItem("financeFlowData", JSON.stringify(appData));
+
+      if (window.currentUser && window.db) {
+        const ref = doc(window.db, "usuarios", window.currentUser.uid);
+        setDoc(ref, appData)
+          .then(() => {
+            console.log("✅ Dados salvos na nuvem.");
+            showToast("✅ Dados salvos na nuvem!", "success");
+          })
+          .catch((err) => {
+            console.error("Erro ao salvar na nuvem:", err);
+            showToast("❌ Erro ao salvar na nuvem!", "error");
+          });
+      }
+    } catch (err) {
+      console.error("❌ Erro em saveData():", err);
+      alert("Erro: " + err.message);
+    }
+  });
+</script>
+
+
+<script> function showToast(message, type = "success") {
+  const toast = document.createElement("div");
+  toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 text-white text-sm ${
+    type === "success" ? "bg-green-600" : type === "error" ? "bg-red-600" : "bg-yellow-600"
+  }`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add("opacity-0");
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
+}
+
+
+</script>
+
+
 </body>
 </html>
