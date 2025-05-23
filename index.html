@@ -1631,7 +1631,7 @@ function gerarGraficoEvolucao() {
   }); 
 
   document.getElementById("logout-btn")?.addEventListener("click", () => {
-      localStorage.removeItem("syncedFromCloud");
+      //localStorage.removeItem("syncedFromCloud");
   window.location.href = "login.html";
 });
 
@@ -1648,7 +1648,7 @@ onAuthStateChanged(auth, (user) => {
 
 </script>
 
-<!-- 
+
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
@@ -1718,7 +1718,7 @@ onAuthStateChanged(auth, async (user) => {
       console.error("Erro ao buscar dados da nuvem:", err);
     }
   });
-</script> --> 
+</script> 
 
 <script type="module">
   import { auth, db } from './firebase.js';
