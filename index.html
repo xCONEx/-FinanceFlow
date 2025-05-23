@@ -635,7 +635,7 @@
 
   <!-- Botões -->
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-    <button id="save-data" onclick="saveData()" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300">
+    <button id="save-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300">
       <i class="fas fa-save text-primary"></i>
       Salvar dados
     </button>
@@ -1577,12 +1577,10 @@ function gerarGraficoEvolucao() {
 
 
  <!-- Firebase -->
-
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
@@ -1596,33 +1594,46 @@ function gerarGraficoEvolucao() {
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
     window.db = db;
     window.currentUser = null;
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         window.currentUser = user;
         document.getElementById("user-name").textContent = `Logado como: ${user.displayName || user.email}`;
+
+        const ref = doc(db, "usuarios", user.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          const data = snap.data();
+          localStorage.setItem("financeFlowData", JSON.stringify(data));
+          calculateTotalJobs(data.jobs || []);
+        }
       } else {
         window.location.href = "login.html";
       }
     });
 
-
-  document.getElementById("logout-btn")?.addEventListener("click", () => {
-      //localStorage.removeItem("syncedFromCloud");
-  window.location.href = "login.html";
-    });
+    function calculateTotalJobs(jobs = []) {
+      const total = jobs.reduce((sum, job) => sum + (parseFloat(job.valor) || 0), 0);
+      document.getElementById("total-jobs").textContent = `Total de Jobs: ${jobs.length}`;
+      document.getElementById("total-faturado").textContent = `Total Faturado: R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+    }
 
     window.saveData = async function () {
       try {
-        const appData = { expenses: [], equipments: [], routine: {} };
+        const appData = {
+          jobs: [],  // Substitua com os dados reais da aplicação
+          expenses: [],
+          equipments: [],
+          routine: {}
+        };
         localStorage.setItem("financeFlowData", JSON.stringify(appData));
         if (window.currentUser && window.db) {
           const ref = doc(window.db, "usuarios", window.currentUser.uid);
           await setDoc(ref, appData);
           console.log("✅ Dados salvos na nuvem.");
+          alert("✅ Dados salvos na nuvem.");
         }
       } catch (err) {
         console.error("❌ Erro em saveData():", err);
@@ -1630,8 +1641,5 @@ function gerarGraficoEvolucao() {
       }
     }
   </script>
-
-
-
 </body>
 </html>
