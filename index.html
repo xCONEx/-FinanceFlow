@@ -15,12 +15,6 @@
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Firebase -->
-
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-
 
 
     <title>FinanceFlow - Gerenciamento Financeiro</title>
@@ -212,6 +206,7 @@
     <p id="user-name" class="text-sm font-medium text-gray-700 dark:text-gray-200">Usuário</p>
     <button id="logout-btn" class="text-xs text-red-500 hover:underline">Sair</button>
   </div>
+
 
 </div>
                 </div>
@@ -1572,6 +1567,10 @@ function gerarGraficoEvolucao() {
 </script>
 
 
+
+<!-- Toast de confirmação -->
+
+
 <script>
   function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
@@ -1604,13 +1603,16 @@ function gerarGraficoEvolucao() {
 
 </script>
 
+<div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg hidden z-50 transition-opacity duration-300"></div>
+
+<!-- Fim do Toast de confirmação -->
 
 
+<!-- Verificação Firebase -->
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
@@ -1623,105 +1625,31 @@ function gerarGraficoEvolucao() {
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
-  const db = getFirestore(app);
-  const provider = new GoogleAuthProvider();
 
-  const loginBtn = document.getElementById("login-btn");
-  const logoutBtn = document.getElementById("logout-btn");
-  const userName = document.getElementById("user-name");
-  const userPhoto = document.getElementById("user-photo");
+  onAuthStateChanged(auth, (user) => {
+    const userName = document.getElementById("user-name");
+    const userPhoto = document.getElementById("user-photo");
 
-  // Clique para logar
-  loginBtn?.addEventListener("click", async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      if (user) {
-        const ref = doc(db, "usuarios", user.uid);
-        const docSnap = await getDoc(ref);
-
-        if (docSnap.exists()) {
-          // 🔁 Substitui dados locais pelos da nuvem
-          localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
-        } else {
-          // Se não existe, salva dados locais ou cria vazio
-          const localData = JSON.parse(localStorage.getItem("financeFlowData")) || {
-            jobs: [],
-            expenses: [],
-            equipments: [],
-            routine: {}
-          };
-          await setDoc(ref, localData);
-        }
-
-        // Recarrega a página após login + sync
-        location.href = "index.html";
-      }
-
-    } catch (e) {
-      alert("Erro ao logar.");
-      console.error(e);
-    }
-  });
-
-  // Espera o Firebase estar pronto
-  firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
-      const db = firebase.firestore();
-      const ref = db.collection("usuarios").doc(user.uid);
-      const docSnap = await ref.get();
-
-      if (docSnap.exists) {
-        localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
-      } else {
-        const defaultData = {
-          jobs: [],
-          expenses: [],
-          equipments: [],
-          routine: {}
-        };
-        await ref.set(defaultData);
-        localStorage.setItem("financeFlowData", JSON.stringify(defaultData));
-      }
-
-      location.reload(); // Força o app a recarregar com os dados sincronizados
-    }
-  });
-
-  // Verifica sessão ativa
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      if (userName) userName.textContent = user.displayName || "Usuário";
+      if (userName) userName.textContent = user.displayName || user.email;
       if (userPhoto && user.photoURL) {
         userPhoto.src = user.photoURL;
         userPhoto.classList.remove("hidden");
       }
-      loginBtn?.classList.add("hidden");
-      logoutBtn?.classList.remove("hidden");
     } else {
-      if (userName) userName.textContent = "Fazer login";
-      userPhoto?.classList.add("hidden");
-      loginBtn?.classList.remove("hidden");
-      logoutBtn?.classList.add("hidden");
+      window.location.href = "login.html";
     }
-  });
-// Botão "Sair" apenas redireciona para o login
-document.getElementById("logout-btn")?.addEventListener("click", () => {
+  }); 
+  
+  document.getElementById("logout-btn")?.addEventListener("click", () => {
   window.location.href = "login.html";
 });
+
 
 
 </script>
 
 
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-
-
-
-
-<!-- Toast de confirmação -->
-<div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg hidden z-50 transition-opacity duration-300"></div>
 
 
 
