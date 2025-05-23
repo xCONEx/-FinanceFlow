@@ -27,6 +27,21 @@
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
   <!-- Firebase Login -->
+
+  <script type="module">
+  import { auth, db, provider } from './firebase.js';
+
+  // Exemplo: fazer login
+  import { signInWithPopup } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+  document.getElementById("login-google").addEventListener("click", async () => {
+    const result = await signInWithPopup(auth, provider);
+    console.log(result.user);
+  });
+</script>
+
+
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
@@ -80,5 +95,7 @@
       }
     });
   </script>
+
+
 </body>
 </html>
