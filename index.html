@@ -1665,7 +1665,7 @@ onAuthStateChanged(auth, async (user) => {
 
 
 </script>
-  --> 
+  
 
 <script type="module">
   import { auth, db } from './firebase.js';
@@ -1697,7 +1697,57 @@ onAuthStateChanged(auth, async (user) => {
       console.error("Erro ao buscar dados da nuvem:", err);
     }
   });
+</script> --> 
+
+<script type="module">
+  import { auth, db } from './firebase.js';
+  import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+  let currentUser;
+
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+  });
+
+  document.getElementById("importar-dados-btn")?.addEventListener("click", async () => {
+    try {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json";
+
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const text = await file.text();
+        const dadosImportados = JSON.parse(text);
+
+        // Salva localmente
+        localStorage.setItem("financeFlowData", JSON.stringify(dadosImportados));
+        localStorage.setItem("syncedFromCloud", "true");
+
+        // Salva na nuvem
+        if (currentUser) {
+          await setDoc(doc(db, "usuarios", currentUser.uid), dadosImportados);
+          showToast("Dados importados e salvos na nuvem!", "success");
+        } else {
+          showToast("Usuário não autenticado. Dados não foram salvos na nuvem.", "error");
+        }
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      };
+
+      input.click();
+    } catch (err) {
+      console.error("Erro ao importar:", err);
+      alert("Erro ao importar os dados.");
+    }
+  });
 </script>
+
 
 
 
