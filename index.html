@@ -8,6 +8,8 @@
     <!-- Manifest & Web App Meta Tags -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+
 <meta name="theme-color" content="#4F46E5">
 
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -1568,46 +1570,6 @@ function gerarGraficoEvolucao() {
 
 
 
-<!-- Toast de confirmação -->
-
-
-<script>
-  function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-
-    // Define cor baseada no tipo
-    const colorMap = {
-      success: 'bg-green-500',
-      error: 'bg-red-500',
-      info: 'bg-blue-500',
-      warning: 'bg-yellow-500'
-    };
-
-    // Reset e aplica nova classe
-    toast.className = 'fixed bottom-4 right-4 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-300';
-    toast.classList.add(colorMap[type] || 'bg-green-500');
-    toast.textContent = message;
-    toast.classList.remove('hidden');
-
-    // Esconde após 3 segundos
-    setTimeout(() => {
-      toast.classList.add('hidden');
-    }, 3000);
-  }
-
-    showToast("✅ Dados salvos com sucesso!", "success");
-    showToast("❌ Erro ao importar", "error");
-    showToast("☁️ Dados sincronizados!", "info");
-
-
-
-</script>
-
-<div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg hidden z-50 transition-opacity duration-300"></div>
-
-<!-- Fim do Toast de confirmação -->
-
-
 <!-- Verificação Firebase -->
 
 <script type="module">
@@ -1669,19 +1631,25 @@ function gerarGraficoEvolucao() {
   const db = getFirestore(app);
 
   onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = "login.html";
-      return;
-    }
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
 
-    const ref = doc(db, "usuarios", user.uid);
-    const docSnap = await getDoc(ref);
+  if (localStorage.getItem("syncedFromCloud")) return;
 
-    if (docSnap.exists()) {
-      localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
-      location.reload(); // força o app a usar os dados sincronizados
-    }
-  });
+  const ref = doc(db, "usuarios", user.uid);
+  const docSnap = await getDoc(ref);
+
+  if (docSnap.exists()) {
+    localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
+    localStorage.setItem("syncedFromCloud", "true");
+    location.reload(); // só recarrega 1 vez
+  }
+});
+
+
+  
 </script>
 
 
