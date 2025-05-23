@@ -1653,6 +1653,8 @@ onAuthStateChanged(auth, (user) => {
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
 
   const firebaseConfig = {
     apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
@@ -1692,6 +1694,7 @@ onAuthStateChanged(auth, async (user) => {
   import { auth, db } from './firebase.js';
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
   import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -1724,6 +1727,7 @@ onAuthStateChanged(auth, async (user) => {
   import { auth, db } from './firebase.js';
   import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
   let currentUser;
 
@@ -1821,15 +1825,30 @@ onAuthStateChanged(auth, async (user) => {
     try {
       await setDoc(doc(db, "usuarios", currentUser.uid), dados);
       console.log("Dados salvos na nuvem com sucesso.");
-      showToast("✅ Dados salvos na nuvem!", "success");
+      alert("✅ Dados salvos na nuvem!", "success");
     } catch (err) {
       console.error("Erro ao salvar dados na nuvem:", err);
-      showToast("❌ Erro ao salvar na nuvem!", "error");
+      alert("❌ Erro ao salvar na nuvem!", "error");
     }
   });
 </script>
 
+<script> function showToast(message, type = "success") {
+  const toast = document.createElement("div");
+  toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 text-white text-sm ${
+    type === "success" ? "bg-green-600" : type === "error" ? "bg-red-600" : "bg-yellow-600"
+  }`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
 
+  setTimeout(() => {
+    toast.classList.add("opacity-0");
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
+}
+
+
+</script>
 
 
 </body>
