@@ -10,15 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script>
-  const supabase = supabase.createClient(
-    'https://jkovpbfdeqntuxuykpqf.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imprb3ZwYmZkZXFudHV4dXlrcHFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5Mzc4MjcsImV4cCI6MjA2MzUxMzgyN30.3DJv4_FncopcGhk1bfZrWpBgL1YuSyC3aL6VoeliB4o'
-  );
-</script>
-
-
 
      <!-- FontAwesome -->
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -56,13 +47,11 @@
             </div>
             
             <div class="space-y-6">
-                <button onclick="signInWithGoogle()" id="btn-google" class="btn-google w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 flex items-center justify-center space-x-3">
+                <button id="google-login" class="btn-google w-full py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border border-gray-300 flex items-center justify-center space-x-3">
                     <img src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-1024.png" alt="Google logo" class="h-5 w-5">
                     <span>Continuar com Google</span>
-                    
                 </button>
-                <button onclick="signInWithGoogle()" class="btn-google">Entrar com Google</button>
-
+                
                 <div class="text-center text-sm text-gray-500">
                     Ao continuar, você concorda com nossos <a href="#" class="text-primary hover:underline">Termos de Serviço</a> e <a href="#" class="text-primary hover:underline">Política de Privacidade</a>
                     <p class="mt-4 text-sm text-gray-500">Seus dados serão sincronizados automaticamente com a nuvem após login.</p>
@@ -80,23 +69,86 @@
         </div>
     </div>
 
-<script>
-async function signInWithGoogle() {
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: window.location.origin + '/index.html'
-    }
-  });
+    <script>
+        // Firebase Configuration
+  // Configuração do Firebase do projeto do Yuri
+  const firebaseConfig = {
+    apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
+    authDomain: "financeflow-e0fae.firebaseapp.com",
+    projectId: "financeflow-e0fae",
+    storageBucket: "financeflow-e0fae.firebasestorage.app",
+    messagingSenderId: "970984329138",
+    appId: "1:970984329138:web:429a185b8bab1971991eab"
+  };
 
-  if (error) {
-    console.error('Erro no login:', error.message);
-    alert('Erro no login: ' + error.message);
-  }
-}
-</script>
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const provider = new firebase.auth.GoogleAuthProvider();
 
+        // DOM Elements
+        const googleLoginBtn = document.getElementById('google-login');
+        const loadingOverlay = document.getElementById('loading-overlay');
 
+        // Show loading overlay
+        function showLoading() {
+            loadingOverlay.classList.remove('hidden');
+        }
 
+        // Hide loading overlay
+        function hideLoading() {
+            loadingOverlay.classList.add('hidden');
+        }
+
+        // Save user data to localStorage
+        function saveUserData(user) {
+            const userData = {
+                uid: user.uid,
+                displayName: user.displayName,
+                email: user.email,
+                photoURL: user.photoURL,
+                lastLogin: new Date().toISOString()
+            };
+            localStorage.setItem('userData', JSON.stringify(userData));
+        }
+
+        // Get user data from localStorage
+        function getUserData() {
+            const userData = localStorage.getItem('userData');
+            return userData ? JSON.parse(userData) : null;
+        }
+
+        // Google Authentication
+        async function signInWithGoogle() {
+            showLoading();
+            try {
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                
+                // Save user data locally
+                saveUserData(user);
+                
+                // Redirect to app
+                window.location.href = 'index.html';
+            } catch (error) {
+                hideLoading();
+                console.error('Erro na autenticação:', error);
+                alert('Erro ao fazer login com Google. Por favor, tente novamente.');
+            }
+        }
+
+        googleLoginBtn.addEventListener('click', signInWithGoogle);
+
+        // Check if user is already logged in locally
+        window.addEventListener('DOMContentLoaded', () => {
+            const userData = getUserData();
+            if (userData) {
+                // User data exists locally, you could automatically log them in
+                // or show their information
+                console.log('Usuário encontrado no localStorage:', userData);
+            }
+        });
+        
+    </script>
 </body>
 </html>
