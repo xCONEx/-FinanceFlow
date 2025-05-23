@@ -803,55 +803,6 @@ document.querySelectorAll('input.currency-format').forEach(input => {
         }
         
 
-
-function saveData() {
-  try {
-    appData.expenses = [...expenses];
-    appData.equipments = [...equipments];
-
-    if (routineResults && !routineResults.classList.contains('hidden')) {
-      appData.routine = {
-        desiredSalary: parseFloat(document.getElementById('desired-salary').value),
-        workDays: parseInt(document.getElementById('work-days').value),
-        dailyHours: parseInt(document.getElementById('daily-hours').value),
-        dailyValue: parseFloat(document.getElementById('daily-value').textContent),
-        hourlyValue: parseFloat(document.getElementById('hourly-value').textContent)
-      };
-    }
-
-    // Salvar no localStorage
-    localStorage.setItem('financeFlowData', JSON.stringify(appData));
-
-    // Salvar na nuvem (Firestore)
-    if (window.currentUser && window.db) {
-      const userRef = doc(window.db, "usuarios", window.currentUser.uid);
-      setDoc(userRef, appData)
-        .then(() => {
-          console.log("✅ Dados salvos na nuvem.");
-          showToast("✅ Dados salvos na nuvem!", "success");
-        })
-        .catch((error) => {
-          console.error("Erro ao salvar dados na nuvem:", error);
-          showToast("❌ Erro ao salvar na nuvem!", "error");
-        });
-    }
-
-    // Notificação visual local
-    const notification = document.createElement('div');
-    notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2';
-    notification.innerHTML = `<i class="fas fa-check-circle"></i><span>Dados salvos com sucesso!</span>`;
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-      notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
-      setTimeout(() => notification.remove(), 300);
-    }, 2000);
-  } catch (err) {
-    console.error("❌ Erro em saveData():", err);
-    alert("Erro ao salvar: " + err.message);
-  }
-}
-
         
         // Toggle sidebar on mobile
         openSidebarBtn.addEventListener('click', () => {
@@ -1577,10 +1528,12 @@ function gerarGraficoEvolucao() {
 
 
  <!-- Firebase -->
+
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
@@ -1596,89 +1549,33 @@ function gerarGraficoEvolucao() {
     const db = getFirestore(app);
 
     window.db = db;
-    window.auth = auth;
     window.currentUser = null;
 
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, (user) => {
       if (user) {
         window.currentUser = user;
-        document.getElementById("user-name").textContent = user.displayName || user.email;
-        if (user.photoURL) {
-          const photo = document.getElementById("user-photo");
-          photo.src = user.photoURL;
-          photo.classList.remove("hidden");
-        }
-
-        if (!localStorage.getItem("syncedFromCloud")) {
-          const ref = doc(db, "usuarios", user.uid);
-          const snap = await getDoc(ref);
-          if (snap.exists()) {
-            localStorage.setItem("financeFlowData", JSON.stringify(snap.data()));
-            localStorage.setItem("syncedFromCloud", "true");
-            location.reload();
-          }
-        }
+        document.getElementById("user-name").textContent = `Logado como: ${user.displayName || user.email}`;
       } else {
         window.location.href = "login.html";
       }
     });
 
-    document.getElementById("logout-btn")?.addEventListener("click", () => {
-      signOut(auth).then(() => window.location.href = "login.html");
-    });
-
     window.saveData = async function () {
-  try {
-    appData.expenses = [...expenses];
-    appData.equipments = [...equipments];
-    
-    if (routineResults && !routineResults.classList.contains('hidden')) {
-      appData.routine = {
-        desiredSalary: parseFloat(document.getElementById('desired-salary').value),
-        workDays: parseInt(document.getElementById('work-days').value),
-        dailyHours: parseInt(document.getElementById('daily-hours').value),
-        dailyValue: parseFloat(document.getElementById('daily-value').textContent),
-        hourlyValue: parseFloat(document.getElementById('hourly-value').textContent)
-      };
-    }
-
-    localStorage.setItem("financeFlowData", JSON.stringify(appData));
-
-    if (window.currentUser && window.db) {
-      const ref = doc(window.db, "usuarios", window.currentUser.uid);
-      await setDoc(ref, appData);
-      console.log("✅ Dados salvos na nuvem.");
-    }
-  } catch (err) {
-    console.error("❌ Erro em saveData():", err);
-    alert("Erro ao salvar: " + err.message);
-  }
-};
-
-
-
-  </script>
-
-  <!-- Exemplo de função de salvar dados corrigida 
-  <script>
-    async function saveData() {
       try {
-        // Exemplo de estrutura que você já tem
-        appData.expenses = [...expenses];
-        appData.equipments = [...equipments];
-        // ... rotina etc.
+        const appData = { expenses: [], equipments: [], routine: {} };
         localStorage.setItem("financeFlowData", JSON.stringify(appData));
-
         if (window.currentUser && window.db) {
           const ref = doc(window.db, "usuarios", window.currentUser.uid);
           await setDoc(ref, appData);
           console.log("✅ Dados salvos na nuvem.");
         }
       } catch (err) {
-        console.error("Erro ao salvar na nuvem:", err);
+        console.error("❌ Erro em saveData():", err);
+        alert("Erro ao salvar: " + err.message);
       }
     }
-  </script> --> 
+  </script>
+
 
 
 </body>
