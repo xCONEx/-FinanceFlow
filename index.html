@@ -1609,6 +1609,12 @@ function gerarGraficoEvolucao() {
       }
     });
 
+
+  document.getElementById("logout-btn")?.addEventListener("click", () => {
+      //localStorage.removeItem("syncedFromCloud");
+  window.location.href = "login.html";
+    });
+
     window.saveData = async function () {
       try {
         const appData = { expenses: [], equipments: [], routine: {} };
