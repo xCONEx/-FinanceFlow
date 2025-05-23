@@ -791,12 +791,12 @@ document.querySelectorAll('input.currency-format').forEach(input => {
         };
         
         // Data storage
-        let appData = {
-            expenses: [],
-            equipments: [],
-            routine: {},
-            jobs: []
-        };
+let appData = {
+  expenses: [],
+  equipments: [],
+  routine: {},
+  jobs: []
+};
         
         // Load data from localStorage
         function loadData() {
@@ -1497,10 +1497,14 @@ document.getElementById('import-data').addEventListener('change', (e) => {
         });
         
         // Calculate total of all jobs
-        function calculateTotalJobs() {
-            const total = appData.jobs.reduce((sum, job) => sum + job.value, 0);
-            document.getElementById('total-jobs').textContent = total.toFixed(2);
-        }
+function calculateTotalJobs() {
+    if (!Array.isArray(appData.jobs)) {
+        appData.jobs = [];
+    }
+
+    const total = appData.jobs.reduce((sum, job) => sum + job.value, 0);
+    document.getElementById('total-jobs').textContent = total.toFixed(2);
+}
         
         // Update dashboard with all current values
         function updateDashboard() {
