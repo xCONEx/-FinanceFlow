@@ -774,65 +774,6 @@ verificarLogin();
 
 
 
-    <script type="module">
-import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-// Firebase já deve estar inicializado
-const auth = getAuth();
-const db = getFirestore();
-
-const importBtn = document.getElementById("import-data");
-const importInput = document.getElementById("import-file");
-
-importBtn?.addEventListener("click", () => {
-  importInput.click();
-});
-
-importInput?.addEventListener("change", async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    try {
-      const data = JSON.parse(e.target.result);
-      localStorage.setItem("financeFlowData", JSON.stringify(data));
-// Obter dados do Firebase
-const userData = JSON.parse(localStorage.getItem('userData'));
-if (userData?.uid) {
-  supabase
-    .from('usuarios_dados')
-    .upsert([{ uid: userData.uid, dados: appData }], { onConflict: ['uid'] })
-    .then(({ data, error }) => {
-      if (error) {
-        console.error('Erro ao salvar no Supabase:', error);
-      } else {
-        console.log('Dados salvos na nuvem via Supabase!', data);
-      }
-    });
-}
-
-      const user = auth.currentUser;
-      if (user) {
-        const ref = doc(db, "usuarios", user.uid);
-        await setDoc(ref, data);
-        showToast("📥 Dados importados e salvos na nuvem!", "success");
-      } else {
-        showToast("⚠️ Dados importados localmente, mas usuário não logado!", "warning");
-      }
-
-      location.reload();
-    } catch (err) {
-      console.error("Erro ao importar:", err);
-      showToast("❌ Erro ao importar dados", "error");
-    }
-  };
-
-  reader.readAsText(file);
-});
-</script>
-
 
 
     <script>
@@ -1057,23 +998,6 @@ carregarDadosSupabase();
         });
 
     
-    // Salvar também no Supabase
-const { data: { session } } = await supabase.auth.getSession();
-const uid = session?.user?.id;
-
-if (uid) {
-  const { error } = await supabase
-    .from('usuarios_dados')
-    .upsert([{ uid: uid, dados: appData }], { onConflict: ['uid'] });
-
-  if (error) {
-    console.error('Erro ao salvar no Supabase:', error.message);
-  } else {
-    console.log('Dados salvos na nuvem via Supabase!');
-  }
-}
-
-
 
         // Exportar dados para .json
 document.getElementById('export-data').addEventListener('click', () => {
@@ -1827,6 +1751,30 @@ function gerarGraficoEvolucao() {
     }
   });
 
+  // Espera o Firebase estar pronto
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+      const db = firebase.firestore();
+      const ref = db.collection("usuarios").doc(user.uid);
+      const docSnap = await ref.get();
+
+      if (docSnap.exists) {
+        localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
+      } else {
+        const defaultData = {
+          jobs: [],
+          expenses: [],
+          equipments: [],
+          routine: {}
+        };
+        await ref.set(defaultData);
+        localStorage.setItem("financeFlowData", JSON.stringify(defaultData));
+      }
+
+      location.reload(); // Força o app a recarregar com os dados sincronizados
+    }
+  });
+  
   // Verifica sessão ativa
   onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -1854,31 +1802,7 @@ document.getElementById("logout-btn")?.addEventListener("click", () => {
 
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-<script>
-  // Espera o Firebase estar pronto
-  firebase.auth().onAuthStateChanged(async (user) => {
-    if (user) {
-      const db = firebase.firestore();
-      const ref = db.collection("usuarios").doc(user.uid);
-      const docSnap = await ref.get();
 
-      if (docSnap.exists) {
-        localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
-      } else {
-        const defaultData = {
-          jobs: [],
-          expenses: [],
-          equipments: [],
-          routine: {}
-        };
-        await ref.set(defaultData);
-        localStorage.setItem("financeFlowData", JSON.stringify(defaultData));
-      }
-
-      location.reload(); // Força o app a recarregar com os dados sincronizados
-    }
-  });
-</script>
 
 
 
