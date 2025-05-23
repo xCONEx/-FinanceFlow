@@ -37,6 +37,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+
     <script>
         tailwind.config = {
             theme: {
@@ -263,7 +264,8 @@
                     </button> -->
 
 
-                   <button id="open-notify" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-green-700" title="Notificações">
+                   <button id="open-notify" class=
+                   "p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-green-700" title="Notificações">
                 <i class="fas fa-bell"></i>
                  </button>
 
@@ -1607,6 +1609,7 @@ function gerarGraficoEvolucao() {
     const userName = document.getElementById("user-name");
     const userPhoto = document.getElementById("user-photo");
 
+
     if (user) {
       if (userName) userName.textContent = user.displayName || user.email;
       if (userPhoto && user.photoURL) {
@@ -1621,6 +1624,15 @@ function gerarGraficoEvolucao() {
   document.getElementById("logout-btn")?.addEventListener("click", () => {
       localStorage.removeItem("syncedFromCloud");
   window.location.href = "login.html";
+});
+
+
+let currentUser = null;
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+  }
 });
 
 
@@ -1748,6 +1760,45 @@ onAuthStateChanged(auth, async (user) => {
   });
 </script>
 
+
+<script type="module">
+  import { auth, db } from './firebase.js';
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+  let currentUser = null;
+
+  // Detecta usuário logado
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+    }
+  });
+
+  // Botão "Salvar" envia dados para a nuvem
+  document.getElementById("save-data")?.addEventListener("click", async () => {
+    const dados = JSON.parse(localStorage.getItem("financeFlowData")) || {
+      jobs: [],
+      expenses: [],
+      equipments: [],
+      routine: {}
+    };
+
+    if (!currentUser) {
+      alert("Você precisa estar logado para salvar na nuvem.");
+      return;
+    }
+
+    try {
+      await setDoc(doc(db, "usuarios", currentUser.uid), dados);
+      console.log("Dados salvos na nuvem com sucesso.");
+      showToast("✅ Dados salvos na nuvem!", "success");
+    } catch (err) {
+      console.error("Erro ao salvar dados na nuvem:", err);
+      showToast("❌ Erro ao salvar na nuvem!", "error");
+    }
+  });
+</script>
 
 
 
