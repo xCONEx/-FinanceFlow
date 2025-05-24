@@ -728,12 +728,6 @@
 
     <script>
 
-  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-
-
-
-
 document.getElementById('export-data-settings')?.addEventListener('click', () => {
   const data = JSON.stringify(appData, null, 2);
   const blob = new Blob([data], { type: "application/json" });
