@@ -650,7 +650,7 @@
   <!-- Botões -->
 
   <!-- Info do usuário (visível apenas se logado) -->
-<div id="user-info-box" class="flex items-center space-x-4 mb-4">
+<div id="user-info" class="flex items-center space-x-4 mb-4">
   <img id="user-photo" class="w-8 h-8 rounded-full hidden" alt="Foto de perfil">
   <div>
     <p id="user-name" class="text-sm font-medium text-gray-700 dark:text-gray-200 ">Usuário</p>
@@ -777,16 +777,6 @@ document.getElementById('export-data-settings')?.addEventListener('click', () =>
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 });
-
-
-
-const user = getAuth().currentUser;
-if (user) {
-  document.getElementById("user-name").textContent = user.displayName || user.email;
-  document.getElementById("user-photo").src = user.photoURL || 'default.jpg';
-  document.getElementById("user-info-box").classList.remove("hidden");
-}
-
 
 
 
@@ -1666,7 +1656,7 @@ function gerarGraficoEvolucao() {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, (user) => {
     const userName = document.getElementById("user-name");
     const userPhoto = document.getElementById("user-photo");
 
