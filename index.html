@@ -701,7 +701,7 @@
 </div>
 </section>
 
-        <!-- Bottom Menu - apenas para mobile -->
+        <!-- Bottom Menu - apenas para mobile 
 <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg flex justify-around py-2 md:hidden z-50"
      style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 13px);">
 
@@ -730,7 +730,40 @@
     <i class="fas fa-cog text-lg"></i>
     <span class="text-[9px]">Config</span>
   </a>
+</nav> -->
+
+<!-- Bottom Menu - apenas para mobile -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg flex justify-around py-2 md:hidden z-50"
+     style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 13px);">
+
+  <a href="#dashboard" id="dashboard-tab" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
+    <i class="fas fa-chart-pie text-lg group-[.active]:text-indigo-600"></i>
+    <span class="text-[9px] group-[.active]:text-indigo-600">Dashboard</span>
+  </a>
+  <a href="#custos-mensais" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
+    <i class="fas fa-receipt text-lg group-[.active]:text-indigo-600"></i>
+    <span class="text-[9px] group-[.active]:text-indigo-600">Custos</span>
+  </a>
+  <a href="#equipamentos" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
+    <i class="fas fa-laptop text-lg group-[.active]:text-indigo-600"></i>
+    <span class="text-[9px] group-[.active]:text-indigo-600">Itens</span>
+  </a>
+  <a href="#rotina" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
+    <i class="fas fa-calendar-alt text-lg group-[.active]:text-indigo-600"></i>
+    <span class="text-[9px] group-[.active]:text-indigo-600">Rotina</span>
+  </a>
+  <a href="#calculadora" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
+    <i class="fas fa-calculator text-lg group-[.active]:text-indigo-600"></i>
+    <span class="text-[9px] group-[.active]:text-indigo-600">Jobs</span>
+  </a>
+  <a href="#configuracoes" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
+    <i class="fas fa-cog text-lg group-[.active]:text-indigo-600"></i>
+    <span class="text-[9px] group-[.active]:text-indigo-600">Config</span>
+  </a>
 </nav>
+
+
+
 
 <button id="backToTop" class="hidden fixed bottom-25 right-4 bg-primary text-white p-3 rounded-full shadow-lg">
   <i class="fas fa-arrow-up"></i>
@@ -1705,33 +1738,6 @@ document.getElementById('backToTop')?.addEventListener('click', () => {
 
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  const navLinks = document.querySelectorAll('[data-nav-target]');
-
-  function setActiveNav(targetId) {
-    navLinks.forEach(link => {
-      const linkTarget = link.getAttribute('href');
-      if (linkTarget === `#${targetId}`) {
-        link.classList.add('active-nav');
-      } else {
-        link.classList.remove('active-nav');
-      }
-    });
-  }
-
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      const targetId = link.getAttribute('href').replace('#', '');
-      setActiveNav(targetId);
-    });
-  });
-
-  // Ativar com base na URL ao carregar
-  const current = window.location.hash.replace('#', '');
-  if (current) setActiveNav(current);
-});
-
-
 
 </script>
 
@@ -1792,6 +1798,36 @@ onAuthStateChanged(auth, (user) => {
 
 </script> --> 
 
+<!-- Menu nav Selecionado -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const navLinks = document.querySelectorAll('[data-nav-target]');
+
+  function setActiveNav(targetId) {
+    navLinks.forEach(link => {
+      const linkTarget = link.getAttribute('href');
+      if (linkTarget === `#${targetId}`) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  }
+
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const targetId = link.getAttribute('href').replace('#', '');
+      setActiveNav(targetId);
+    });
+  });
+
+  // Ativar pela hash ao carregar a página
+  const current = window.location.hash.replace('#', '');
+  if (current) setActiveNav(current);
+});
+</script>
+
+<!-- Final Menu nav Selecionado -->
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
