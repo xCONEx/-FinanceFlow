@@ -121,9 +121,14 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
+         .pt-safe-top {
+     padding-top: env(safe-area-inset-top);
+         }
+
     </style>
 </head>
-  <body class="bg-gray-50 font-sans"> 
+
+    <body class="bg-gray-50 font-sans" style="padding-bottom: env(safe-area-inset-bottom); padding-top: env(safe-area-inset-top);">
 
     
 
@@ -176,7 +181,7 @@
 
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <div class="sidebar bg-white w-64 border-r border-gray-200 flex flex-col">
+        <div class="pt-safe-top sidebar bg-white w-64 border-r border-gray-200 flex flex-col">
             <div class="p-4 flex items-center justify-between border-b border-gray-200">
                 <div class="flex items-center space-x-2">
                     <i class="fas fa-wallet text-primary text-2xl"></i>
@@ -245,25 +250,6 @@
                 </div>
                 <div class="flex items-center space-x-4">
 
-                    <!-- Botões de Exportar e Importar 
-
-                    <button id="export-data" class="p-2 rounded-full hover:bg-gray-100 text-green-500 hover:text-green-700" title="Exportar dados">
-                     <i class="fas fa-download"></i>
-                    </button>
-
-                    <label for="import-data" class="p-2 rounded-full hover:bg-gray-100 text-blue-500 hover:text-blue-700 cursor-pointer" title="Importar dados">
-                     <i class="fas fa-upload"></i>
-                     <input type="file" id="import-data" accept=".json" class="hidden">
-                    </label>
-
-                    <button id="save-data" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700" title="Salvar dados">
-                        <i class="fas fa-save"></i>
-                    </button>
-                    <button id="reset-data" class="p-2 rounded-full hover:bg-gray-100 text-red-500 hover:text-red-700" title="Resetar dados">
-                        <i class="fas fa-rotate-left"></i>
-                    </button> -->
-
-
                    <button id="open-notify" class=
                    "p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-green-700" title="Notificações">
                 <i class="fas fa-bell"></i>
@@ -279,7 +265,7 @@
             </header>
             
             <!-- Main content area -->
-            <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+            <main class="pb-24 flex-1 overflow-y-auto p-6 bg-gray-50">
                 <!-- Dashboard Overview -->
                 <section id="dashboard" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -704,14 +690,9 @@
 </div>
 </section>
 
-
-            </main>
-        </div>
-
         <!-- Bottom Menu - apenas para mobile -->
 <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg flex justify-around py-2 md:hidden z-50"
-     style="padding-bottom: constant(safe-area-inset-bottom); padding-bottom: env(safe-area-inset-bottom);">
-
+     style="padding-bottom: env(safe-area-inset-bottom);">
 
   <a href="#dashboard" onclick="updateDashboard()" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 w-full">
     <i class="fas fa-chart-pie text-lg"></i>
@@ -739,6 +720,9 @@
   </a>
 </nav>
 
+
+            </main>
+        </div>
 
 
 
