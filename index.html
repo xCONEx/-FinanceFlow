@@ -219,13 +219,13 @@
                     </a>
                 </div>
             </nav>
-            <div class="p-4 border-t border-gray-200 mb-20">
+            <div class="p-4 border-t border-gray-200 mb-18">
                 <div class="flex items-center space-x-3">
                    
                     <div id="user-info" class="flex items-center space-x-3 ">
   <img id="user-photo" class="w-8 h-8 rounded-full hidden" alt="Foto de perfil">
   <div>
-    <p id="user-name" class="text-sm font-medium text-gray-700 dark:text-gray-200">Usuário</p>
+    <p id="user-name" class="text-sm font-medium text-gray-700 dark:text-gray-200 ">Usuário</p>
     <button id="logout-btn" class="text-xs text-red-500 hover:underline">Sair</button>
   </div>
 
@@ -650,7 +650,7 @@
   <!-- Botões -->
 
   <!-- Info do usuário (visível apenas se logado) -->
-<div id="user-info" class="flex items-center space-x-4 mb-4 md:hidden">
+<div id="user-info-box" class="flex items-center space-x-4 mb-4">
   <img id="user-photo" class="w-8 h-8 rounded-full hidden" alt="Foto de perfil">
   <div>
     <p id="user-name" class="text-sm font-medium text-gray-700 dark:text-gray-200 ">Usuário</p>
@@ -778,6 +778,14 @@ document.getElementById('export-data-settings')?.addEventListener('click', () =>
   URL.revokeObjectURL(url);
 });
 
+
+
+const user = getAuth().currentUser;
+if (user) {
+  document.getElementById("user-name").textContent = user.displayName || user.email;
+  document.getElementById("user-photo").src = user.photoURL || 'default.jpg';
+  document.getElementById("user-info-box").classList.remove("hidden");
+}
 
 
 
