@@ -125,6 +125,11 @@
      padding-top: env(safe-area-inset-top);
          }
 
+.active-nav {
+  color: #6366f1; /* Indigo-500 */
+}
+
+
     </style>
 </head>
 
@@ -701,27 +706,27 @@
      style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 13px);">
 
 
-  <a href="#dashboard" id="dashboard-tab" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:text-gray-100 w-full">
+  <a href="#dashboard" id="dashboard-tab" class="flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
     <i class="fas fa-chart-pie text-lg"></i>
     <span class="text-[9px]">Dashboard</span>
   </a>
-  <a href="#custos-mensais" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:text-gray-100 w-full ">
+  <a href="#custos-mensais" class="flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
     <i class="fas fa-receipt text-lg"></i>
     <span class="text-[9px]">Custos</span>
   </a>
-  <a href="#equipamentos" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:text-gray-100 w-full">
+  <a href="#equipamentos" class="flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
     <i class="fas fa-laptop text-lg"></i>
     <span class="text-[9px]">Itens</span>
   </a>
-  <a href="#rotina" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:text-gray-100 w-full">
+  <a href="#rotina" class="flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
     <i class="fas fa-calendar-alt text-lg"></i>
     <span class="text-[9px]">Rotina</span>
   </a>
-  <a href="#calculadora" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:text-gray-100 w-full">
+  <a href="#calculadora" class="flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
     <i class="fas fa-calculator text-lg"></i>
     <span class="text-[9px]">Jobs</span>
   </a>
-  <a href="#configuracoes" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:text-gray-100 w-full">
+  <a href="#configuracoes" class="flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
     <i class="fas fa-cog text-lg"></i>
     <span class="text-[9px]">Config</span>
   </a>
@@ -1697,6 +1702,35 @@ window.addEventListener('scroll', () => {
 document.getElementById('backToTop')?.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const navLinks = document.querySelectorAll('[data-nav-target]');
+
+  function setActiveNav(targetId) {
+    navLinks.forEach(link => {
+      const linkTarget = link.getAttribute('href');
+      if (linkTarget === `#${targetId}`) {
+        link.classList.add('active-nav');
+      } else {
+        link.classList.remove('active-nav');
+      }
+    });
+  }
+
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const targetId = link.getAttribute('href').replace('#', '');
+      setActiveNav(targetId);
+    });
+  });
+
+  // Ativar com base na URL ao carregar
+  const current = window.location.hash.replace('#', '');
+  if (current) setActiveNav(current);
+});
+
 
 
 </script>
