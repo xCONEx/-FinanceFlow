@@ -18,20 +18,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-<!-- 
-<script type="module">
-  import { auth, db, provider } from './firebase.js';
-
-  // Exemplo: fazer login
-  import { signInWithPopup } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-
-  document.getElementById("login-google").addEventListener("click", async () => {
-    const result = await signInWithPopup(auth, provider);
-    console.log(result.user);
-  });
-</script> --> 
-
-
 
     <title>FinanceFlow - Gerenciamento Financeiro</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -733,34 +719,27 @@
 </nav> -->
 
 <!-- Bottom Menu - apenas para mobile -->
-<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg flex justify-around py-2 md:hidden z-50"
-     style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 13px);">
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg flex justify-around py-2 md:hidden z-50" style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 13px);"> 
 
-  <a href="#dashboard" id="dashboard-tab" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
-    <i class="fas fa-chart-pie text-lg group-[.active]:text-indigo-600"></i>
-    <span class="text-[9px] group-[.active]:text-indigo-600">Dashboard</span>
-  </a>
-  <a href="#custos-mensais" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
-    <i class="fas fa-receipt text-lg group-[.active]:text-indigo-600"></i>
-    <span class="text-[9px] group-[.active]:text-indigo-600">Custos</span>
-  </a>
-  <a href="#equipamentos" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
-    <i class="fas fa-laptop text-lg group-[.active]:text-indigo-600"></i>
-    <span class="text-[9px] group-[.active]:text-indigo-600">Itens</span>
-  </a>
-  <a href="#rotina" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
-    <i class="fas fa-calendar-alt text-lg group-[.active]:text-indigo-600"></i>
-    <span class="text-[9px] group-[.active]:text-indigo-600">Rotina</span>
-  </a>
-  <a href="#calculadora" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
-    <i class="fas fa-calculator text-lg group-[.active]:text-indigo-600"></i>
-    <span class="text-[9px] group-[.active]:text-indigo-600">Jobs</span>
-  </a>
-  <a href="#configuracoes" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 [&.active]:text-indigo-600">
-    <i class="fas fa-cog text-lg group-[.active]:text-indigo-600"></i>
-    <span class="text-[9px] group-[.active]:text-indigo-600">Config</span>
-  </a>
-</nav>
+    <a href="#dashboard" id="dashboard-tab" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 active:bg-transparent"> 
+        <i class="fas fa-chart-pie text-lg group-[.active]:text-indigo-600"></i> 
+        <span class="text-[9px] group-[.active]:text-indigo-600">Dashboard</span> </a> 
+        <a href="#custos-mensais" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 active:bg-transparent"> 
+            <i class="fas fa-receipt text-lg group-[.active]:text-indigo-600"></i> 
+            <span class="text-[9px] group-[.active]:text-indigo-600">Custos</span> </a> 
+            <a href="#equipamentos" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 active:bg-transparent"> 
+                <i class="fas fa-laptop text-lg group-[.active]:text-indigo-600"></i> 
+                <span class="text-[9px] group-[.active]:text-indigo-600">Itens</span> </a> 
+                <a href="#rotina" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 active:bg-transparent"> 
+                    <i class="fas fa-calendar-alt text-lg group-[.active]:text-indigo-600"></i> 
+                    <span class="text-[9px] group-[.active]:text-indigo-600">Rotina</span> </a> 
+                <a href="#calculadora" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 active:bg-transparent"> 
+                    <i class="fas fa-calculator text-lg group-[.active]:text-indigo-600"></i> 
+                    <span class="text-[9px] group-[.active]:text-indigo-600">Jobs</span> </a> 
+                    <a href="#configuracoes" data-nav-target class="group flex flex-col items-center justify-center w-full text-gray-500 hover:text-indigo-600 active:bg-transparent"> 
+                        <i class="fas fa-cog text-lg group-[.active]:text-indigo-600"></i> 
+                        <span class="text-[9px] group-[.active]:text-indigo-600">Config</span> </a> 
+                    </nav>
 
 
 
