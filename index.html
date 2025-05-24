@@ -527,7 +527,7 @@
                         <form id="routine-form" class="space-y-6">
                             <div>
                                 <label for="desired-salary" class="block text-sm font-medium text-gray-700 mb-1">Salário Desejado (R$)</label>
-                                <input type="text" id="desired-salary" class="currency-format w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                <input type="text" step="0.01" id="desired-salary" class="currency-format w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                             </div>
                             <div>
                                 <label for="work-days" class="block text-sm font-medium text-gray-700 mb-1">Dias de Trabalho por Mês</label>
@@ -1597,6 +1597,45 @@ function gerarGraficoEvolucao() {
 }
 
 
+function autoSaveAndUpdate() {
+  if (typeof updateDashboard === 'function') updateDashboard();
+  if (typeof saveData === 'function') saveData();
+}
+
+// Ao enviar os formulários de rotina, calculadora, custos e equipamentos
+document.addEventListener('DOMContentLoaded', () => {
+  const routineForm = document.getElementById('routine-form');
+  const jobCalculatorForm = document.getElementById('job-calculator-form');
+  const expenseForm = document.getElementById('expense-form');
+  const equipmentForm = document.getElementById('equipment-form');
+
+  if (routineForm) {
+    routineForm.addEventListener('submit', (e) => {
+      setTimeout(autoSaveAndUpdate, 300);
+    });
+  }
+
+  if (jobCalculatorForm) {
+    jobCalculatorForm.addEventListener('submit', (e) => {
+      setTimeout(autoSaveAndUpdate, 300);
+    });
+  }
+
+  if (expenseForm) {
+    expenseForm.addEventListener('submit', (e) => {
+      setTimeout(autoSaveAndUpdate, 300);
+    });
+  }
+
+  if (equipmentForm) {
+    equipmentForm.addEventListener('submit', (e) => {
+      setTimeout(autoSaveAndUpdate, 300);
+    });
+  }
+});
+
+
+
 </script>
 
 
@@ -1776,6 +1815,7 @@ onAuthStateChanged(auth, async (user) => {
     }
   });
 </script> --> 
+
 
 
 
