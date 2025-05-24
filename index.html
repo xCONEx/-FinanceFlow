@@ -125,35 +125,6 @@
      padding-top: env(safe-area-inset-top);
          }
 
-
-.toast {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  border-radius: 0.75rem;
-  font-size: 14px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  color: #fff;
-  animation: fadeIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
-  opacity: 1;
-}
-
-.toast-success { background-color: #10b981; } /* green */
-.toast-error { background-color: #ef4444; }   /* red */
-.toast-info { background-color: #3b82f6; }     /* blue */
-
-.toast i { margin-right: 10px; }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeOut {
-  to   { opacity: 0; transform: translateY(20px); }
-}
-
-
     </style>
 </head>
 
@@ -1035,9 +1006,9 @@ document.getElementById('import-data').addEventListener('change', (e) => {
       localStorage.setItem('financeFlowData', JSON.stringify(appData));
       //localStorage.removeItem("syncedFromCloud");
       updateDashboard();
-     showToast("✅ Dados importados com sucesso!", "success");
+      alert('✅ Dados importados com sucesso!');
     } catch (err) {
-       showToast("❌ Erro ao importar o arquivo. Verifique se está no formato correto.", "error");
+      alert('❌ Erro ao importar o arquivo. Verifique se está no formato correto.');
     }
   };
   reader.readAsText(file);
@@ -1698,18 +1669,6 @@ document.addEventListener("touchend", () => {
 });
 
 
-document.getElementById("dashboard-tab")?.addEventListener("click", (e) => {
-  e.preventDefault(); // evita o comportamento padrão do link
-
-  // Altera a hash (navega para o #dashboard)
-  window.location.hash = "#dashboard";
-
-  // Executa a função
-  if (typeof updateDashboard === "function") {
-    updateDashboard();
-  }
-});
-
 
 
 // Esconde o menu
@@ -2053,26 +2012,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script> 
 
-function showToast(message, type = 'info') {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
+    function showToast(message, type = "success") {
+  const toast = document.createElement("div");
+  toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 text-white text-sm ${
+    type === "success" ? "bg-green-600" : type === "error" ? "bg-red-600" : "bg-yellow-600"
+  }`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
 
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-
-  const icons = {
-    success: '<i class="fas fa-check-circle"></i>',
-    error: '<i class="fas fa-times-circle"></i>',
-    info: '<i class="fas fa-info-circle"></i>',
-  };
-
-  toast.innerHTML = `${icons[type] || ''}<span>${message}</span>`;
-  container.appendChild(toast);
-
-  // Remove o toast depois da animação
   setTimeout(() => {
-    toast.remove();
-  }, 3000);
+    toast.classList.add("opacity-0");
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
 }
 
 
