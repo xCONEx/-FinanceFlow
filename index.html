@@ -1597,45 +1597,46 @@ function gerarGraficoEvolucao() {
 }
 
 
-function autoSaveAndUpdate() {
-  if (typeof updateDashboard === 'function') updateDashboard();
-  if (typeof saveData === 'function') saveData();
-}
 
-// Ao enviar os formulários de rotina, calculadora, custos e equipamentos
-document.addEventListener('DOMContentLoaded', () => {
-  const routineForm = document.getElementById('routine-form');
-  const jobCalculatorForm = document.getElementById('job-calculator-form');
-  const expenseForm = document.getElementById('expense-form');
-  const equipmentForm = document.getElementById('equipment-form');
+</script>
 
-  if (routineForm) {
-    routineForm.addEventListener('submit', (e) => {
-      setTimeout(autoSaveAndUpdate, 300);
-    });
+
+<script>
+  function autoSaveAndUpdate() {
+    if (typeof updateDashboard === 'function') updateDashboard();
+    if (typeof saveData === 'function') saveData();
   }
 
-  if (jobCalculatorForm) {
-    jobCalculatorForm.addEventListener('submit', (e) => {
-      setTimeout(autoSaveAndUpdate, 300);
-    });
-  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const routineForm = document.getElementById('routine-form');
+    const jobCalculatorForm = document.getElementById('job-calculator-form');
+    const expenseForm = document.getElementById('expense-form');
+    const equipmentForm = document.getElementById('equipment-form');
 
-  if (expenseForm) {
-    expenseForm.addEventListener('submit', (e) => {
-      setTimeout(autoSaveAndUpdate, 300);
-    });
-  }
+    if (routineForm) {
+      routineForm.addEventListener('submit', (e) => {
+        autoSaveAndUpdate();
+      });
+    }
 
-  if (equipmentForm) {
-    equipmentForm.addEventListener('submit', (e) => {
-      setTimeout(autoSaveAndUpdate, 300);
-    });
-  }
-});
+    if (jobCalculatorForm) {
+      jobCalculatorForm.addEventListener('submit', (e) => {
+        autoSaveAndUpdate();
+      });
+    }
 
+    if (expenseForm) {
+      expenseForm.addEventListener('submit', (e) => {
+        autoSaveAndUpdate();
+      });
+    }
 
-
+    if (equipmentForm) {
+      equipmentForm.addEventListener('submit', (e) => {
+        autoSaveAndUpdate();
+      });
+    }
+  });
 </script>
 
 
