@@ -701,7 +701,7 @@
      style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 13px);">
 
 
-  <a href="#dashboard" onclick="updateDashboard()" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 w-full">
+  <a href="#dashboard" id="dashboard-tab" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100 w-full">
     <i class="fas fa-chart-pie text-lg"></i>
     <span class="text-[9px]">Dashboard</span>
   </a>
@@ -1637,10 +1637,67 @@ function gerarGraficoEvolucao() {
 
 
 
+// PULL TO REFRESH no mobile
+let touchStartY = 0;
+let touchEndY = 0;
+
+document.addEventListener("touchstart", (e) => {
+  touchStartY = e.touches[0].clientY;
+});
+
+document.addEventListener("touchmove", (e) => {
+  touchEndY = e.touches[0].clientY;
+});
+
+document.addEventListener("touchend", () => {
+  const diffY = touchEndY - touchStartY;
+
+  if (diffY > 120 && window.scrollY === 0) {
+    location.reload(); // recarrega a página
+  }
+});
+
+document.getElementById("dashboard-tab")?.addEventListener("click", () => {
+  setTimeout(() => {
+    if (typeof updateDashboard === 'function') {
+      updateDashboard();
+    }
+  }, 300); // aguarda a navegação até a seção
+});
+
+document.querySelectorAll('input, select, textarea').forEach(el => {
+  el.addEventListener('focus', () => {
+    document.querySelector('nav').classList.add('hidden');
+  });
+  el.addEventListener('blur', () => {
+    document.querySelector('nav').classList.remove('hidden');
+  });
+});
+
+// Exibir botão ao rolar
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('backToTop');
+  if (window.scrollY > 400) {
+    btn.classList.remove('hidden');
+  } else {
+    btn.classList.add('hidden');
+  }
+});
+
+// Ir para o topo
+document.getElementById('backToTop')?.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
 
 </script>
 
+<button id="backToTop" class="hidden fixed bottom-20 right-4 bg-primary text-white p-3 rounded-full shadow-lg">
+  <i class="fas fa-arrow-up"></i>
+</button>
 
+
+<!-- FIM DO SCRIPT GERAL -->
 
 
 <!-- Verificação Firebase
