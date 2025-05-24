@@ -1288,7 +1288,7 @@ document.getElementById('import-data').addEventListener('change', (e) => {
             const value = parseFloat(document.getElementById('expense-value').value);
             
             if (!description || isNaN(value)) {
-                showToast("Por favor, preencha todos os campos corretamente.", "error");
+                alert('Por favor, preencha todos os campos corretamente.');
                 return;
             }
             
@@ -1415,7 +1415,7 @@ document.getElementById('import-data').addEventListener('change', (e) => {
             const value = parseFloat(document.getElementById('equipment-value').value);
             
             if (!description || isNaN(value)) {
-                showToast("Por favor, preencha todos os campos corretamente.", "error");
+                alert('Por favor, preencha todos os campos corretamente.');
                 return;
             }
             
@@ -1479,7 +1479,7 @@ document.getElementById('import-data').addEventListener('change', (e) => {
             const dailyHours = parseInt(document.getElementById('daily-hours').value);
             
             if (isNaN(desiredSalary) || isNaN(workDays) || isNaN(dailyHours)) {
-                showToast("Por favor, preencha todos os campos corretamente.", "error");
+                alert('Por favor, preencha todos os campos corretamente.');
                 return;
             }
             
@@ -1523,7 +1523,7 @@ document.getElementById('import-data').addEventListener('change', (e) => {
             const hourlyRate = parseFloat(document.getElementById('hourly-value').textContent) || 0;
             
             if (hourlyRate === 0) {
-               showToast("Por favor, calcule primeiro seu valor por hora na seção "Rotina de Trabalho".", "error");
+                alert('Por favor, calcule primeiro seu valor por hora na seção "Rotina de Trabalho".');
                 return;
             }
             
