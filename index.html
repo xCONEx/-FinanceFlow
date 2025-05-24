@@ -859,20 +859,6 @@ function saveData() {
     // Salvar no localStorage
     localStorage.setItem('financeFlowData', JSON.stringify(appData));
 
-    // Salvar na nuvem (Firestore)
-    if (window.currentUser && window.db) {
-      const userRef = doc(window.db, "usuarios", window.currentUser.uid);
-      setDoc(userRef, appData)
-        .then(() => {
-          console.log("✅ Dados salvos na nuvem.");
-          showToast("✅ Dados salvos na nuvem!", "success");
-        })
-        .catch((error) => {
-          console.error("Erro ao salvar dados na nuvem:", error);
-          showToast("❌ Erro ao salvar na nuvem!", "error");
-        });
-    }
-
     // Notificação visual local
     const notification = document.createElement('div');
     notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2';
