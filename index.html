@@ -129,52 +129,29 @@
 .toast {
   display: flex;
   align-items: center;
-  background-color: #1f2937; /* bg-gray-800 */
-  color: white;
   padding: 12px 16px;
   border-radius: 0.75rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   font-size: 14px;
-  animation: slideIn 0.3s ease, fadeOut 0.5s ease forwards;
-  position: relative;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  color: #fff;
+  animation: fadeIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+  opacity: 1;
 }
 
-.toast-icon {
-  margin-right: 12px;
-  font-size: 16px;
-}
+.toast-success { background-color: #10b981; } /* green */
+.toast-error { background-color: #ef4444; }   /* red */
+.toast-info { background-color: #3b82f6; }     /* blue */
 
-.toast-success {
-  background-color: #10b981; /* green-500 */
-}
+.toast i { margin-right: 10px; }
 
-.toast-error {
-  background-color: #ef4444; /* red-500 */
-}
-
-.toast-info {
-  background-color: #3b82f6; /* blue-500 */
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(50%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeOut {
-  to {
-    opacity: 0;
-    transform: translateX(50%);
-  }
+  to   { opacity: 0; transform: translateY(20px); }
 }
-
-
 
 
     </style>
@@ -1058,9 +1035,9 @@ document.getElementById('import-data').addEventListener('change', (e) => {
       localStorage.setItem('financeFlowData', JSON.stringify(appData));
       //localStorage.removeItem("syncedFromCloud");
       updateDashboard();
-      alert('✅ Dados importados com sucesso!');
+     showToast("✅ Dados importados com sucesso!", "success");
     } catch (err) {
-      alert('❌ Erro ao importar o arquivo. Verifique se está no formato correto.');
+       showToast("❌ Erro ao importar o arquivo. Verifique se está no formato correto.", "error");
     }
   };
   reader.readAsText(file);
@@ -1311,7 +1288,7 @@ document.getElementById('import-data').addEventListener('change', (e) => {
             const value = parseFloat(document.getElementById('expense-value').value);
             
             if (!description || isNaN(value)) {
-                alert('Por favor, preencha todos os campos corretamente.');
+                showToast("Por favor, preencha todos os campos corretamente.", "error");
                 return;
             }
             
@@ -1438,7 +1415,7 @@ document.getElementById('import-data').addEventListener('change', (e) => {
             const value = parseFloat(document.getElementById('equipment-value').value);
             
             if (!description || isNaN(value)) {
-                alert('Por favor, preencha todos os campos corretamente.');
+                showToast("Por favor, preencha todos os campos corretamente.", "error");
                 return;
             }
             
@@ -1502,7 +1479,7 @@ document.getElementById('import-data').addEventListener('change', (e) => {
             const dailyHours = parseInt(document.getElementById('daily-hours').value);
             
             if (isNaN(desiredSalary) || isNaN(workDays) || isNaN(dailyHours)) {
-                alert('Por favor, preencha todos os campos corretamente.');
+                showToast("Por favor, preencha todos os campos corretamente.", "error");
                 return;
             }
             
@@ -1546,7 +1523,7 @@ document.getElementById('import-data').addEventListener('change', (e) => {
             const hourlyRate = parseFloat(document.getElementById('hourly-value').textContent) || 0;
             
             if (hourlyRate === 0) {
-                alert('Por favor, calcule primeiro seu valor por hora na seção "Rotina de Trabalho".');
+               showToast("Por favor, calcule primeiro seu valor por hora na seção "Rotina de Trabalho".", "error");
                 return;
             }
             
@@ -2076,35 +2053,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script> 
 
- function showToast(message, type = 'info') {
+function showToast(message, type = 'info') {
   const container = document.getElementById('toast-container');
+  if (!container) return;
 
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
 
   const icons = {
-    success: '<i class="fas fa-check-circle toast-icon"></i>',
-    error: '<i class="fas fa-exclamation-circle toast-icon"></i>',
-    info: '<i class="fas fa-info-circle toast-icon"></i>',
+    success: '<i class="fas fa-check-circle"></i>',
+    error: '<i class="fas fa-times-circle"></i>',
+    info: '<i class="fas fa-info-circle"></i>',
   };
 
-  toast.innerHTML = `${icons[type] || icons.info}<span>${message}</span>`;
-
+  toast.innerHTML = `${icons[type] || ''}<span>${message}</span>`;
   container.appendChild(toast);
 
-  // Remove após 3 segundos
+  // Remove o toast depois da animação
   setTimeout(() => {
-    toast.style.animation = 'fadeOut 0.5s ease forwards';
-    setTimeout(() => toast.remove(), 500);
+    toast.remove();
   }, 3000);
 }
 
 
-
 </script>
 
-<!-- Toast Notification -->
-<div id="toast-container" class="fixed bottom-6 right-4 space-y-2 z-[9999] max-w-sm"></div>
 
 
 
