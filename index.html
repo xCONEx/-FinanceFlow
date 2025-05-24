@@ -1643,7 +1643,7 @@ function gerarGraficoEvolucao() {
 
 
 
-<!-- Verificação Firebase -->
+<!-- Verificação Firebase
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -1693,7 +1693,76 @@ onAuthStateChanged(auth, (user) => {
 
 
 
+</script> --> 
+
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
+    authDomain: "financeflow-e0fae.firebaseapp.com",
+    projectId: "financeflow-e0fae",
+    storageBucket: "financeflow-e0fae.firebasestorage.app",
+    messagingSenderId: "970984329138",
+    appId: "1:970984329138:web:429a185b8bab1971991eab"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, (user) => {
+    const userPhoto = document.getElementById("user-photo");
+    const userName = document.getElementById("user-name");
+    const logoutBtn = document.getElementById("logout-btn");
+
+    if (user) {
+      // Preenche o usuário
+      if (userName) userName.textContent = user.displayName || user.email;
+      if (userPhoto && user.photoURL) {
+        userPhoto.src = user.photoURL;
+        userPhoto.classList.remove("hidden");
+      }
+
+      // Clona o bloco de usuário no mobile
+      const original = document.getElementById("user-info");
+      const mobileBox = document.getElementById("user-info-mobile");
+      if (original && mobileBox) {
+        const clone = original.cloneNode(true);
+        // Remove os IDs duplicados do clone
+        clone.querySelector("#user-photo")?.removeAttribute("id");
+        clone.querySelector("#user-name")?.removeAttribute("id");
+        clone.querySelector("#logout-btn")?.removeAttribute("id");
+        mobileBox.innerHTML = ''; // limpa antes
+        mobileBox.appendChild(clone);
+
+        // Ativa logout no botão clonado
+        const clonedLogoutBtn = mobileBox.querySelector("button");
+        if (clonedLogoutBtn) {
+          clonedLogoutBtn.addEventListener("click", () => {
+            signOut(auth).then(() => {
+              window.location.href = "login.html";
+            });
+          });
+        }
+      }
+
+    } else {
+      // Redireciona se não estiver logado
+      window.location.href = "login.html";
+    }
+  });
+
+  // Logout no desktop
+  document.getElementById("logout-btn")?.addEventListener("click", () => {
+    signOut(auth).then(() => {
+      window.location.href = "login.html";
+    });
+  });
 </script>
+
+
 
 
   <script type="module">
@@ -1761,32 +1830,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'login.html';
       }
     });
-  }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  const originalUserInfo = document.getElementById('user-info');
-  const userInfoMobile = document.getElementById('user-info-mobile');
-
-  if (originalUserInfo && userInfoMobile) {
-    // Clona o conteúdo já preenchido
-    const clone = originalUserInfo.cloneNode(true);
-    userInfoMobile.appendChild(clone);
-
-    // Reatribui o botão sair no clone
-    const logoutBtnClone = userInfoMobile.querySelector('#logout-btn');
-    if (logoutBtnClone) {
-      logoutBtnClone.addEventListener('click', () => {
-        localStorage.removeItem("userData");
-        if (firebase?.auth) {
-          firebase.auth().signOut().then(() => {
-            window.location.href = "login.html";
-          });
-        } else {
-          window.location.href = "login.html";
-        }
-      });
-    }
   }
 });
 
