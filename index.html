@@ -662,6 +662,17 @@
                      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 
   <!-- Botões -->
+
+  <!-- Info do usuário (visível apenas se logado) -->
+<div id="user-info-box" class="flex items-center space-x-4 mb-4 hidden md:hidden">
+  <img id="user-photo" class="w-12 h-12 rounded-full" alt="Foto de perfil">
+  <div>
+    <p id="user-name" class="text-sm font-medium text-gray-700 dark:text-gray-200">Usuário</p>
+    <button id="logout-btn" class="text-xs text-red-500 hover:underline">Sair</button>
+  </div>
+</div>
+
+
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
     <button id="save-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300">
       <i class="fas fa-save text-primary"></i>
@@ -1694,20 +1705,37 @@ onAuthStateChanged(auth, async (user) => {
 
 // usuario no mobile
 
+
+
 document.addEventListener('DOMContentLoaded', () => {
+  const userData = JSON.parse(localStorage.getItem('userData'));
   const userPhoto = document.getElementById('user-photo');
   const userName = document.getElementById('user-name');
-  const isMobile = window.innerWidth < 768;
+  const userBox = document.getElementById('user-info-box');
+  const logoutBtn = document.getElementById('logout-btn');
 
-  if (isMobile) {
-    const goToSettings = () => {
-      window.location.hash = '#configuracoes';
-    };
+  if (userData && userPhoto && userName && userBox) {
+    userPhoto.src = userData.photoURL || '';
+    userName.textContent = userData.displayName || 'Usuário';
+    userPhoto.classList.remove('hidden');
+    userBox.classList.remove('hidden');
+  }
 
-    if (userPhoto) userPhoto.addEventListener('click', goToSettings);
-    if (userName) userName.addEventListener('click', goToSettings);
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('userData');
+      // Se estiver usando Firebase Auth:
+      if (firebase?.auth) {
+        firebase.auth().signOut().then(() => {
+          window.location.href = 'login.html';
+        });
+      } else {
+        window.location.href = 'login.html';
+      }
+    });
   }
 });
+
 
 
 </script>
@@ -1841,23 +1869,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </script>
 
-<!-- Bottom Navigation -->
+
+
+<!-- Bottom Menu - apenas para mobile -->
 <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg flex justify-around py-2 md:hidden z-50">
-  <a href="#dashboard" class="flex flex-col items-center text-gray-600 hover:text-indigo-600">
-    <i class="fas fa-chart-pie text-lg"></i>
-    <span class="text-xs">Dashboard</span>
-  </a>
   <a href="#custos-mensais" class="flex flex-col items-center text-gray-600 hover:text-indigo-600">
-    <i class="fas fa-wallet text-lg"></i>
+    <i class="fas fa-receipt text-lg"></i>
     <span class="text-xs">Custos</span>
   </a>
   <a href="#equipamentos" class="flex flex-col items-center text-gray-600 hover:text-indigo-600">
-    <i class="fas fa-tools text-lg"></i>
+    <i class="fas fa-laptop text-lg"></i>
     <span class="text-xs">Itens</span>
   </a>
   <a href="#rotina" class="flex flex-col items-center text-gray-600 hover:text-indigo-600">
-    <i class="fas fa-clock text-lg"></i>
+    <i class="fas fa-calendar-alt text-lg"></i>
     <span class="text-xs">Rotina</span>
+  </a>
+  <a href="#calculadora" class="flex flex-col items-center text-gray-600 hover:text-indigo-600">
+    <i class="fas fa-calculator text-lg"></i>
+    <span class="text-xs">Jobs</span>
   </a>
   <a href="#configuracoes" class="flex flex-col items-center text-gray-600 hover:text-indigo-600">
     <i class="fas fa-cog text-lg"></i>
