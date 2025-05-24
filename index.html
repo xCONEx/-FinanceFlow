@@ -751,7 +751,7 @@ document.getElementById('export-data-settings')?.addEventListener('click', () =>
 
 
 
-        function formatCurrencyInput(input) {
+    function formatCurrencyInput(input) {
   let value = input.value.replace(/\D/g, '');
   value = (parseInt(value, 10) / 100).toFixed(2);
   value = value.replace('.', ',');
@@ -762,6 +762,20 @@ document.getElementById('export-data-settings')?.addEventListener('click', () =>
 document.querySelectorAll('input.currency-format').forEach(input => {
   input.addEventListener('input', () => formatCurrencyInput(input));
 });
+
+function parseBRL(value) {
+  if (!value) return 0;
+  return parseFloat(
+    value.replace("R$", "").replace(/\./g, "").replace(",", ".")
+  );
+}
+
+function formatBRL(value) {
+  return value.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+}
 
 
 
@@ -1789,6 +1803,7 @@ onAuthStateChanged(auth, async (user) => {
 <script type="module">
   import { auth, db } from './firebase.js';
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  import { setDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 
   window.db = db; // Deixa acessível globalmente
@@ -1858,7 +1873,9 @@ onAuthStateChanged(auth, async (user) => {
 </script>
 
 
-<script> function showToast(message, type = "success") {
+<script> 
+
+    function showToast(message, type = "success") {
   const toast = document.createElement("div");
   toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 text-white text-sm ${
     type === "success" ? "bg-green-600" : type === "error" ? "bg-red-600" : "bg-yellow-600"
