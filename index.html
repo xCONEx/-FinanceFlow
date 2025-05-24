@@ -860,7 +860,7 @@ function saveData() {
     // Notificação visual local
     const notification = document.createElement('div');
     notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2';
-    notification.innerHTML = `<i class="fas fa-check-circle"></i><span>Dados salvos com sucesso!</span>`;
+    //notification.innerHTML = `<i class="fas fa-check-circle"></i><span>Dados salvos com sucesso!</span>`;
     document.body.appendChild(notification);
 
     setTimeout(() => {
@@ -1824,6 +1824,31 @@ onAuthStateChanged(auth, async (user) => {
 
 
 </script>
+
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg flex justify-around py-2 md:hidden z-50">
+  <button onclick="showSection('dashboard')" class="flex flex-col items-center text-gray-600">
+    <i class="fas fa-chart-pie text-lg"></i>
+    <span class="text-xs">Dashboard</span>
+  </button>
+  <button onclick="showSection('custos')" class="flex flex-col items-center text-gray-600">
+    <i class="fas fa-wallet text-lg"></i>
+    <span class="text-xs">Custos</span>
+  </button>
+  <button onclick="showSection('equipamentos')" class="flex flex-col items-center text-gray-600">
+    <i class="fas fa-tools text-lg"></i>
+    <span class="text-xs">Itens</span>
+  </button>
+  <button onclick="showSection('rotina')" class="flex flex-col items-center text-gray-600">
+    <i class="fas fa-clock text-lg"></i>
+    <span class="text-xs">Rotina</span>
+  </button>
+  <button onclick="showSection('configuracoes')" class="flex flex-col items-center text-gray-600">
+    <i class="fas fa-cog text-lg"></i>
+    <span class="text-xs">Config</span>
+  </button>
+</nav>
+
 
 
 </body>
