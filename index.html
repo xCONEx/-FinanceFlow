@@ -438,7 +438,7 @@
                                 </div>
                                 <div class="flex justify-end space-x-3 pt-4">
                                     <button type="button" id="cancel-expense" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
-                                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">Salvar</button>
+                                    <button type="submit" onclick="saveData()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">Salvar</button>
                                 </div>
                             </form>
                         </div>
@@ -510,7 +510,7 @@
                                 </div>
                                 <div class="flex justify-end space-x-3 pt-4">
                                     <button type="button" id="cancel-equipment" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
-                                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">Salvar</button>
+                                    <button type="submit" onclick="saveData()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">Salvar</button>
                                 </div>
                             </form>
                         </div>
@@ -538,7 +538,7 @@
                                 <input type="number" id="daily-hours" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                             </div>
                             <div class="pt-2">
-                                <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark w-full">Calcular</button>
+                                <button type="submit" onclick="saveData()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark w-full">Calcular</button>
                             </div>
                         </form>
                         
@@ -611,7 +611,7 @@
                             </div>
                             
                             <div class="pt-2">
-                                <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark w-full">Calcular</button>
+                                <button type="submit" onclick="saveData()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark w-full">Calcular</button>
                             </div>
                         </form>
                         
@@ -1596,28 +1596,6 @@ function gerarGraficoEvolucao() {
   });
 }
 
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  const autoSaveButtons = [
-    '#expense-form button[type="submit"]',
-    '#equipment-form button[type="submit"]',
-    '#routine-form button[type="submit"]',
-    '#job-calculator-form button[type="submit"]'
-  ];
-
-  autoSaveButtons.forEach(selector => {
-    const button = document.querySelector(selector);
-    if (button) {
-      button.addEventListener('click', () => {
-        setTimeout(() => {
-          if (typeof updateDashboard === 'function') updateDashboard();
-          if (typeof saveData === 'function') saveData();
-        }, 100); // espera mínima após submit
-      });
-    }
-  });
-});
 
 
 
