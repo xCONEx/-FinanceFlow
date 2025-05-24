@@ -219,7 +219,7 @@
                     </a>
                 </div>
             </nav>
-            <div class="p-4 border-t border-gray-200 mb-20">
+            <div class="p-4 border-t border-gray-200 mb-10">
                 <div class="flex items-center space-x-3">
                    
                     <div id="user-info" class="flex items-center space-x-3 ">
@@ -657,14 +657,11 @@
   <!-- Botões -->
 
   <!-- Info do usuário (visível apenas se logado) -->
-<div id="user-info-box" class="flex items-center space-x-4 mb-4 hidden">
-  <img id="user-photo" class="w-12 h-12 rounded-full hidden" alt="Foto de perfil">
-  <div>
-    <p id="user-name" class="text-sm font-medium text-gray-700 dark:text-gray-200">Usuário</p>
-    <button id="logout-btn" class="text-xs text-red-500 hover:underline">Sair</button>
-  </div>
-</div>
+<div id="user-info-mobile" class="block md:hidden mb-4">
 
+
+
+</div>
 
 
 
@@ -1767,6 +1764,32 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+  const originalUserInfo = document.getElementById('user-info');
+  const userInfoMobile = document.getElementById('user-info-mobile');
+
+  if (originalUserInfo && userInfoMobile) {
+    // Clona o conteúdo já preenchido
+    const clone = originalUserInfo.cloneNode(true);
+    userInfoMobile.appendChild(clone);
+
+    // Reatribui o botão sair no clone
+    const logoutBtnClone = userInfoMobile.querySelector('#logout-btn');
+    if (logoutBtnClone) {
+      logoutBtnClone.addEventListener('click', () => {
+        localStorage.removeItem("userData");
+        if (firebase?.auth) {
+          firebase.auth().signOut().then(() => {
+            window.location.href = "login.html";
+          });
+        } else {
+          window.location.href = "login.html";
+        }
+      });
+    }
+  }
+});
+
 
 
 </script>
@@ -1901,43 +1924,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 
-<script type="module">
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-
-  const auth = getAuth();
-
-  // Ao carregar a página
-  document.addEventListener('DOMContentLoaded', () => {
-    const userPhoto = document.getElementById('user-photo');
-    const userName = document.getElementById('user-name');
-    const userBox = document.getElementById('user-info-box');
-    const logoutBtn = document.getElementById('logout-btn');
-
-    // Firebase: aguarda status do login
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        if (userName) userName.textContent = user.displayName || user.email;
-        if (userPhoto && user.photoURL) {
-          userPhoto.src = user.photoURL;
-          userPhoto.classList.remove("hidden");
-        }
-        if (userBox) userBox.classList.remove("hidden");
-      } else {
-        window.location.href = "login.html";
-      }
-    });
-
-    // Logout
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem("userData");
-        signOut(auth).then(() => {
-          window.location.href = "login.html";
-        });
-      });
-    }
-  });
-</script>
 
 
 
