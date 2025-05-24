@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Controle financeiro para fotógrafos, designers e videomakers. Simples, rápido e feito para você.">
+    <title>FinanceFlow - Controle Financeiro para Profissionais Criativos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #4F46E5 0%, #10B981 100%);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-blur {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .btn-primary {
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3), 0 2px 4px -1px rgba(79, 70, 229, 0.06);
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50 text-gray-800">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 nav-blur bg-white/80 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <i class="fas fa-wallet text-2xl text-indigo-600 mr-2"></i>
+                    <span class="text-xl font-bold text-gray-900">FinanceFlow</span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-700 hover:text-indigo-600 transition">Recursos</a>
+                    <a href="#how-it-works" class="text-gray-700 hover:text-indigo-600 transition">Como Funciona</a>
+                    <a href="#pricing" class="text-gray-700 hover:text-indigo-600 transition">Planos</a>
+                    <a href="#testimonials" class="text-gray-700 hover:text-indigo-600 transition">Depoimentos</a>
+                </div>
+                
+                <!-- Login Button -->
+                <div class="flex items-center">
+                    <a href="login.html" class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition btn-primary">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Button -->
+    <div class="md:hidden fixed bottom-4 right-4 z-50">
+        <button id="mobile-menu-button" class="p-3 rounded-full bg-indigo-600 text-white shadow-lg">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden fixed inset-0 bg-white z-40 flex flex-col items-center justify-center space-y-8">
+        <button id="close-mobile-menu" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times text-2xl"></i>
+        </button>
+        <a href="#features" class="text-2xl text-gray-800 hover:text-indigo-600">Recursos</a>
+        <a href="#how-it-works" class="text-2xl text-gray-800 hover:text-indigo-600">Como Funciona</a>
+        <a href="#pricing" class="text-2xl text-gray-800 hover:text-indigo-600">Planos</a>
+        <a href="#testimonials" class="text-2xl text-gray-800 hover:text-indigo-600">Depoimentos</a>
+        <a href="login.html" class="px-6 py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-xl">
+            <i class="fas fa-sign-in-alt mr-2"></i> Login
+        </a>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 hero-gradient text-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-12 md:mb-0 fade-in">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                        Controle financeiro para profissionais criativos
+                    </h1>
+                    <p class="text-xl md:text-2xl mb-8 opacity-90">
+                        Calcule seus jobs, gerencie custos e maximize seus lucros com a ferramenta feita para fotógrafos, videomakers e designers.
+                    </p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="#signup" class="px-8 py-4 rounded-lg bg-white text-indigo-600 font-bold text-lg hover:bg-gray-100 transition btn-primary">
+                            Comece Grátis
+                        </a>
+                        <a href="#demo" class="px-8 py-4 rounded-lg border-2 border-white text-white font-bold text-lg hover:bg-white hover:bg-opacity-10 transition">
+                            Ver Demonstração
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2 fade-in" style="animation-delay: 0.2s;">
+                    <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                         alt="Interface do FinanceFlow mostrando gráfico financeiro" 
+                         class="rounded-xl shadow-2xl border-8 border-white/20">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Recursos Poderosos
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Tudo que você precisa para gerenciar suas finanças como profissional criativo
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-gray-50 p-8 rounded-xl feature-card transition fade-in" style="animation-delay: 0.1s;">
+                    <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-calculator text-2xl text-indigo-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Calculadora de Jobs</h3>
+                    <p class="text-gray-600">
+                        Calcule automaticamente o valor de seus trabalhos considerando custos, horas trabalhadas e margem de lucro.
+                    </p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="bg-gray-50 p-8 rounded-xl feature-card transition fade-in" style="animation-delay: 0.2s;">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-2xl text-green-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Dashboard Inteligente</h3>
+                    <p class="text-gray-600">
+                        Visualize seus ganhos, custos e lucros em gráficos interativos que facilitam a análise financeira.
+                    </p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="bg-gray-50 p-8 rounded-xl feature-card transition fade-in" style="animation-delay: 0.3s;">
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-laptop text-2xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Gestão de Equipamentos</h3>
+                    <p class="text-gray-600">
+                        Cadastre seus equipamentos e calcule automaticamente a depreciação para incluir nos custos dos jobs.
+                    </p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="bg-gray-50 p-8 rounded-xl feature-card transition fade-in" style="animation-delay: 0.4s;">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-calendar-alt text-2xl text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Rotina de Trabalho</h3>
+                    <p class="text-gray-600">
+                        Defina seus dias e horas de trabalho para calcular automaticamente seu valor hora ideal.
+                    </p>
+                </div>
+                
+                <!-- Feature 5 -->
+                <div class="bg-gray-50 p-8 rounded-xl feature-card transition fade-in" style="animation-delay: 0.5s;">
+                    <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-file-invoice-dollar text-2xl text-yellow-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Custos Mensais</h3>
+                    <p class="text-gray-600">
+                        Registre todos seus custos fixos e variáveis para ter um controle completo das suas finanças.
+                    </p>
+                </div>
+                
+                <!-- Feature 6 -->
+                <div class="bg-gray-50 p-8 rounded-xl feature-card transition fade-in" style="animation-delay: 0.6s;">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-cloud-upload-alt text-2xl text-red-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Backup na Nuvem</h3>
+                    <p class="text-gray-600">
+                        Seus dados seguros e sincronizados em todos dispositivos. Acesse de qualquer lugar.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Como o FinanceFlow Funciona
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Três passos simples para transformar sua gestão financeira
+                </p>
+            </div>
+            
+            <div class="flex flex-col md:flex-row items-center justify-between space-y-12 md:space-y-0">
+                <!-- Step 1 -->
+                <div class="flex flex-col items-center text-center max-w-xs fade-in" style="animation-delay: 0.1s;">
+                    <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mb-6">
+                        <span class="text-2xl font-bold text-indigo-600">1</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Configure Seu Perfil</h3>
+                    <p class="text-gray-600">
+                        Informe seus custos mensais, equipamentos e rotina de trabalho para cálculos precisos.
+                    </p>
+                </div>
+                
+                <!-- Arrow -->
+                <div class="hidden md:block fade-in" style="animation-delay: 0.2s;">
+                    <i class="fas fa-arrow-right text-3xl text-gray-400"></i>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="flex flex-col items-center text-center max-w-xs fade-in" style="animation-delay: 0.3s;">
+                    <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mb-6">
+                        <span class="text-2xl font-bold text-indigo-600">2</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Calcule Seus Jobs</h3>
+                    <p class="text-gray-600">
+                        Use nossa calculadora inteligente para precificar seus trabalhos com margem de lucro.
+                    </p>
+                </div>
+                
+                <!-- Arrow -->
+                <div class="hidden md:block fade-in" style="animation-delay: 0.4s;">
+                    <i class="fas fa-arrow-right text-3xl text-gray-400"></i>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="flex flex-col items-center text-center max-w-xs fade-in" style="animation-delay: 0.5s;">
+                    <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mb-6">
+                        <span class="text-2xl font-bold text-indigo-600">3</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Acompanhe Seu Crescimento</h3>
+                    <p class="text-gray-600">
+                        Monitore sua evolução financeira com gráficos e relatórios detalhados.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="py-20 px-4 sm:px-6 lg:px-8 bg-indigo-600 text-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-12 md:mb-0 fade-in">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">
+                        Veja o FinanceFlow em Ação
+                    </h2>
+                    <p class="text-xl opacity-90 mb-8">
+                        Assista a uma demonstração rápida de como o FinanceFlow pode transformar sua gestão financeira.
+                    </p>
+                    <a href="#signup" class="px-8 py-4 rounded-lg bg-white text-indigo-600 font-bold text-lg hover:bg-gray-100 transition btn-primary">
+                        Experimente Grátis
+                    </a>
+                </div>
+                <div class="md:w-1/2 fade-in" style="animation-delay: 0.2s;">
+                    <div class="relative aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <button class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition">
+                                <i class="fas fa-play text-3xl text-white"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Planos que Cabem no Seu Bolso
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Escolha o plano perfeito para suas necessidades
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Free Plan -->
+                <div class="bg-gray-50 rounded-xl p-8 border border-gray-200 fade-in" style="animation-delay: 0.1s;">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Básico</h3>
+                    <p class="text-gray-600 mb-6">Ideal para quem está começando</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-gray-900">R$ 0</span>
+                        <span class="text-gray-600">/mês</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>3 Jobs por mês</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>5 Custos mensais</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>3 Equipamentos</span>
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-times text-red-400 mr-2"></i>
+                            <span>Backup na nuvem</span>
+                        </li>
+                    </ul>
+                    <a href="#signup" class="block w-full px-6 py-3 rounded-lg border-2 border-indigo-600 text-indigo-600 font-bold text-center hover:bg-indigo-50 transition">
+                        Começar
+                    </a>
+                </div>
+                
+                <!-- Pro Plan (Featured) -->
+                <div class="bg-indigo-600 rounded-xl p-8 text-white transform scale-105 shadow-xl fade-in" style="animation-delay: 0.2s;">
+                    <div class="mb-4">
+                        <span class="px-3 py-1 bg-white text-indigo-600 rounded-full text-sm font-bold">MAIS POPULAR</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Profissional</h3>
+                    <p class="opacity-90 mb-6">Para quem quer levar a sério</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold">R$ 29</span>
+                        <span class="opacity-90">/mês</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-white mr-2"></i>
+                            <span>Jobs ilimitados</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-white mr-2"></i>
+                            <span>Custos ilimitados</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-white mr-2"></i>
+                            <span>Equipamentos ilimitados</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-white mr-2"></i>
+                            <span>Backup na nuvem</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-white mr-2"></i>
+                            <span>Relatórios avançados</span>
+                        </li>
+                    </ul>
+                    <a href="#signup" class="block w-full px-6 py-3 rounded-lg bg-white text-indigo-600 font-bold text-center hover:bg-gray-100 transition">
+                        Assinar Agora
+                    </a>
+                </div>
+                
+                <!-- Business Plan -->
+                <div class="bg-gray-50 rounded-xl p-8 border border-gray-200 fade-in" style="animation-delay: 0.3s;">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Estúdio</h3>
+                    <p class="text-gray-600 mb-6">Para equipes e produtoras</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-gray-900">R$ 99</span>
+                        <span class="text-gray-600">/mês</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Todos recursos Pro</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Até 5 usuários</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Controle por projetos</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Relatórios consolidados</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-2"></i>
+                            <span>Suporte prioritário</span>
+                        </li>
+                    </ul>
+                    <a href="#signup" class="block w-full px-6 py-3 rounded-lg border-2 border-indigo-600 text-indigo-600 font-bold text-center hover:bg-indigo-50 transition">
+                        Fale Conosco
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    O Que Nossos Usuários Dizem
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Profissionais criativos que já transformaram suas finanças
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-white p-8 rounded-xl shadow-sm fade-in" style="animation-delay: 0.1s;">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                            <img src="https://randomuser.me/api/portraits/women/43.jpg" alt="Ana Santos" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900">Ana Santos</h4>
+                            <p class="text-gray-600">Fotógrafa</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700">
+                        "O FinanceFlow mudou completamente como eu precifico meus trabalhos. Antes eu chutava valores, agora tenho total controle e minha margem de lucro aumentou 40%!"
+                    </p>
+                    <div class="mt-4 text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-white p-8 rounded-xl shadow-sm fade-in" style="animation-delay: 0.2s;">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Carlos Mendes" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900">Carlos Mendes</h4>
+                            <p class="text-gray-600">Videomaker</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700">
+                        "Finalmente parei de trabalhar no escuro. Saber exatamente quanto cobrar por cada job me deu muito mais confiança para negociar com clientes."
+                    </p>
+                    <div class="mt-4 text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-white p-8 rounded-xl shadow-sm fade-in" style="animation-delay: 0.3s;">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                            <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Juliana Rocha" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900">Juliana Rocha</h4>
+                            <p class="text-gray-600">Designer</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700">
+                        "A calculadora de jobs é incrível! Nunca mais deixei de considerar custos importantes nos meus orçamentos. Meus projetos agora são muito mais lucrativos."
+                    </p>
+                    <div class="mt-4 text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section id="signup" class="py-20 px-4 sm:px-6 lg:px-8 bg-indigo-600 text-white">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6 fade-in">
+                Pronto para Transformar Suas Finanças?
+            </h2>
+            <p class="text-xl opacity-90 mb-8 max-w-3xl mx-auto fade-in" style="animation-delay: 0.1s;">
+                Cadastre-se agora e comece a precificar seus trabalhos como um profissional.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 fade-in" style="animation-delay: 0.2s;">
+                <a href="signup.html" class="px-8 py-4 rounded-lg bg-white text-indigo-600 font-bold text-lg hover:bg-gray-100 transition btn-primary">
+                    Criar Conta Grátis
+                </a>
+                <a href="login.html" class="px-8 py-4 rounded-lg border-2 border-white text-white font-bold text-lg hover:bg-white hover:bg-opacity-10 transition">
+                    Fazer Login
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-900 text-gray-400">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Logo and About -->
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-wallet text-2xl text-indigo-500 mr-2"></i>
+                        <span class="text-xl font-bold text-white">FinanceFlow</span>
+                    </div>
+                    <p class="mb-4">
+                        A ferramenta definitiva para gestão financeira de profissionais criativos.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-facebook text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-youtube text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Links -->
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-4">Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition">Início</a></li>
+                        <li><a href="#features" class="hover:text-white transition">Recursos</a></li>
+                        <li><a href="#pricing" class="hover:text-white transition">Planos</a></li>
+                        <li><a href="#testimonials" class="hover:text-white transition">Depoimentos</a></li>
+                        <li><a href="#" class="hover:text-white transition">Blog</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Legal -->
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-4">Legal</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition">Termos de Uso</a></li>
+                        <li><a href="#" class="hover:text-white transition">Política de Privacidade</a></li>
+                        <li><a href="#" class="hover:text-white transition">Cookies</a></li>
+                        <li><a href="#" class="hover:text-white transition">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact -->
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-4">Contato</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>
+                            <span>contato@financeflow.com</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone-alt mr-2"></i>
+                            <span>(11) 99999-9999</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            <span>São Paulo - SP</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center">
+                <p>&copy; 2025 FinanceFlow. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const closeMobileMenu = document.getElementById('close-mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.remove('hidden');
+        });
+        
+        closeMobileMenu.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        // Animation on scroll
+        const fadeElements = document.querySelectorAll('.fade-in');
+        
+        const fadeInOnScroll = () => {
+            fadeElements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (elementTop < windowHeight - 100) {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }
+            });
+        };
+        
+        // Initialize elements as invisible
+        fadeElements.forEach(element => {
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(20px)';
+            element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        });
+        
+        // Check on load
+        window.addEventListener('load', fadeInOnScroll);
+        
+        // Check on scroll
+        window.addEventListener('scroll', fadeInOnScroll);
+    </script>
+</body>
+</html>
