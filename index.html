@@ -125,6 +125,58 @@
      padding-top: env(safe-area-inset-top);
          }
 
+
+.toast {
+  display: flex;
+  align-items: center;
+  background-color: #1f2937; /* bg-gray-800 */
+  color: white;
+  padding: 12px 16px;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  font-size: 14px;
+  animation: slideIn 0.3s ease, fadeOut 0.5s ease forwards;
+  position: relative;
+}
+
+.toast-icon {
+  margin-right: 12px;
+  font-size: 16px;
+}
+
+.toast-success {
+  background-color: #10b981; /* green-500 */
+}
+
+.toast-error {
+  background-color: #ef4444; /* red-500 */
+}
+
+.toast-info {
+  background-color: #3b82f6; /* blue-500 */
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(50%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateX(50%);
+  }
+}
+
+
+
+
     </style>
 </head>
 
@@ -726,6 +778,11 @@
     <span class="text-[9px]">Config</span>
   </a>
 </nav>
+
+<button id="backToTop" class="hidden fixed bottom-20 right-4 bg-primary text-white p-3 rounded-full shadow-lg">
+  <i class="fas fa-arrow-up"></i>
+</button>
+
 
 
             </main>
@@ -1637,33 +1694,48 @@ function gerarGraficoEvolucao() {
 
 
 
-// PULL TO REFRESH no mobile
-let touchStartY = 0;
-let touchEndY = 0;
+let startY = 0;
+let isPulling = false;
 
 document.addEventListener("touchstart", (e) => {
-  touchStartY = e.touches[0].clientY;
+  if (window.scrollY === 0) {
+    startY = e.touches[0].clientY;
+    isPulling = true;
+  }
 });
 
 document.addEventListener("touchmove", (e) => {
-  touchEndY = e.touches[0].clientY;
-});
+  if (!isPulling) return;
 
-document.addEventListener("touchend", () => {
-  const diffY = touchEndY - touchStartY;
+  const currentY = e.touches[0].clientY;
+  const diff = currentY - startY;
 
-  if (diffY > 120 && window.scrollY === 0) {
+  if (diff > 120) {
+    isPulling = false;
     location.reload(); // recarrega a página
   }
 });
 
-document.getElementById("dashboard-tab")?.addEventListener("click", () => {
-  setTimeout(() => {
-    if (typeof updateDashboard === 'function') {
-      updateDashboard();
-    }
-  }, 300); // aguarda a navegação até a seção
+document.addEventListener("touchend", () => {
+  isPulling = false;
 });
+
+
+document.getElementById("dashboard-tab")?.addEventListener("click", (e) => {
+  e.preventDefault(); // evita o comportamento padrão do link
+
+  // Altera a hash (navega para o #dashboard)
+  window.location.hash = "#dashboard";
+
+  // Executa a função
+  if (typeof updateDashboard === "function") {
+    updateDashboard();
+  }
+});
+
+
+
+// Esconde o menu
 
 document.querySelectorAll('input, select, textarea').forEach(el => {
   el.addEventListener('focus', () => {
@@ -1673,6 +1745,7 @@ document.querySelectorAll('input, select, textarea').forEach(el => {
     document.querySelector('nav').classList.remove('hidden');
   });
 });
+
 
 // Exibir botão ao rolar
 window.addEventListener('scroll', () => {
@@ -1692,9 +1765,6 @@ document.getElementById('backToTop')?.addEventListener('click', () => {
 
 </script>
 
-<button id="backToTop" class="hidden fixed bottom-20 right-4 bg-primary text-white p-3 rounded-full shadow-lg">
-  <i class="fas fa-arrow-up"></i>
-</button>
 
 
 <!-- FIM DO SCRIPT GERAL -->
@@ -2006,23 +2076,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script> 
 
-    function showToast(message, type = "success") {
-  const toast = document.createElement("div");
-  toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 text-white text-sm ${
-    type === "success" ? "bg-green-600" : type === "error" ? "bg-red-600" : "bg-yellow-600"
-  }`;
-  toast.textContent = message;
-  document.body.appendChild(toast);
+ function showToast(message, type = 'info') {
+  const container = document.getElementById('toast-container');
 
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+
+  const icons = {
+    success: '<i class="fas fa-check-circle toast-icon"></i>',
+    error: '<i class="fas fa-exclamation-circle toast-icon"></i>',
+    info: '<i class="fas fa-info-circle toast-icon"></i>',
+  };
+
+  toast.innerHTML = `${icons[type] || icons.info}<span>${message}</span>`;
+
+  container.appendChild(toast);
+
+  // Remove após 3 segundos
   setTimeout(() => {
-    toast.classList.add("opacity-0");
-    setTimeout(() => toast.remove(), 300);
-  }, 2500);
+    toast.style.animation = 'fadeOut 0.5s ease forwards';
+    setTimeout(() => toast.remove(), 500);
+  }, 3000);
 }
+
 
 
 </script>
 
+<!-- Toast Notification -->
+<div id="toast-container" class="fixed bottom-6 right-4 space-y-2 z-[9999] max-w-sm"></div>
 
 
 
