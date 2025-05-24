@@ -1692,6 +1692,22 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 
+// usuario no mobile
+
+document.addEventListener('DOMContentLoaded', () => {
+  const userPhoto = document.getElementById('user-photo');
+  const userName = document.getElementById('user-name');
+  const isMobile = window.innerWidth < 768;
+
+  if (isMobile) {
+    const goToSettings = () => {
+      window.location.hash = '#configuracoes';
+    };
+
+    if (userPhoto) userPhoto.addEventListener('click', goToSettings);
+    if (userName) userName.addEventListener('click', goToSettings);
+  }
+});
 
 
 </script>
@@ -1827,27 +1843,28 @@ onAuthStateChanged(auth, async (user) => {
 
 <!-- Bottom Navigation -->
 <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg flex justify-around py-2 md:hidden z-50">
-  <button onclick="showSection('dashboard')" class="flex flex-col items-center text-gray-600">
+  <a href="#dashboard" class="flex flex-col items-center text-gray-600 hover:text-indigo-600">
     <i class="fas fa-chart-pie text-lg"></i>
     <span class="text-xs">Dashboard</span>
-  </button>
-  <button onclick="showSection('custos')" class="flex flex-col items-center text-gray-600">
+  </a>
+  <a href="#custos-mensais" class="flex flex-col items-center text-gray-600 hover:text-indigo-600">
     <i class="fas fa-wallet text-lg"></i>
     <span class="text-xs">Custos</span>
-  </button>
-  <button onclick="showSection('equipamentos')" class="flex flex-col items-center text-gray-600">
+  </a>
+  <a href="#equipamentos" class="flex flex-col items-center text-gray-600 hover:text-indigo-600">
     <i class="fas fa-tools text-lg"></i>
     <span class="text-xs">Itens</span>
-  </button>
-  <button onclick="showSection('rotina')" class="flex flex-col items-center text-gray-600">
+  </a>
+  <a href="#rotina" class="flex flex-col items-center text-gray-600 hover:text-indigo-600">
     <i class="fas fa-clock text-lg"></i>
     <span class="text-xs">Rotina</span>
-  </button>
-  <button onclick="showSection('configuracoes')" class="flex flex-col items-center text-gray-600">
+  </a>
+  <a href="#configuracoes" class="flex flex-col items-center text-gray-600 hover:text-indigo-600">
     <i class="fas fa-cog text-lg"></i>
     <span class="text-xs">Config</span>
-  </button>
+  </a>
 </nav>
+
 
 
 
