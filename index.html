@@ -211,6 +211,19 @@
 }
 
 
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  will-change: opacity, transform;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
 
 </style>
 
@@ -379,7 +392,7 @@
                 <!-- Dashboard Overview -->
                 <section id="dashboard" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border">
+                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="reveal p-6 rounded-xl shadow-sm border">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p style="color: var(--text); opacity: 0.7;">Custos Mensais</p>
@@ -390,7 +403,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border">
+                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="reveal p-6 rounded-xl shadow-sm border">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p style="color: var(--text); opacity: 0.7;">Valor Equipamentos</p>
@@ -401,7 +414,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border">
+                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="reveal p-6 rounded-xl shadow-sm border">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p style="color: var(--text); opacity: 0.7;">Valor Hora</p>
@@ -412,7 +425,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border">
+                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="reveal p-6 rounded-xl shadow-sm border">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p style="color: var(--text); opacity: 0.7;">Total de Jobs</p>
@@ -426,8 +439,8 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border">
-                            <div class="flex items-center justify-between mb-4">
+                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="reveal p-6 rounded-xl shadow-sm border">
+                            <div class="reveal flex items-center justify-between mb-4">
                                 <h3 class="font-bold color: var(--text);">Distribuição de Custos</h3>
                                 
                             </div>
@@ -435,7 +448,7 @@
                                 <canvas id="costsChart"></canvas>
                             </div>
                         </div>
-                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="reveal p-6 rounded-xl shadow-sm border border-gray-200">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="font-bold color: var(--text);">Últimos Jobs Calculados</h3>
                                 <button id="view-job-history" class="text-sm text-primary hover:underline">Ver histórico</button>
@@ -456,7 +469,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                    <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border">
+                    <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="reveal p-6 rounded-xl shadow-sm border">
                     <h2 class="font-bold text-dark">Evolução Mensal</h2>
                     <canvas id="graficoEvolucao" height="120"></canvas>
                     </div>
@@ -2131,6 +2144,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 </script>
+
+// Animação de fade e slide up
+
+<script>
+  const revealElements = document.querySelectorAll('.reveal');
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+      } else {
+        entry.target.classList.remove('active');
+      }
+    });
+  }, {
+    threshold: 0.15
+  });
+
+  revealElements.forEach(el => revealObserver.observe(el));
+</script>
+
 
 
 
