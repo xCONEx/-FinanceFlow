@@ -10,7 +10,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 
-<meta name="theme-color" content="#4F46E5">
 
 <link rel="apple-touch-icon" href="icon-192.png">
 
@@ -18,24 +17,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-<!-- 
-<script type="module">
-  import { auth, db, provider } from './firebase.js';
-
-  // Exemplo: fazer login
-  import { signInWithPopup } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-
-  document.getElementById("login-google").addEventListener("click", async () => {
-    const result = await signInWithPopup(auth, provider);
-    console.log(result.user);
-  });
-</script> --> 
-
-
 
     <title>FinanceFlow - Gerenciamento Financeiro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css" />
 
 
     <script>
@@ -55,97 +41,196 @@
     </script>
 
 
+<!-- Custom Styles --> 
 
-    <style>
+<style>
+:root {
+  --bg: #ffffff;
+  --text: #000000;
+  --primary: #6366f1;
+  --card-bg: #f9f9f9;
+  --input-bg: #ffffff;
+  --border: #e5e7eb;
+  --bg-jobHis: #f3f4f6; /* fundo do histórico de jobs */
+}
 
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .sidebar {
-            transition: all 0.3s ease;
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                position: fixed;
-                z-index: 50;
-                height: 100vh;
-                top: 0;
-                left: 0;
-            }
-            
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            
-            .overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: rgba(0,0,0,0.5);
-                z-index: 40;
-            }
-            
-            .overlay.open {
-                display: block;
-            }
-        }
-        
-        .job-history-modal {
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .job-item {
-            transition: all 0.2s ease;
-        }
-        
-        .job-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-         .pt-safe-top {
-     padding-top: env(safe-area-inset-top);
-         }
-
-.active-nav {
-  color: #6366f1; /* Indigo-500 */
+[data-theme="dark"] {
+  --bg: #101826;         /* fundo geral (layout) */
+  --card-bg: #1f2937;    /* fundo dos cards/boxes */
+  --text: #f1f5f9;       /* texto branco principal */
+  --text-muted: #3f4754; /* texto secundário leve */
+  --input-bg: #475569;   /* fundo de input */
+  --primary: #6366f1;    /* roxo padrão (fixo) */
+  --border: #3F4754;     /* bordas suaves */
+  --bg-jobHis: #1f2937;  /* fundo do histórico de jobs */
 }
 
 
-    </style>
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+  }
+
+  #theme-toggle {
+
+  cursor: pointer;
+  z-index: 999;
+  transition: all 0.3s ease;
+}
+
+
+  .chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .sidebar {
+    transition: all 0.3s ease;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      transform: translateX(-100%);
+      position: fixed;
+      z-index: 50;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      
+      background: var(--bg);
+    }
+
+    .sidebar.open {
+      transform: translateX(0);
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 40;
+    }
+
+    .overlay.open {
+      display: block;
+    }
+  }
+
+  .job-history-modal {
+    max-height: 80vh;
+    overflow-y: auto;
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 1rem;
+  }
+
+  .job-item {
+    transition: all 0.2s ease;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .job-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .pt-safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .active-nav {
+    color: var(--primary);
+    font-weight: bold;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--input-bg);
+    color: var(--text);
+    font-size: 16px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+  }
+
+  button {
+    background: var(--primary);
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+
+[data-theme="dark"] .text-dark {
+  color: var(--text) !important;
+  opacity: 1;
+}
+
+[data-theme="dark"] .bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+[data-theme="dark"] .text-gray-700,
+[data-theme="dark"] .text-gray-500,
+[data-theme="dark"] .text-dark {
+  color: var(--text) !important;
+  opacity: 0.7;
+}
+
+[data-theme="dark"] .text-dark {
+  color: var(--text) !important;
+  opacity: 1;
+}
+
+
+
+</style>
+
+
 </head>
 
-    <body class="bg-gray-50 font-sans" style="padding-bottom: env(safe-area-inset-bottom); padding-top: env(safe-area-inset-top);">
+    <body class="font-sans " style="padding-bottom: env(safe-area-inset-bottom); padding-top: env(safe-area-inset-top);">
+
 
     
 
 
     <!-- Modal de Ajuda -->
 <div id="help-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex justify-center items-center px-4">
-  <div class="bg-white p-6 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-lg">
+  <div style="background: var(--bg);" class=" p-6 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-lg">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-xl font-bold text-dark">Como usar o FinanceFlow</h2>
-      <button id="close-help" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+      <button id="close-help" class="color: var(--text); opacity: 0.6 hover:color: var(--text)"><i class="fas fa-times"></i></button>
     </div>
-    <ul class="text-sm text-gray-700 space-y-2">
+    <ul class="text-sm color: var(--text) space-y-2">
       <li>✅ Preencha seus <strong>custos mensais</strong></li>
       <li>🛠️ Adicione seus <strong>equipamentos</strong></li>
       <li>🕒 Configure sua <strong>rotina de trabalho</strong></li>
@@ -153,19 +238,20 @@
       <li>💾 Salve, exporte e importe seus dados</li>
     </ul>
     <div class="mt-4 text-right">
-      <a href="https://seulink.com" target="_blank" class="text-primary hover:underline text-sm">Ver tutorial completo</a>
+      <a href="https://seulink.com" target="_blank" class="text-primary hover:underline hover:text-indigo-600 text-sm">Ver tutorial completo</a>
     </div>
   </div>
 </div>
 
 <!-- Modal de Notificações -->
-<div id="notify-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex justify-center items-center px-4">
-  <div class="bg-white p-6 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-lg">
+<div id="notify-modal" class="fixed inset-0  bg-black bg-opacity-50 hidden z-50 flex justify-center items-center px-4">
+  <div style="background: var(--bg);" class="p-6 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto shadow-lg">
+    
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-xl font-bold text-dark">Novidades</h2>
-      <button id="close-notify" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+      <button id="close-notify" class="color: var(--text); opacity: 0.6 hover:color: var(--text)"><i class="fas fa-times"></i></button>
     </div>
-<ul class="text-sm text-gray-700 space-y-2">
+<ul class="text-sm color: var(--text) space-y-2">
 
 <li>✅ Salvar dados com 1 clique</li>
 <li>📤 Exportar e 📥 importar dados (.json)</li>
@@ -182,7 +268,7 @@
 
 </ul>
 
-<p class="text-xs mt-4 text-gray-500 ">
+<p class="text-xs mt-4 color: var(--text); opacity: 0.6 ">
   🔜 Em breve: metas visuais, exportação em PDF e painel colaborativo multiusuário!
 </p>
 
@@ -193,45 +279,45 @@
 
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <div class="pt-safe-top sidebar bg-white w-64 border-r border-gray-200 flex flex-col ">
-            <div class="p-4 flex items-center justify-between border-b border-gray-200">
+        <div style="border-color: var(--border)" class="pt-safe-top sidebar background: var(--card-bg) w-64 border-r  flex flex-col ">
+            <div style="border-color: var(--border)" class="p-4 flex items-center justify-between border-b">
                 <div class="flex items-center space-x-2">
-                    <i class="fas fa-wallet text-primary text-2xl"></i>
-                    <h1 class="text-xl font-bold text-dark">FinanceFlow</h1>
+                    <i class="fas fa-wallet text-indigo-600 text-lg"></i>
+                    <span class="text-xl font-bold color: var(--text)">FinanceFlow</span>
                 </div>
-                <button id="close-sidebar" class="md:hidden text-gray-500 hover:text-gray-700">
+                <button id="close-sidebar" class="md:hidden color: var(--text); opacity: 0.6 hover:color: var(--text)">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg bg-primary text-white">
+                <a href="#" class="flex items-center space-x-3 p-3 rounded-lg rounded-lg color: var(--text) hover:bg-indigo-600">
                     <i class="fas fa-home"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="#custos-mensais" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                <a href="#custos-mensais" class="flex items-center space-x-3 p-3 rounded-lg color: var(--text) hover:bg-indigo-600">
                     <i class="fas fa-receipt"></i>
                     <span>Custos Mensais</span>
                 </a>
-                <a href="#equipamentos" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                <a href="#equipamentos" class="flex items-center space-x-3 p-3 rounded-lg color: var(--text) hover:bg-indigo-600">
                     <i class="fas fa-laptop"></i>
                     <span>Itens de Trabalho</span>
                 </a>
-                <a href="#rotina" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                <a href="#rotina" class="flex items-center space-x-3 p-3 rounded-lg color: var(--text) hover:bg-indigo-600">
                     <i class="fas fa-calendar-alt"></i>
                     <span>Rotina de Trabalho</span>
                 </a>
-                <a href="#calculadora" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                <a href="#calculadora" class="flex items-center space-x-3 p-3 rounded-lg color: var(--text) hover:bg-indigo-600">
                     <i class="fas fa-calculator"></i>
                     <span>Calculadora de Jobs</span>
                 </a>
-                <div class="pt-4 border-t border-gray-200">
-                    <a href="#configuracoes" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                <div style="border-color: var(--border)" class="pt-4 border-t">
+                    <a href="#configuracoes" class="flex items-center space-x-3 p-3 rounded-lg color: var(--text) hover:bg-indigo-600">
                         <i class="fas fa-cog"></i>
                         <span>Configurações</span>
                     </a>
                 </div>
             </nav>
-            <div class="p-4 border-t border-gray-200">
+            <div style="border-color: var(--border)" class="p-4 border-t">
                 <div class="flex items-center space-x-3">
                    
                     <div id="user-info" class="flex items-center space-x-3 ">
@@ -253,30 +339,35 @@
         <!-- Main content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Top navigation -->
-            <header class="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <button id="open-sidebar" class="hidden md:block text-gray-500 hover:text-gray-700">
-  <i class="fas fa-bars"></i>
-</button>
+            <header class="flex items-center justify-between p-4" style="background: var(--bg); border-bottom: 1px solid var(--border);">
 
-                   <h2 class="text-xl font-bold text-dark hidden md:block">Dashboard</h2>
+                <div class="flex items-center space-x-3">
+                    <button id="open-sidebar" style="border-color: var(--border)" class="hidden md:block color: var(--text); opacity: 0.6 hover:color: var(--text)">
+                     <i class="fas fa-bars"></i>
+                    </button>
+
+                   <h2 class="text-xl font-bold color: var(--text) hidden md:block">Dashboard</h2>
 
                     <div class="flex items-center space-x-2 md:hidden">
                     <i class="fas fa-wallet text-indigo-600 text-lg"></i>
-                    <span class="text-xl font-bold text-dark">FinanceFlow</span>
+                    <span class="text-xl font-bold color: var(--text)">FinanceFlow</span>
                     </div>
 
                 </div>
                 <div class="flex items-center space-x-4">
 
                    <button id="open-notify" class=
-                   "p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-green-700" title="Notificações">
+                   "p-2 rounded-full hover:bg-gray-100 color: var(--text); opacity: 0.6 hover:text-green-700" title="Notificações">
                 <i class="fas fa-bell"></i>
                  </button>
-
-
-                    <button id="open-help" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-red-700" title="Ajuda">
+                
+                    <button id="open-help" class="p-2 rounded-full hover:bg-gray-100 color: var(--text); opacity: 0.6 hover:text-red-700" title="Ajuda">
                      <i class="fas fa-question-circle"></i>
+                    </button>
+
+
+                  <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 color: var(--text); opacity: 0.6 hover:text-red-700" title="Alternar tema">
+                     <i class="fa-solid fa-moon"></i>
                     </button>
 
 
@@ -284,50 +375,50 @@
             </header>
             
             <!-- Main content area -->
-            <main class="p-24 pb-[100px] flex-1 overflow-y-auto p-6 bg-gray-50">
+            <main class="p-24 pb-[100px] flex-1 overflow-y-auto p-6 ">
                 <!-- Dashboard Overview -->
                 <section id="dashboard" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-gray-500">Custos Mensais</p>
-                                    <h3 class="text-2xl font-bold text-dark mt-1">R$ <span id="total-custos">0,00</span></h3>
+                                    <p style="color: var(--text); opacity: 0.7;">Custos Mensais</p>
+                                    <h3 class="text-2xl font-bold color: var(--text); mt-1">R$ <span id="total-custos">0,00</span></h3>
                                 </div>
-                                <div class="p-3 rounded-full bg-blue-50 text-primary">
+                                <div class="p-3 rounded-full text-green-600">
                                     <i class="fas fa-receipt text-xl"></i>
                                 </div>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-gray-500">Valor Equipamentos</p>
-                                    <h3 class="text-2xl font-bold text-dark mt-1">R$ <span id="total-equipamentos">0,00</span></h3>
+                                    <p style="color: var(--text); opacity: 0.7;">Valor Equipamentos</p>
+                                    <h3 class="text-2xl font-bold color: var(--text); mt-1">R$ <span id="total-equipamentos">0,00</span></h3>
                                 </div>
-                                <div class="p-3 rounded-full bg-green-50 text-secondary">
+                                <div class="p-3 rounded-ful text-blue-600">
                                     <i class="fas fa-laptop text-xl"></i>
                                 </div>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-gray-500">Valor Hora</p>
-                                    <h3 class="text-2xl font-bold text-dark mt-1">R$ <span id="valor-hora">0,00</span></h3>
+                                    <p style="color: var(--text); opacity: 0.7;">Valor Hora</p>
+                                    <h3 class="text-2xl font-bold color: var(--text); mt-1">R$ <span id="valor-hora">0,00</span></h3>
                                 </div>
-                                <div class="p-3 rounded-full bg-purple-50 text-purple-600">
+                                <div class="p-3 rounded-full  text-purple-600">
                                     <i class="fas fa-clock text-xl"></i>
                                 </div>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-gray-500">Total de Jobs</p>
-                                    <h3 class="text-2xl font-bold text-dark mt-1">R$ <span id="total-jobs">0,00</span></h3>
+                                    <p style="color: var(--text); opacity: 0.7;">Total de Jobs</p>
+                                    <h3 class="text-2xl font-bold color: var(--text); mt-1">R$ <span id="total-jobs">0,00</span></h3>
                                 </div>
-                                <div class="p-3 rounded-full bg-yellow-50 text-yellow-600">
+                                <div class="p-3 rounded-full text-yellow-600">
                                     <i class="fas fa-briefcase text-xl"></i>
                                 </div>
                             </div>
@@ -335,23 +426,23 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="font-bold text-dark">Distribuição de Custos</h3>
+                                <h3 class="font-bold color: var(--text);">Distribuição de Custos</h3>
                                 
                             </div>
                             <div class="chart-container">
                                 <canvas id="costsChart"></canvas>
                             </div>
                         </div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border border-gray-200">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="font-bold text-dark">Últimos Jobs Calculados</h3>
+                                <h3 class="font-bold color: var(--text);">Últimos Jobs Calculados</h3>
                                 <button id="view-job-history" class="text-sm text-primary hover:underline">Ver histórico</button>
                             </div>
-                            <div id="recent-jobs-list" class="space-y-3">
+                            <div id="recent-jobs-list" class="background: var(--card-bg); color: var(--text); space-y-3">
                                 <!-- Jobs serão adicionados aqui dinamicamente -->
-                                <div class="text-center py-8 text-gray-500">
+                                <div class="background: var(--card-bg); color: var(--text); text-center py-8 color: var(--text); opacity: 0.6">
                                     <i class="fas fa-briefcase text-3xl mb-2"></i>
                                     <p>Nenhum job calculado ainda</p>
                                 </div>
@@ -365,7 +456,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div style="background: var(--card-bg); color: var(--text); border-color: var(--border);" class="p-6 rounded-xl shadow-sm border">
                     <h2 class="font-bold text-dark">Evolução Mensal</h2>
                     <canvas id="graficoEvolucao" height="120"></canvas>
                     </div>
@@ -383,15 +474,15 @@
                 <section id="custos-mensais" class="mt-12 space-y-6 hidden fade-in">
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold text-dark">Custos Mensais</h2>
-                        <button id="add-expense" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                        <button id="add-expense" class="bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg flex items-center space-x-2">
                             <i class="fas fa-plus"></i>
                             <span>Adicionar Despesa</span>
                         </button>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="p-4 border-b border-gray-200">
-                            <div class="grid grid-cols-12 gap-4 font-medium text-gray-500">
+                    <div style="border-color: var(--border)" class="background: var(--card-bg) rounded-xl shadow-sm border overflow-hidden">
+                        <div style="border-color: var(--border)" class="p-4 border-b">
+                            <div class="grid grid-cols-12 gap-4 font-medium color: var(--text); opacity: 0.6">
                                 <div class="col-span-5">Descrição</div>
                                 <div class="col-span-3">Categoria</div>
                                 <div class="col-span-2 text-right">Valor</div>
@@ -401,9 +492,9 @@
                         <div id="expenses-list" class="divide-y divide-gray-200">
                             <!-- Expenses will be added here dynamically -->
                         </div>
-                        <div class="p-4 border-t border-gray-200 bg-gray-50">
+                        <div style="border-color: var(--border)" class="p-4 border-t">
                             <div class="flex justify-between items-center">
-                                <span class="font-medium text-gray-700">Total Mensal:</span>
+                                <span class="font-medium color: var(--text)">Total Mensal:</span>
                                 <span class="font-bold text-xl text-dark">R$ <span id="monthly-total">0,00</span></span>
                             </div>
                         </div>
@@ -411,21 +502,21 @@
                     
                     <!-- Add Expense Modal -->
                     <div id="expense-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-                        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+                        <div style="background: var(--bg);" class=" rounded-xl p-6 w-full max-w-md">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-xl font-bold text-dark">Adicionar Despesa</h3>
-                                <button id="close-expense-modal" class="text-gray-500 hover:text-gray-700">
+                                <button id="close-expense-modal" class="color: var(--text); opacity: 0.6 hover:color: var(--text)">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
                             <form id="expense-form" class="space-y-4">
                                 <div>
-                                    <label for="expense-description" class="block text-sm font-medium text-gray-700 mb-1 break-words max-w-[130px]">Descrição</label>
-                                    <input type="text" id="expense-description" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <label for="expense-description" class="block text-sm font-medium color: var(--text) mb-1 break-words max-w-[130px]">Descrição</label>
+                                    <input type="text" id="expense-description" style="border-color: var(--border);" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                                 </div>
                                 <div>
-                                    <label for="expense-category" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
-                                    <select id="expense-category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <label for="expense-category" class="block text-sm font-medium color: var(--text) mb-1">Categoria</label>
+                                    <select id="expense-category" style="border-color: var(--border);" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                                         <option value="Moradia">Moradia</option>
                                         <option value="Alimentação">Alimentação</option>
                                         <option value="Transporte">Transporte</option>
@@ -436,13 +527,13 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label for="expense-value" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
-                                   <input type="text" id="expense-value" class="currency-format w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <label for="expense-value" class="block text-sm font-medium color: var(--text) mb-1">Valor (R$)</label>
+                                   <input type="text" id="expense-value" style="border-color: var(--border);" class="currency-format w-full px-4 py-2 border  rounded-lg focus:ring-primary focus:border-primary">
 
 
                                 </div>
                                 <div class="flex justify-end space-x-3 pt-4">
-                                    <button type="button" id="cancel-expense" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
+                                    <button type="button" id="cancel-expense" style="border-color: var(--border);" class="px-4 py-2 border rounded-lg color: var(--text) hover:bg-gray-50">Cancelar</button>
                                     <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">Salvar</button>
                                 </div>
                             </form>
@@ -456,15 +547,15 @@
                 <section id="equipamentos" class="mt-12 space-y-6 hidden fade-in">
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold text-dark">Itens de Trabalho</h2>
-                        <button id="add-equipment" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                        <button id="add-equipment" class="bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg flex items-center space-x-2">
                             <i class="fas fa-plus"></i>
                             <span>Adicionar Item</span>
                         </button>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="p-4 border-b border-gray-200">
-                            <div class="grid grid-cols-12 gap-4 font-medium text-gray-500">
+                    <div style="border-color: var(--border); background: var(--card-bg)" class=" rounded-xl shadow-sm border overflow-hidden">
+                        <div style="border-color: var(--border)" class="p-4 border-b">
+                            <div class="grid grid-cols-12 gap-4 font-medium color: var(--text); opacity: 0.6">
                                 <div class="col-span-6">Descrição</div>
                                 <div class="col-span-3">Categoria</div>
                                 <div class="col-span-2 text-right">Valor</div>
@@ -474,9 +565,9 @@
                         <div id="equipment-list" class="divide-y divide-gray-200">
                             <!-- Equipment will be added here dynamically -->
                         </div>
-                        <div class="p-4 border-t border-gray-200 bg-gray-50">
+                        <div style="border-color: var(--border)" class="p-4 border-t ">
                             <div class="flex justify-between items-center">
-                                <span class="font-medium text-gray-700">Total em Equipamentos:</span>
+                                <span class="font-medium color: var(--text)">Total em Equipamentos:</span>
                                 <span class="font-bold text-xl text-dark">R$ <span id="equipment-total">0,00</span></span>
                             </div>
                         </div>
@@ -484,21 +575,21 @@
                     
                     <!-- Add Equipment Modal -->
                     <div id="equipment-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-                        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+                        <div style="background: var(--bg);" class=" rounded-xl p-6 w-full max-w-md">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-xl font-bold text-dark">Adicionar Item</h3>
-                                <button id="close-equipment-modal" class="text-gray-500 hover:text-gray-700">
+                                <button id="close-equipment-modal" class="color: var(--text); opacity: 0.6 hover:color: var(--text)">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
                             <form id="equipment-form" class="space-y-4">
                                 <div>
-                                    <label for="equipment-description" class="block text-sm font-medium text-gray-700 mb-1 break-words max-w-[130px]">Descrição</label>
-                                    <input type="text" id="equipment-description" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <label for="equipment-description" class="block text-sm font-medium color: var(--text) mb-1 break-words max-w-[130px]">Descrição</label>
+                                    <input type="text" id="equipment-description" style="border-color: var(--border);" class="w-full px-4 py-2 border  rounded-lg focus:ring-primary focus:border-primary">
                                 </div>
                                 <div>
-                                    <label for="equipment-category" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
-                                    <select id="equipment-category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <label for="equipment-category" class="block text-sm font-medium color: var(--text) mb-1">Categoria</label>
+                                    <select id="equipment-category" style="border-color: var(--border);" class="w-full px-4 py-2 border  rounded-lg focus:ring-primary focus:border-primary">
                                         <option value="Câmera">Câmera</option>
                                         <option value="Lente">Lente</option>
                                         <option value="Hardware">Hardware</option>
@@ -509,12 +600,12 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label for="equipment-value" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
-                                    <input type="text" id="equipment-value" class="currency-format w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <label for="equipment-value" class="block text-sm font-medium color: var(--text) mb-1">Valor (R$)</label>
+                                    <input type="text" id="equipment-value" style="border-color: var(--border);" class="currency-format w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
 
                                 </div>
                                 <div class="flex justify-end space-x-3 pt-4">
-                                    <button type="button" id="cancel-equipment" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancelar</button>
+                                    <button type="button" id="cancel-equipment" style="border-color: var(--border);" class="px-4 py-2 border  rounded-lg color: var(--text) hover:bg-gray-50">Cancelar</button>
                                     <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">Salvar</button>
                                 </div>
                             </form>
@@ -528,22 +619,23 @@
                         <h2 class="text-2xl font-bold text-dark">Rotina de Trabalho</h2>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div style="border-color: var(--border); background: var(--card-bg)" class=" rounded-xl shadow-sm border p-6">
                         <form id="routine-form" class="space-y-6">
                             <div>
-                                <label for="desired-salary" class="block text-sm font-medium text-gray-700 mb-1">Salário Desejado (R$)</label>
-                                <input type="text" step="0.01" id="desired-salary" class="currency-format w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                <label for="desired-salary" class="block text-sm font-medium color: var(--text) mb-1">Salário Desejado (R$)</label>
+                                <input type="text" step="0.01" id="desired-salary" style="border-color: var(--border);" class="currency-format w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                             </div>
                             <div>
-                                <label for="work-days" class="block text-sm font-medium text-gray-700 mb-1">Dias de Trabalho por Mês</label>
-                                <input type="number" id="work-days" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                <label for="work-days" class="block text-sm font-medium color: var(--text) mb-1">Dias de Trabalho por Mês</label>
+                                <input type="number" id="work-days" style="border-color: var(--border);" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                             </div>
                             <div>
-                                <label for="daily-hours" class="block text-sm font-medium text-gray-700 mb-1">Horas de Trabalho por Dia</label>
-                                <input type="number" id="daily-hours" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                <label for="daily-hours" class="block text-sm font-medium color: var(--text) mb-1">Horas de Trabalho por Dia</label>
+                                <input type="number" id="daily-hours" style="border-color: var(--border);" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                             </div>
                             <div class="pt-2">
-                                <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark w-full">Calcular</button>
+                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-gray-600 hover:bg--indigo-300 dark:bg--indigo-600 dark:hover:bg-gray-700 dark:text-gray-300 w-full">Calcular</button>
+                                
                             </div>
                         </form>
                         
@@ -572,36 +664,36 @@
                         <h2 class="text-2xl font-bold text-dark">Calculadora de Jobs</h2>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div style="border-color: var(--border); background: var(--card-bg)" class=" rounded-xl shadow-sm border p-6">
                         <form id="job-calculator-form" class="space-y-6">
                             <div>
-                                <label for="job-description" class="block text-sm font-medium text-gray-700 mb-1">Descrição do Job</label>
-                                <input type="text" id="job-description" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                <label for="job-description" class="block text-sm font-medium color: var(--text) mb-1">Descrição do Job</label>
+                                <input type="text" id="job-description" style="border-color: var(--border);" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <label for="logistics-cost" class="block text-sm font-medium text-gray-700 mb-1">Logística (R$)</label>
-                                    <input type="number" step="0.01" id="logistics-cost" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <label for="logistics-cost" class="block text-sm font-medium color: var(--text) mb-1">Logística (R$)</label>
+                                    <input type="number" step="0.01" id="logistics-cost" style="border-color: var(--border);" class="w-full px-4 py-2 borde rounded-lg focus:ring-primary focus:border-primary">
                                 </div>
                                 <div>
-                                    <label for="equipment-cost" class="block text-sm font-medium text-gray-700 mb-1">Equipamentos (R$)</label>
-                                    <input type="number" step="0.01" id="equipment-cost" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <label for="equipment-cost" class="block text-sm font-medium color: var(--text) mb-1">Equipamentos (R$)</label>
+                                    <input type="number" step="0.01" id="equipment-cost" style="border-color: var(--border);" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                                 </div>
                                 <div>
-                                    <label for="assistance-cost" class="block text-sm font-medium text-gray-700 mb-1">Assistência (R$)</label>
-                                    <input type="number" step="0.01" id="assistance-cost" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <label for="assistance-cost" class="block text-sm font-medium color: var(--text) mb-1">Assistência (R$)</label>
+                                    <input type="number" step="0.01" id="assistance-cost" style="border-color: var(--border);" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                                 </div>
                             </div>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label for="estimated-hours" class="block text-sm font-medium text-gray-700 mb-1">Horas Estimadas</label>
-                                    <input type="number" id="estimated-hours" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <label for="estimated-hours" class="block text-sm font-medium color: var(--text) mb-1">Horas Estimadas</label>
+                                    <input type="number" id="estimated-hours"style="border-color: var(--border);"  class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                                 </div>
                                 <div>
-                                    <label for="difficulty-level" class="block text-sm font-medium text-gray-700 mb-1">Nível de Dificuldade</label>
-                                    <select id="difficulty-level" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                    <label for="difficulty-level" class="block text-sm font-medium color: var(--text) mb-1">Nível de Dificuldade</label>
+                                    <select id="difficulty-level" style="border-color: var(--border);" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                                         <option value="1">Fácil</option>
                                         <option value="1.25" selected>Médio</option>
                                         <option value="1.5">Difícil</option>
@@ -611,20 +703,20 @@
                             </div>
                             
                             <div>
-                                <label for="discount-percentage" class="block text-sm font-medium text-gray-700 mb-1">Desconto (%)</label>
-                                <input type="number" id="discount-percentage" value="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                                <label for="discount-percentage" class="block text-sm font-medium color: var(--text) mb-1">Desconto (%)</label>
+                                <input type="number" id="discount-percentage" value="0" style="border-color: var(--border);" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                             </div>
                             
                             <div class="pt-2">
-                                <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark w-full">Calcular</button>
+                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-gray-600 hover:bg--indigo-300 dark:bg--indigo-600 dark:hover:bg-gray-700 dark:text-gray-300 w-full"">Calcular</button>
                             </div>
                         </form>
                         
                         <div id="job-results" class="mt-8 space-y-4 hidden">
                             <div class="p-4 bg-gray-50 rounded-lg">
                                 <div class="flex justify-between items-center">
-                                    <span class="font-medium text-gray-700">Custos Totais:</span>
-                                    <span class="font-bold text-dark">R$ <span id="total-costs">0,00</span></span>
+                                    <span class="font-medium text-blue-700">Custos Totais:</span>
+                                    <span class="font-bold text-blue-900">R$ <span id="total-costs">0,00</span></span>
                                 </div>
                             </div>
                             <div class="p-4 bg-blue-50 rounded-lg">
@@ -664,7 +756,7 @@
   <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold text-dark">Configurações</h2>
                     </div>
-                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                     <div style="border-color: var(--border); background: var(--card-bg)" class=" rounded-xl shadow-sm border p-6">
 
   <!-- Botões -->
 
@@ -678,62 +770,64 @@
 
 
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-    <button id="save-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300">
+    <button id="save-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-indigo-600 dark:hover:bg-gray-700 dark:text-gray-300">
       <i class="fas fa-save text-primary"></i>
       Salvar dados
     </button>
-    <button id="export-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300">
+    <button id="export-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-indigo-600 dark:hover:bg-gray-700 dark:text-gray-300">
       <i class="fas fa-download text-green-500"></i>
       Exportar dados
     </button>
-    <label for="import-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 cursor-pointer">
+    <label for="import-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-indigo-600 dark:hover:bg-gray-700 dark:text-gray-300 cursor-pointer">
       <i class="fas fa-upload text-blue-500"></i>
       Importar dados
       <input type="file" id="import-data" accept=".json" class="hidden">
     </label>
-    <button id="reset-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300">
+    <button id="reset-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-indigo-600 dark:hover:bg-gray-700 dark:text-gray-300">
       <i class="fas fa-trash-alt text-red-500"></i>
       Resetar tudo
     </button>
   </div>
 
   <!-- Sobre o App -->
-  <div class="pt-6 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+  <div style="border-color: var(--border)" class="pt-6 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 space-y-1">
     <p><strong>📱 FinanceFlow</strong> — Sistema de gestão e precificação para audiovisual</p>
     <p>🛠️ Desenvolvido por <strong>Yuri Adriel</strong></p>
     <p>🔢 Versão: <span class="text-primary font-semibold">1.0.0</span></p>
-    <p>📸 Instagram: <a href="https://instagram.com/euyuriadriel" target="_blank" class="text-primary hover:underline">@euyuriadriel</a></p>
+    <p>📸 Instagram: <a href="https://instagram.com/euyuriadriel" target="_blank" class="text-primary hover:underline hover:text-indigo-600">@euyuriadriel</a></p>
   
 </div>
 </div>
 </section>
 
         <!-- Bottom Menu - apenas para mobile -->
-<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg flex justify-around py-2 md:hidden z-50"
-     style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 13px);">
+<nav class="fixed bottom-0 left-0 right-0  border-t shadow-lg flex justify-around py-2 md:hidden z-50"
+     style="background: var(--card-bg); border-top: 1px solid var(--border); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 13px);">
 
 
-  <a href="#dashboard" id="dashboard-tab" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:text-gray-100 w-full">
+
+
+  <a href="#dashboard" id="dashboard-tab" class="flex flex-col items-center justify-center rounded-lg color: var(--text) hover:text-gray-100 w-full">
     <i class="fas fa-chart-pie text-lg"></i>
     <span class="text-[9px]">Dashboard</span>
   </a>
-  <a href="#custos-mensais" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:text-gray-100 w-full ">
+  <a href="#custos-mensais" class="flex flex-col items-center justify-center rounded-lg color: var(--text) hover:text-gray-100 w-full ">
     <i class="fas fa-receipt text-lg"></i>
     <span class="text-[9px]">Custos</span>
   </a>
-  <a href="#equipamentos" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:text-gray-100 w-full">
+  <a href="#equipamentos" class="flex flex-col items-center justify-center rounded-lg color: var(--text) hover:text-gray-100 w-full">
     <i class="fas fa-laptop text-lg"></i>
     <span class="text-[9px]">Itens</span>
   </a>
-  <a href="#rotina" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:text-gray-100 w-full">
+  <a href="#rotina" class="flex flex-col items-center justify-center rounded-lg color: var(--text) hover:text-gray-100 w-full">
     <i class="fas fa-calendar-alt text-lg"></i>
     <span class="text-[9px]">Rotina</span>
   </a>
-  <a href="#calculadora" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:text-gray-100 w-full">
+  <a href="#calculadora" class="flex flex-col items-center justify-center rounded-lg color: var(--text) hover:text-gray-100 w-full">
     <i class="fas fa-calculator text-lg"></i>
     <span class="text-[9px]">Jobs</span>
   </a>
-  <a href="#configuracoes" class="flex flex-col items-center justify-center rounded-lg text-gray-700 hover:text-gray-100 w-full">
+  <a href="#configuracoes" class="flex flex-col items-center justify-center rounded-lg color: var(--text) hover:text-gray-100 w-full">
     <i class="fas fa-cog text-lg"></i>
     <span class="text-[9px]">Config</span>
   </a>
@@ -756,18 +850,18 @@
 
     <!-- Job History Modal -->
     <div id="job-history-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl p-6 w-full max-w-2xl job-history-modal">
+        <div style="background: var(--card-bg)" class=" rounded-xl p-6 w-full max-w-2xl job-history-modal">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-dark">Histórico de Jobs</h3>
-                <button id="close-job-history-modal" class="text-gray-500 hover:text-gray-700">
+                <button id="close-job-history-modal" class="color: var(--text); opacity: 0.6 hover:color: var(--text)">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div id="job-history-list" class="space-y-3">
                 <!-- Jobs will be listed here -->
             </div>
-            <div class="mt-4 flex justify-between items-center border-t border-gray-200 pt-4">
-                <span class="font-medium text-gray-700">Total:</span>
+            <div style="border-color: var(--border)" class="mt-4 flex justify-between items-center border-t pt-4">
+                <span class="font-medium color: var(--text)">Total:</span>
                 <span class="font-bold text-xl text-dark">R$ <span id="job-history-total">0,00</span></span>
             </div>
             <div class="mt-4 flex justify-end">
@@ -971,10 +1065,10 @@ function saveData() {
                 // Update active link
                 navLinks.forEach(navLink => {
                     navLink.classList.remove('bg-primary', 'text-white');
-                    navLink.classList.add('text-gray-700', 'hover:bg-gray-100');
+                    navLink.classList.add('color: var(--text)', 'hover:bg-gray-100');
                 });
                 
-                link.classList.remove('text-gray-700', 'hover:bg-gray-100');
+                link.classList.remove('color: var(--text)', 'hover:bg-gray-100');
                 link.classList.add('bg-primary', 'text-white');
             });
         });
@@ -1055,7 +1149,7 @@ document.getElementById('import-data').addEventListener('change', (e) => {
             
             if (appData.jobs.length === 0) {
                 recentJobsList.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
+                    <div class="text-center py-8 color: var(--text); opacity: 0.6">
                         <i class="fas fa-briefcase text-3xl mb-2"></i>
                         <p>Nenhum job calculado ainda</p>
                     </div>
@@ -1068,18 +1162,20 @@ document.getElementById('import-data').addEventListener('change', (e) => {
             
             recentJobs.forEach(job => {
                 const jobElement = document.createElement('div');
-                jobElement.className = 'bg-gray-50 p-4 rounded-lg job-item';
+               jobElement.className = 'p-4 rounded-lg job-item';
+                jobElement.setAttribute("style", "background: var(--bg); color: var(--text);");
+  
                 jobElement.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>
-                            <h4 class="font-medium text-dark break-words max-w-[130px]">${job.description}</h4>
-                            <p class="text-sm text-gray-500">${job.date}</p>
+                            <h4 class="font-medium color: var(--text) break-words max-w-[130px]">${job.description}</h4>
+                            <p class="text-sm color: var(--text); opacity: 0.6">${job.date}</p>
                         </div>
                         <span class="font-bold text-dark">R$ ${job.value.toFixed(2)}</span>
                     </div>
                     <div class="mt-2 flex justify-between items-center text-sm">
                         <span class="text-green-600">Lucro: R$ ${job.profit.toFixed(2)}</span>
-                        <span class="text-gray-500">${job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) + '%' : '0%'} de margem</span>
+                        <span class="color: var(--text); opacity: 0.6">${job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) + '%' : '0%'} de margem</span>
                     </div>
                 `;
                 recentJobsList.appendChild(jobElement);
@@ -1093,7 +1189,7 @@ document.getElementById('import-data').addEventListener('change', (e) => {
             
             if (appData.jobs.length === 0) {
                 jobHistoryList.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
+                    <div class="text-center py-8 color: var(--text); opacity: 0.6">
                         <i class="fas fa-briefcase text-3xl mb-2"></i>
                         <p>Nenhum job no histórico</p>
                     </div>
@@ -1115,18 +1211,20 @@ document.getElementById('import-data').addEventListener('change', (e) => {
                 totalValue += job.value;
                 
                 const jobElement = document.createElement('div');
-                jobElement.className = 'bg-gray-50 p-4 rounded-lg job-item';
+               jobElement.className = 'p-4 rounded-lg job-item';
+                jobElement.setAttribute("style", "background: var(--bg); color: var(--text);");
+
                 jobElement.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>
                             <h4 class="font-medium text-dark break-words max-w-[130px]">${job.description}</h4>
-                            <p class="text-sm text-gray-500">${job.date}</p>
+                            <p class="text-sm color: var(--text); opacity: 0.6">${job.date}</p>
                         </div>
                         <span class="font-bold text-dark">R$ ${job.value.toFixed(2)}</span>
                     </div>
                     <div class="mt-2 flex justify-between items-center text-sm">
                         <span class="text-green-600">Lucro: R$ ${job.profit.toFixed(2)}</span>
-                        <span class="text-gray-500">${job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) + '%' : '0%'} de margem</span>
+                        <span class="color: var(--text); opacity: 0.6">${job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) + '%' : '0%'} de margem</span>
                     </div>
                 `;
                 jobHistoryList.appendChild(jobElement);
@@ -1210,13 +1308,14 @@ document.getElementById('import-data').addEventListener('change', (e) => {
                 total += expense.value;
                 
                 const expenseElement = document.createElement('div');
-                expenseElement.className = 'grid grid-cols-12 gap-4 p-4 items-center';
+               expenseElement.className = 'grid grid-cols-12 gap-4 p-4 items-center';
+                expenseElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
                 expenseElement.innerHTML = `
-                    <div class="col-span-5 font-medium text-dark break-words max-w-[130px]">${expense.description}</div>
+                    <div class="col-span-5 font-medium  break-words max-w-[130px]">${expense.description}</div>
                     <div class="col-span-3">
                         <span class="px-3 py-1 rounded-full text-xs ${getCategoryColor(expense.category)}">${expense.category}</span>
                     </div>
-                    <div class="col-span-2 text-right font-medium text-dark">R$ ${expense.value.toFixed(2)}</div>
+                    <div class="col-span-2 text-right font-medium ">R$ ${expense.value.toFixed(2)}</div>
                     <div class="col-span-2 flex justify-center space-x-2">
                         <button class="edit-expense p-2 text-blue-500 hover:text-blue-700" data-id="${expense.id}">
                             <i class="fas fa-edit"></i>
@@ -1338,12 +1437,13 @@ document.getElementById('import-data').addEventListener('change', (e) => {
                 
                 const equipmentElement = document.createElement('div');
                 equipmentElement.className = 'grid grid-cols-12 gap-4 p-4 items-center';
+                   equipmentElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
                 equipmentElement.innerHTML = `
-                    <div class="col-span-6 font-medium text-dark break-words max-w-[130px]">${equipment.description}</div>
+                    <div class="col-span-6 font-medium break-words max-w-[130px]">${equipment.description}</div>
                     <div class="col-span-3">
                         <span class="px-3 py-1 rounded-full text-xs ${getEquipmentCategoryColor(equipment.category)}">${equipment.category}</span>
                     </div>
-                    <div class="col-span-2 text-right font-medium text-dark">R$ ${equipment.value.toFixed(2)}</div>
+                    <div class="col-span-2 text-right font-medium ">R$ ${equipment.value.toFixed(2)}</div>
                     <div class="col-span-1 flex justify-center">
                         <button class="edit-equipment p-2 text-blue-500 hover:text-blue-700" data-id="${equipment.id}">
                             <i class="fas fa-edit"></i>
@@ -1685,14 +1785,17 @@ document.addEventListener("touchend", () => {
 
 // Esconde o menu
 
-document.querySelectorAll('input, select, textarea').forEach(el => {
-  el.addEventListener('focus', () => {
-    document.querySelector('nav').classList.add('hidden');
+if (window.innerWidth <= 768) {
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    el.addEventListener('focus', () => {
+      document.querySelector('nav').classList.add('hidden');
+    });
+    el.addEventListener('blur', () => {
+      document.querySelector('nav').classList.remove('hidden');
+    });
   });
-  el.addEventListener('blur', () => {
-    document.querySelector('nav').classList.remove('hidden');
-  });
-});
+}
+
 
 
 // Exibir botão ao rolar
@@ -1718,59 +1821,6 @@ document.getElementById('backToTop')?.addEventListener('click', () => {
 
 
 <!-- FIM DO SCRIPT GERAL -->
-
-
-<!-- Verificação Firebase
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
-    authDomain: "financeflow-e0fae.firebaseapp.com",
-    projectId: "financeflow-e0fae",
-    storageBucket: "financeflow-e0fae.firebasestorage.app",
-    messagingSenderId: "970984329138",
-    appId: "1:970984329138:web:429a185b8bab1971991eab"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  onAuthStateChanged(auth, (user) => {
-    const userName = document.getElementById("user-name");
-    const userPhoto = document.getElementById("user-photo");
-
-
-    if (user) {
-      if (userName) userName.textContent = user.displayName || user.email;
-      if (userPhoto && user.photoURL) {
-        userPhoto.src = user.photoURL;
-        userPhoto.classList.remove("hidden");
-      }
-    } else {
-      window.location.href = "login.html";
-    }
-  }); 
-
-  document.getElementById("logout-btn")?.addEventListener("click", () => {
-      //localStorage.removeItem("syncedFromCloud");
-  window.location.href = "login.html";
-});
-
-
-let currentUser = null;
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUser = user;
-  }
-});
-
-
-
-</script> --> 
 
 
 <script type="module">
@@ -2044,6 +2094,30 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('theme-toggle');
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      toggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    setTheme(initialTheme);
+
+    toggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+    });
+  });
+</script>
 
 
 
