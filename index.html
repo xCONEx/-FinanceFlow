@@ -5,13 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Manifest & Web App Meta Tags -->
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#6366f1" />
+<link rel="apple-touch-icon" href="/icons/icon-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-
-<link rel="apple-touch-icon" href="icon-192.png">
 
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -72,6 +71,7 @@
     color: var(--text);
     font-family: 'Inter', sans-serif;
     transition: all 0.3s ease;
+    
   }
 
   #theme-toggle {
@@ -2117,6 +2117,19 @@ document.addEventListener('DOMContentLoaded', () => {
       setTheme(newTheme);
     });
   });
+</script>
+
+
+//App nativo 
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('✅ Service Worker registrado'))
+        .catch(err => console.log('❌ Erro ao registrar SW', err));
+    });
+  }
 </script>
 
 
