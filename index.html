@@ -223,6 +223,43 @@
   transform: translateY(0);
 }
 
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; visibility: hidden; }
+}
+
+.animate-fade {
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+.dots-loader {
+  display: flex;
+  gap: 6px;
+  font-size: 2rem;
+  animation: fadeIn 0.5s ease;
+}
+
+.dots-loader span {
+  animation: blink 1.2s infinite;
+}
+
+.dots-loader span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.dots-loader span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(1); }
+  40% { opacity: 1; transform: scale(1.2); }
+}
+
+
 
 
 </style>
@@ -231,6 +268,13 @@
 </head>
 
     <body class="font-sans " style="padding-bottom: env(safe-area-inset-bottom); padding-top: env(safe-area-inset-top);">
+
+<div id="splash-screen" class="fixed inset-0 flex flex-col items-center justify-center bg-indigo-600 z-[9999] text-white">
+  <h1 class="text-3xl font-bold mb-4">FinanceFlow</h1>
+  <div class="dots-loader">
+    <span>.</span><span>.</span><span>.</span>
+  </div>
+</div>
 
 
     
@@ -714,14 +758,23 @@
                                     </select>
                                 </div>
                             </div>
-                            
+                            <!-- Categoria do Job --> 
+                            <label for="job-category" class="block text-sm font-medium mb-1">Categoria do Job</label>
+       <select id="job-category" class="w-full mb-4 p-2 rounded border" style="background: var(--input-bg); color: var(--text); border-color: var(--border);"> 
+          <option value="Institucional">Institucional</option>
+           <option value="Casamento">Casamento</option>
+          <option value="Clipe">Clipe</option>
+          <option value="VSL">VSL</option>
+                  <option value="Outro">Outro</option>
+        </select>
+
                             <div>
                                 <label for="discount-percentage" class="block text-sm font-medium color: var(--text) mb-1">Desconto (%)</label>
                                 <input type="number" id="discount-percentage" value="0" style="border-color: var(--border);" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                             </div>
                             
                             <div class="pt-2">
-                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-gray-600 hover:bg--indigo-300 dark:bg--indigo-600 dark:hover:bg-gray-700 dark:text-gray-300 w-full"">Calcular</button>
+                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-gray-600 hover:bg--indigo-300 dark:bg--indigo-600 dark:hover:bg-gray-700 dark:text-gray-300 w-full">Calcular</button>
                             </div>
                         </form>
                         
@@ -1156,96 +1209,335 @@ document.getElementById('import-data').addEventListener('change', (e) => {
         });
 
         // Render recent jobs (3 most recent)
-        function renderRecentJobs() {
-            const recentJobsList = document.getElementById('recent-jobs-list');
-            recentJobsList.innerHTML = '';
-            
-            if (appData.jobs.length === 0) {
-                recentJobsList.innerHTML = `
-                    <div class="text-center py-8 color: var(--text); opacity: 0.6">
-                        <i class="fas fa-briefcase text-3xl mb-2"></i>
-                        <p>Nenhum job calculado ainda</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Get last 3 jobs
-            const recentJobs = appData.jobs.slice(-3).reverse();
-            
-            recentJobs.forEach(job => {
-                const jobElement = document.createElement('div');
-               jobElement.className = 'p-4 rounded-lg job-item';
-                jobElement.setAttribute("style", "background: var(--bg); color: var(--text);");
-  
-                jobElement.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-medium color: var(--text) break-words max-w-[130px]">${job.description}</h4>
-                            <p class="text-sm color: var(--text); opacity: 0.6">${job.date}</p>
-                        </div>
-                        <span class="font-bold text-dark">R$ ${job.value.toFixed(2)}</span>
-                    </div>
-                    <div class="mt-2 flex justify-between items-center text-sm">
-                        <span class="text-green-600">Lucro: R$ ${job.profit.toFixed(2)}</span>
-                        <span class="color: var(--text); opacity: 0.6">${job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) + '%' : '0%'} de margem</span>
-                    </div>
-                `;
-                recentJobsList.appendChild(jobElement);
-            });
-        }
+function renderRecentJobs() {
+  const recentJobsList = document.getElementById('recent-jobs-list');
+  recentJobsList.innerHTML = '';
 
-        // Render full job history
-        function renderJobHistory() {
-            const jobHistoryList = document.getElementById('job-history-list');
-            jobHistoryList.innerHTML = '';
-            
-            if (appData.jobs.length === 0) {
-                jobHistoryList.innerHTML = `
-                    <div class="text-center py-8 color: var(--text); opacity: 0.6">
-                        <i class="fas fa-briefcase text-3xl mb-2"></i>
-                        <p>Nenhum job no histórico</p>
-                    </div>
-                `;
-                document.getElementById('job-history-total').textContent = '0,00';
-                return;
-            }
-            
-            // Sort jobs by date (newest first)
-            const sortedJobs = [...appData.jobs].sort((a, b) => {
-                const dateA = new Date(a.date.split('/').reverse().join('-'));
-                const dateB = new Date(b.date.split('/').reverse().join('-'));
-                return dateB - dateA;
-            });
-            
-            let totalValue = 0;
-            
-            sortedJobs.forEach(job => {
-                totalValue += job.value;
-                
-                const jobElement = document.createElement('div');
-               jobElement.className = 'p-4 rounded-lg job-item';
-                jobElement.setAttribute("style", "background: var(--bg); color: var(--text);");
+  if (appData.jobs.length === 0) {
+    recentJobsList.innerHTML = `
+      <div class="text-center py-8 color: var(--text); opacity: 0.6">
+        <i class="fas fa-briefcase text-3xl mb-2"></i>
+        <p>Nenhum job calculado ainda</p>
+      </div>
+    `;
+    return;
+  }
 
-                jobElement.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-medium text-dark break-words max-w-[130px]">${job.description}</h4>
-                            <p class="text-sm color: var(--text); opacity: 0.6">${job.date}</p>
-                        </div>
-                        <span class="font-bold text-dark">R$ ${job.value.toFixed(2)}</span>
-                    </div>
-                    <div class="mt-2 flex justify-between items-center text-sm">
-                        <span class="text-green-600">Lucro: R$ ${job.profit.toFixed(2)}</span>
-                        <span class="color: var(--text); opacity: 0.6">${job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) + '%' : '0%'} de margem</span>
-                    </div>
-                `;
-                jobHistoryList.appendChild(jobElement);
-            });
-            
-            document.getElementById('job-history-total').textContent = totalValue.toFixed(2);
+  const recentJobs = appData.jobs.slice(-3).reverse();
+
+  recentJobs.forEach((job, i) => {
+    const index = appData.jobs.length - 1 - i;
+    const jobElement = document.createElement('div');
+    jobElement.className = 'p-4 rounded-lg job-item border mb-2';
+    jobElement.style.background = 'var(--bg)';
+    jobElement.style.color = 'var(--text)';
+    jobElement.style.borderColor = 'var(--border)';
+
+    jobElement.innerHTML = `
+      <div class="flex justify-between items-start">
+        <div>
+          <h4 class="font-bold job-desc break-words max-w-[130px]">${job.description}</h4>
+          <p class="text-sm opacity-60">${job.date}</p>
+        </div>
+        <span class="flex flex-col text-sm items-end">
+      <span style="opacity: 0.9;">R$ ${job.value.toFixed(2)}</span>
+      <span style="opacity: 0.6; font-size: 0.75rem;">${job.category}</span>
+    </span>
+      </div>
+      <div class="mt-1 text-sm flex justify-between">
+        <span class="text-green-600">Lucro: R$ ${job.profit.toFixed(2)}</span>
+        <span class="opacity-60">${job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) : '0'}% margem</span>
+      </div>
+      ${job.status !== 'fechado' ? `
+        <div class="flex gap-2 mt-3 text-lg">
+          <button class="btn-edit" title="Editar nome">✏️</button>
+          <button class="btn-delete" title="Excluir">🗑️</button>
+          <button class="btn-pdf" title="Exportar Orçamento em PDF">📄</button>
+        </div>
+      ` : `<div class="mt-2 text-green-500">✅ Aprovado</div>`}
+    `;
+
+    // Editar nome
+    if (job.status !== 'fechado') {
+      const btnEdit = jobElement.querySelector('.btn-edit');
+      const descEl = jobElement.querySelector('.job-desc');
+
+btnEdit.addEventListener('click', () => {
+  const job = appData.jobs[index];
+
+  // Preenche o modal
+  document.getElementById('editJobDescription').value = job.description || '';
+  document.getElementById('editJobClient').value = job.client || '';
+  document.getElementById('editJobDate').value = job.eventDate || '';
+  document.getElementById('editEstimatedHours').value = job.hours || 0;
+  document.getElementById('editDifficultyLevel').value = job.difficulty || 1;
+  document.getElementById('editLogisticsCost').value = job.logistics || 0;
+  document.getElementById('editEquipmentCost').value = job.equipment || 0;
+  document.getElementById('editAssistanceCost').value = job.assistance || 0;
+
+  document.getElementById('editModal').classList.remove('hidden');
+
+  document.getElementById('saveEditBtn').onclick = () => {
+    job.description = document.getElementById('editJobDescription').value.trim();
+    job.client = document.getElementById('editJobClient').value.trim();
+    job.eventDate = document.getElementById('editJobDate').value;
+    job.hours = parseFloat(document.getElementById('editEstimatedHours').value) || 0;
+    job.difficulty = parseFloat(document.getElementById('editDifficultyLevel').value) || 1;
+    job.logistics = parseFloat(document.getElementById('editLogisticsCost').value) || 0;
+    job.equipment = parseFloat(document.getElementById('editEquipmentCost').value) || 0;
+    job.assistance = parseFloat(document.getElementById('editAssistanceCost').value) || 0;
+
+    const custoTotal = job.logistics + job.equipment + job.assistance;
+    const valorHora = 50;
+    job.value = (job.hours * valorHora) * job.difficulty + custoTotal;
+    job.profit = job.value - custoTotal;
+
+    saveData();
+    renderRecentJobs();
+    renderJobHistory();
+    updateDashboard();
+
+    document.getElementById('editModal').classList.add('hidden');
+  };
+});
+
+
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('closeEditModal').addEventListener('click', () => {
+    document.getElementById('editModal').classList.add('hidden');
+  });
+});
+
+    const btnPDF = jobElement.querySelector('.btn-pdf');
+    btnPDF.addEventListener('click', () => {
+        exportJobToPDF(job);
+    });
+
+      // Excluir
+      jobElement.querySelector('.btn-delete').addEventListener('click', () => {
+        if (confirm('Deseja remover este job?')) {
+          appData.jobs.splice(index, 1);
+          saveData();
+          renderRecentJobs();
+          renderJobHistory();
+          updateDashboard();
         }
+      });
+    }
+
+    recentJobsList.appendChild(jobElement);
+  });
+}
+
+
+function exportJobToPDF(job) {
+    const { jsPDF } = window.jspdf;
+     const doc = new jsPDF();
+
+    const title = `Orçamento: ${job.description}`;
+    const date = new Date().toLocaleDateString('pt-BR');
+
+    doc.setFontSize(18);
+    doc.text(title, 14, 20);
+
+    doc.setFontSize(12);
+    doc.text(`Cliente: ${job.client || 'Não informado'}`, 14, 30);
+    doc.text(`Data do evento: ${job.eventDate || 'Não definida'}`, 14, 38);
+    doc.text(`Data de geração: ${date}`, 14, 46);
+    doc.text(`Categoria: ${job.category || 'Outro'}`, 14, 54);
+
+    // Tabela de custos
+    doc.autoTable({
+        startY: 65,
+        head: [['Descrição', 'Valor (R$)']],
+        body: [
+            ['Horas estimadas', `${job.hours}h`],
+            ['Logística', `R$ ${job.logistics.toFixed(2)}`],
+            ['Equipamentos', `R$ ${job.equipment.toFixed(2)}`],
+            ['Assistência', `R$ ${job.assistance.toFixed(2)}`],
+            ['Custo total', `R$ ${(job.logistics + job.equipment + job.assistance).toFixed(2)}`],
+            ['Valor do serviço', `R$ ${(job.value).toFixed(2)}`],
+            
+        ],
+        theme: 'striped',
+    });
+
+    doc.setFontSize(11);
+    doc.text('Este orçamento é uma estimativa com base nas informações fornecidas.', 14, doc.lastAutoTable.finalY + 10);
+    doc.text('Este orçamento é válido por 15 dias.', 14, doc.lastAutoTable.finalY + 15);
+
+    doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
+}
+
+
+
+function renderJobHistory() {
+    const jobHistoryList = document.getElementById('job-history-list');
+    jobHistoryList.innerHTML = '';
+
+    if (appData.jobs.length === 0) {
+        jobHistoryList.innerHTML = `
+            <div class="text-center py-8 color: var(--text); opacity: 0.6">
+                <i class="fas fa-briefcase text-3xl mb-2"></i>
+                <p>Nenhum job no histórico</p>
+            </div>
+        `;
+        document.getElementById('job-history-total').textContent = '0,00';
+        return;
+    }
+
+    // Ordena os jobs por data (mais recente primeiro)
+    const sortedJobs = [...appData.jobs].sort((a, b) => {
+        const dateA = new Date(a.date.split('/').reverse().join('-'));
+        const dateB = new Date(b.date.split('/').reverse().join('-'));
+        return dateB - dateA;
         
+    });
+
+    let totalValue = 0;
+
+    sortedJobs.forEach((job, i) => {
+        const index = appData.jobs.indexOf(job);
+        const jobElement = document.createElement('div');
+        jobElement.className = 'p-4 rounded-lg job-item border mb-2';
+        jobElement.style.background = 'var(--bg)';
+        jobElement.style.color = 'var(--text)';
+        jobElement.style.borderColor = 'var(--border)';
+
+        totalValue += job.value;
+
+        jobElement.innerHTML = `
+            <div class="flex justify-between items-center mb-1">
+                <span class="flex flex-col job-desc">
+                    <strong>${job.description}</strong>
+                    <span style="opacity: 0.6; font-size: 0.75rem;">${job.category || ''}</span>
+                </span>
+                <span class="text-sm opacity-90">R$ ${job.value.toFixed(2)}</span>
+            </div>
+            <div class="mt-1 text-sm flex justify-between">
+                <span class="text-green-600">Lucro: R$ ${job.profit.toFixed(2)}</span>
+                <span class="opacity-60">${job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) : '0'}% margem</span>
+            </div>
+            ${job.status !== 'fechado' ? `
+                <div class="flex gap-2 mt-3 text-lg">
+                    <button class="btn-edit" title="Editar nome">✏️</button>
+                    <button class="btn-delete" title="Excluir">🗑️</button>
+                    <button class="btn-pdf" title="Exportar Orçamento em PDF">📄</button>
+                </div>
+            ` : `<div class="mt-2 text-green-500">✅ Aprovado</div>`}
+        `;
+
+        // Apenas se não estiver fechado, ativa botões
+        if (job.status !== 'fechado') {
+            const btnEdit = jobElement.querySelector('.btn-edit');
+            const descEl = jobElement.querySelector('.job-desc');
+
+btnEdit.addEventListener('click', () => {
+  // Preenche os campos
+  document.getElementById('editJobDescription').value = job.description || '';
+  document.getElementById('editJobClient').value = job.client || '';
+  document.getElementById('editJobDate').value = job.eventDate || '';
+  document.getElementById('editEstimatedHours').value = job.hours || 0;
+  document.getElementById('editDifficultyLevel').value = job.difficulty || 1;
+  document.getElementById('editLogisticsCost').value = job.logistics || 0;
+  document.getElementById('editEquipmentCost').value = job.equipment || 0;
+  document.getElementById('editAssistanceCost').value = job.assistance || 0;
+
+  document.getElementById('editModal').classList.remove('hidden');
+
+  document.getElementById('saveEditBtn').onclick = () => {
+    job.description = document.getElementById('editJobDescription').value.trim();
+    job.client = document.getElementById('editJobClient').value.trim();
+    job.eventDate = document.getElementById('editJobDate').value;
+    job.hours = parseFloat(document.getElementById('editEstimatedHours').value) || 0;
+    job.difficulty = parseFloat(document.getElementById('editDifficultyLevel').value) || 1;
+    job.logistics = parseFloat(document.getElementById('editLogisticsCost').value) || 0;
+    job.equipment = parseFloat(document.getElementById('editEquipmentCost').value) || 0;
+    job.assistance = parseFloat(document.getElementById('editAssistanceCost').value) || 0;
+
+    const custoTotal = job.logistics + job.equipment + job.assistance;
+    const valorHora = 50;
+    job.value = (job.hours * valorHora) * job.difficulty + custoTotal;
+    job.profit = job.value - custoTotal;
+
+    saveData();
+    renderJobHistory();
+    renderRecentJobs();
+    updateDashboard();
+
+    document.getElementById('editModal').classList.add('hidden');
+  };
+});
+
+            const btnDelete = jobElement.querySelector('.btn-delete');
+            btnDelete.addEventListener('click', () => {
+                if (confirm('Deseja remover este job?')) {
+                    appData.jobs.splice(index, 1);
+                    saveData();
+                    renderJobHistory();
+                    renderRecentJobs();
+                    updateDashboard();
+                }
+            });
+        }
+
+        document.getElementById('closeEditModal').addEventListener('click', () => {
+  document.getElementById('editModal').classList.add('hidden');
+});
+
+    const btnPDF = jobElement.querySelector('.btn-pdf');
+    btnPDF.addEventListener('click', () => {
+        exportJobToPDF(job);
+    });
+
+
+        // ✅ ISSO TEM QUE FICAR FORA DO IF!
+        jobHistoryList.appendChild(jobElement);
+    });
+
+    document.getElementById('job-history-total').textContent = totalValue.toFixed(2);
+}
+
+
+function exportJobToPDF(job) {
+    const { jsPDF } = window.jspdf;
+     const doc = new jsPDF();
+
+    const title = `Orçamento: ${job.description}`;
+    const date = new Date().toLocaleDateString('pt-BR');
+
+    doc.setFontSize(18);
+    doc.text(title, 14, 20);
+
+    doc.setFontSize(12);
+    doc.text(`Cliente: ${job.client || 'Não informado'}`, 14, 30);
+    doc.text(`Data do evento: ${job.eventDate || 'Não definida'}`, 14, 38);
+    doc.text(`Data de geração: ${date}`, 14, 46);
+    doc.text(`Categoria: ${job.category || 'Outro'}`, 14, 54);
+
+    // Tabela de custos
+    doc.autoTable({
+        startY: 65,
+        head: [['Descrição', 'Valor (R$)']],
+        body: [
+            ['Horas estimadas', `${job.hours}h`],
+            ['Logística', `R$ ${job.logistics.toFixed(2)}`],
+            ['Equipamentos', `R$ ${job.equipment.toFixed(2)}`],
+            ['Assistência', `R$ ${job.assistance.toFixed(2)}`],
+            ['Custo total', `R$ ${(job.logistics + job.equipment + job.assistance).toFixed(2)}`],
+            ['Valor do serviço', `R$ ${(job.value).toFixed(2)}`],
+            
+        ],
+        theme: 'striped',
+    });
+
+    doc.setFontSize(11);
+    doc.text('Este orçamento é uma estimativa com base nas informações fornecidas.', 14, doc.lastAutoTable.finalY + 10);
+    doc.text('Este orçamento é válido por 15 dias.', 14, doc.lastAutoTable.finalY + 10);
+
+    doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
+}
+
         // Initialize Chart
         const costsChartCtx = document.getElementById('costsChart').getContext('2d');
         let costsChart = new Chart(costsChartCtx, {
@@ -1616,47 +1908,58 @@ document.getElementById('import-data').addEventListener('change', (e) => {
             const difficultyLevel = parseFloat(document.getElementById('difficulty-level').value);
             const discountPercentage = parseFloat(document.getElementById('discount-percentage').value) || 0;
             
-            const hourlyRate = parseFloat(document.getElementById('hourly-value').textContent) || 0;
             
+            const hourlyRate = parseFloat(document.getElementById('hourly-value').textContent) || 0;
+            const jobDescription = document.getElementById('job-description').value || 'Job sem descrição';
+            const categoryInput = document.getElementById('job-category');
+            const category = categoryInput ? categoryInput.value : 'Outro';
+
             if (hourlyRate === 0) {
                 alert('Por favor, calcule primeiro seu valor por hora na seção "Rotina de Trabalho".');
                 return;
             }
-            
+
             const totalDirectCosts = logisticsCost + equipmentCost + assistanceCost;
             const serviceCost = estimatedHours * hourlyRate * difficultyLevel;
             const totalBeforeDiscount = totalDirectCosts + serviceCost;
             const discountAmount = totalBeforeDiscount * (discountPercentage / 100);
             const totalWithDiscount = totalBeforeDiscount - discountAmount;
             const profit = totalWithDiscount - totalDirectCosts;
-            
+
             totalCosts.textContent = totalDirectCosts.toFixed(2);
             serviceValue.textContent = serviceCost.toFixed(2);
             finalValue.textContent = totalWithDiscount.toFixed(2);
             profitMargin.textContent = profit.toFixed(2);
-            
+
             jobResults.classList.remove('hidden');
-            
+
             // Update dashboard
             updateDashboard();
-            
+
             // Save job to history
-            const jobDescription = document.getElementById('job-description').value || 'Job sem descrição';
             const job = {
                 description: jobDescription,
+                category: category,
                 date: new Date().toLocaleDateString('pt-BR'),
                 value: totalWithDiscount,
-                profit: profit
+                profit: profit,
+                status: 'pendente',
+                logistics: logisticsCost,
+                equipment: equipmentCost,
+                  assistance: assistanceCost,
+                  hours: estimatedHours,
+                  difficulty: difficultyLevel
             };
-            
+
             appData.jobs.push(job);
             saveData();
             renderRecentJobs();
             updateDashboard();
-            
+
             // Update jobs count
             document.getElementById('jobs-count').textContent = appData.jobs.length;
         });
+
         
         // Calculate total of all jobs
 function calculateTotalJobs() {
@@ -2133,7 +2436,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 
-//App nativo 
+<!-- App nativo --> 
 
 <script>
   if ('serviceWorker' in navigator) {
@@ -2145,7 +2448,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 </script>
 
-// Animação de fade e slide up
+<!-- Animação de fade e slide up --> 
 
 <script>
   const revealElements = document.querySelectorAll('.reveal');
@@ -2166,6 +2469,80 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 
+ <!--  Tela de Load --> 
+<script>
+  window.addEventListener('load', () => {
+    const splash = document.getElementById('splash-screen');
+    splash.style.transition = 'opacity 0.6s ease';
+    splash.style.opacity = '0';
+    setTimeout(() => splash.remove(), 2500); // aqui controla o tempo
+  });
+</script>
+
+
+<!-- Modal -->
+<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+  <div class="bg-[#1e1e2f] text-white rounded-xl p-6 shadow-lg w-full max-w-lg space-y-4 border border-gray-700">
+    <h2 class="text-2xl font-bold text-white">Editar Job</h2>
+
+    <div class="space-y-3">
+      <div>
+        <label class="text-sm font-medium">Descrição</label>
+        <input id="editJobDescription" type="text" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+      </div>
+
+      <div>
+        <label class="text-sm font-medium">Cliente</label>
+        <input id="editJobClient" type="text" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="text-sm font-medium">Data do Evento</label>
+        <input id="editJobDate" type="date" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="text-sm font-medium">Horas Estimadas</label>
+        <input id="editEstimatedHours" type="number" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="text-sm font-medium">Nível de Dificuldade</label>
+        <select id="editDifficultyLevel" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2">
+          <option value="1">Fácil</option>
+          <option value="1.25">Médio</option>
+          <option value="1.5">Difícil</option>
+          <option value="2">Muito Difícil</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-sm font-medium">Logística (R$)</label>
+        <input id="editLogisticsCost" type="number" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="text-sm font-medium">Equipamentos (R$)</label>
+        <input id="editEquipmentCost" type="number" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="text-sm font-medium">Assistência (R$)</label>
+        <input id="editAssistanceCost" type="number" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2" />
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-3 pt-4">
+      <button id="closeEditModal" class="px-4 py-2 rounded-md bg-gray-500 hover:bg-gray-600 text-white">Cancelar</button>
+      <button id="saveEditBtn" class="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Exportar PDF -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
 
 
