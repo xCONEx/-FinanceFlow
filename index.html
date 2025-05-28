@@ -1592,66 +1592,94 @@ async function exportJobToPDF(job) {
   const user = firebase.auth().currentUser;
 
   const gerarPDF = (logoBase64 = null) => {
-    if (logoBase64) {
-      try {
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const logoWidth = 40;
-        const logoHeight = 20;
-        const logoX = pageWidth - logoWidth - 14;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 14;
+    let contentStartY = 20;
 
-        doc.addImage(logoBase64, 'PNG', logoX, 10, logoWidth, logoHeight);
-      } catch (err) {
-        console.error('Erro ao adicionar logo no PDF:', err);
-      }
+    // Se tiver logo, renderiza na mesma linha do título, à direita
+    if (logoBase64) {
+      const img = new Image();
+      img.src = logoBase64;
+
+      img.onload = () => {
+        const maxWidth = 40;
+        const maxHeight = 20;
+
+        let width = img.width;
+        let height = img.height;
+
+        // Redimensiona mantendo a proporção
+        const widthRatio = maxWidth / width;
+        const heightRatio = maxHeight / height;
+        const scale = Math.min(widthRatio, heightRatio);
+
+        width = width * scale;
+        height = height * scale;
+
+        const x = pageWidth - width - margin;
+        const y = contentStartY;
+
+        doc.addImage(logoBase64, 'PNG', x, y, width, height);
+
+        renderTexto(y + height + 10); // renderiza abaixo da logo
+      };
+    } else {
+      renderTexto(contentStartY);
     }
 
-    const contentStartY = logoBase64 ? 35 : 20;
+    function renderTexto(startY) {
+      // Título
+      doc.setFontSize(18);
+      doc.setTextColor(33, 37, 41);
+      doc.text(title, margin, startY);
 
-    doc.setFontSize(18);
-    doc.setTextColor(33, 37, 41);
-    doc.text(title, 14, contentStartY);
+      const infoStartY = startY + 10;
 
-    doc.setFontSize(12);
-    doc.setTextColor(55, 65, 81);
-    doc.text(`Cliente: ${job.client || 'Não informado'}`, 14, contentStartY + 10);
-    doc.text(`Evento: ${job.eventDate || 'Não definida'}`, 14, contentStartY + 18);
-    doc.text(`Gerado em: ${date}`, 14, contentStartY + 26);
-    doc.text(`Categoria: ${job.category || 'Outro'}`, 14, contentStartY + 34);
+      // Info
+      doc.setFontSize(12);
+      doc.setTextColor(55, 65, 81);
+      doc.text(`Cliente: ${job.client || 'Não informado'}`, margin, infoStartY + 0);
+      doc.text(`Evento: ${job.eventDate || 'Não definida'}`, margin, infoStartY + 8);
+      doc.text(`Gerado em: ${date}`, margin, infoStartY + 16);
+      doc.text(`Categoria: ${job.category || 'Outro'}`, margin, infoStartY + 24);
 
-    doc.autoTable({
-      startY: contentStartY + 45,
-      head: [['Item', 'Valor (R$)']],
-      body: [
-        ['Horas estimadas', `${job.hours || 0}h`],
-        ['Logística', `R$ ${(job.logistics || 0).toFixed(2)}`],
-        ['Equipamentos', `R$ ${(job.equipment || 0).toFixed(2)}`],
-        ['Assistência', `R$ ${(job.assistance || 0).toFixed(2)}`],
-        ['Custo total', `R$ ${((job.logistics || 0) + (job.equipment || 0) + (job.assistance || 0)).toFixed(2)}`],
-        ['Valor total', `R$ ${(job.value || 0).toFixed(2)}`],
-      ],
-      theme: 'grid',
-      headStyles: {
-        fillColor: [99, 102, 241],
-        textColor: 255,
-        fontSize: 12,
-      },
-      bodyStyles: {
-        fontSize: 11,
-      },
-    });
+      // Tabela
+      doc.autoTable({
+        startY: infoStartY + 35,
+        head: [['Item', 'Valor (R$)']],
+        body: [
+          ['Horas estimadas', `${job.hours || 0}h`],
+          ['Logística', `R$ ${(job.logistics || 0).toFixed(2)}`],
+          ['Equipamentos', `R$ ${(job.equipment || 0).toFixed(2)}`],
+          ['Assistência', `R$ ${(job.assistance || 0).toFixed(2)}`],
+          ['Custo total', `R$ ${((job.logistics || 0) + (job.equipment || 0) + (job.assistance || 0)).toFixed(2)}`],
+          ['Valor total', `R$ ${(job.value || 0).toFixed(2)}`],
+        ],
+        theme: 'grid',
+        headStyles: {
+          fillColor: [99, 102, 241],
+          textColor: 255,
+          fontSize: 12,
+        },
+        bodyStyles: {
+          fontSize: 11,
+        },
+      });
 
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text(
-      'Este orçamento é uma estimativa com base nas informações fornecidas.',
-      14,
-      doc.lastAutoTable.finalY + 12
-    );
+      // Rodapé
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(
+        'Este orçamento é uma estimativa com base nas informações fornecidas.',
+        margin,
+        doc.lastAutoTable.finalY + 12
+      );
 
-    doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
+      doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
+    }
   };
 
-  // Se não logado, gera PDF sem logo
+  // Se não estiver logado
   if (!user) return gerarPDF();
 
   try {
@@ -1663,6 +1691,7 @@ async function exportJobToPDF(job) {
     gerarPDF();
   }
 }
+
 
 
 
@@ -1804,66 +1833,94 @@ async function exportJobToPDF(job) {
   const user = firebase.auth().currentUser;
 
   const gerarPDF = (logoBase64 = null) => {
-    if (logoBase64) {
-      try {
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const logoWidth = 40;
-        const logoHeight = 20;
-        const logoX = pageWidth - logoWidth - 14;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 14;
+    let contentStartY = 20;
 
-        doc.addImage(logoBase64, 'PNG', logoX, 10, logoWidth, logoHeight);
-      } catch (err) {
-        console.error('Erro ao adicionar logo no PDF:', err);
-      }
+    // Se tiver logo, renderiza na mesma linha do título, à direita
+    if (logoBase64) {
+      const img = new Image();
+      img.src = logoBase64;
+
+      img.onload = () => {
+        const maxWidth = 40;
+        const maxHeight = 20;
+
+        let width = img.width;
+        let height = img.height;
+
+        // Redimensiona mantendo a proporção
+        const widthRatio = maxWidth / width;
+        const heightRatio = maxHeight / height;
+        const scale = Math.min(widthRatio, heightRatio);
+
+        width = width * scale;
+        height = height * scale;
+
+        const x = pageWidth - width - margin;
+        const y = contentStartY;
+
+        doc.addImage(logoBase64, 'PNG', x, y, width, height);
+
+        renderTexto(y + height + 10); // renderiza abaixo da logo
+      };
+    } else {
+      renderTexto(contentStartY);
     }
 
-    const contentStartY = logoBase64 ? 35 : 20;
+    function renderTexto(startY) {
+      // Título
+      doc.setFontSize(18);
+      doc.setTextColor(33, 37, 41);
+      doc.text(title, margin, startY);
 
-    doc.setFontSize(18);
-    doc.setTextColor(33, 37, 41);
-    doc.text(title, 14, contentStartY);
+      const infoStartY = startY + 10;
 
-    doc.setFontSize(12);
-    doc.setTextColor(55, 65, 81);
-    doc.text(`Cliente: ${job.client || 'Não informado'}`, 14, contentStartY + 10);
-    doc.text(`Evento: ${job.eventDate || 'Não definida'}`, 14, contentStartY + 18);
-    doc.text(`Gerado em: ${date}`, 14, contentStartY + 26);
-    doc.text(`Categoria: ${job.category || 'Outro'}`, 14, contentStartY + 34);
+      // Info
+      doc.setFontSize(12);
+      doc.setTextColor(55, 65, 81);
+      doc.text(`Cliente: ${job.client || 'Não informado'}`, margin, infoStartY + 0);
+      doc.text(`Evento: ${job.eventDate || 'Não definida'}`, margin, infoStartY + 8);
+      doc.text(`Gerado em: ${date}`, margin, infoStartY + 16);
+      doc.text(`Categoria: ${job.category || 'Outro'}`, margin, infoStartY + 24);
 
-    doc.autoTable({
-      startY: contentStartY + 45,
-      head: [['Item', 'Valor (R$)']],
-      body: [
-        ['Horas estimadas', `${job.hours || 0}h`],
-        ['Logística', `R$ ${(job.logistics || 0).toFixed(2)}`],
-        ['Equipamentos', `R$ ${(job.equipment || 0).toFixed(2)}`],
-        ['Assistência', `R$ ${(job.assistance || 0).toFixed(2)}`],
-        ['Custo total', `R$ ${((job.logistics || 0) + (job.equipment || 0) + (job.assistance || 0)).toFixed(2)}`],
-        ['Valor total', `R$ ${(job.value || 0).toFixed(2)}`],
-      ],
-      theme: 'grid',
-      headStyles: {
-        fillColor: [99, 102, 241],
-        textColor: 255,
-        fontSize: 12,
-      },
-      bodyStyles: {
-        fontSize: 11,
-      },
-    });
+      // Tabela
+      doc.autoTable({
+        startY: infoStartY + 35,
+        head: [['Item', 'Valor (R$)']],
+        body: [
+          ['Horas estimadas', `${job.hours || 0}h`],
+          ['Logística', `R$ ${(job.logistics || 0).toFixed(2)}`],
+          ['Equipamentos', `R$ ${(job.equipment || 0).toFixed(2)}`],
+          ['Assistência', `R$ ${(job.assistance || 0).toFixed(2)}`],
+          ['Custo total', `R$ ${((job.logistics || 0) + (job.equipment || 0) + (job.assistance || 0)).toFixed(2)}`],
+          ['Valor total', `R$ ${(job.value || 0).toFixed(2)}`],
+        ],
+        theme: 'grid',
+        headStyles: {
+          fillColor: [99, 102, 241],
+          textColor: 255,
+          fontSize: 12,
+        },
+        bodyStyles: {
+          fontSize: 11,
+        },
+      });
 
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text(
-      'Este orçamento é uma estimativa com base nas informações fornecidas.',
-      14,
-      doc.lastAutoTable.finalY + 12
-    );
+      // Rodapé
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(
+        'Este orçamento é uma estimativa com base nas informações fornecidas.',
+        margin,
+        doc.lastAutoTable.finalY + 12
+      );
 
-    doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
+      doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
+    }
   };
 
-  // Se não logado, gera PDF sem logo
+  // Se não estiver logado
   if (!user) return gerarPDF();
 
   try {
@@ -1875,6 +1932,7 @@ async function exportJobToPDF(job) {
     gerarPDF();
   }
 }
+
 
 
 
