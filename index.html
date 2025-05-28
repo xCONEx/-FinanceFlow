@@ -1592,29 +1592,25 @@ async function exportJobToPDF(job) {
   const user = firebase.auth().currentUser;
 
   const gerarPDF = (logoBase64 = null) => {
-    // Insere logo à direita, se existir
     if (logoBase64) {
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const logoWidth = 40;
-      const logoHeight = 20;
-      const logoX = pageWidth - logoWidth - 14;
-      const logoY = 10;
-
       try {
-        doc.addImage(logoBase64, 'PNG', logoX, logoY, logoWidth, logoHeight);
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const logoWidth = 40;
+        const logoHeight = 20;
+        const logoX = pageWidth - logoWidth - 14;
+
+        doc.addImage(logoBase64, 'PNG', logoX, 10, logoWidth, logoHeight);
       } catch (err) {
-        console.error('Erro ao adicionar imagem ao PDF:', err);
+        console.error('Erro ao adicionar logo no PDF:', err);
       }
     }
 
     const contentStartY = logoBase64 ? 35 : 20;
 
-    // Título
     doc.setFontSize(18);
     doc.setTextColor(33, 37, 41);
     doc.text(title, 14, contentStartY);
 
-    // Informações básicas
     doc.setFontSize(12);
     doc.setTextColor(55, 65, 81);
     doc.text(`Cliente: ${job.client || 'Não informado'}`, 14, contentStartY + 10);
@@ -1622,7 +1618,6 @@ async function exportJobToPDF(job) {
     doc.text(`Gerado em: ${date}`, 14, contentStartY + 26);
     doc.text(`Categoria: ${job.category || 'Outro'}`, 14, contentStartY + 34);
 
-    // Tabela
     doc.autoTable({
       startY: contentStartY + 45,
       head: [['Item', 'Valor (R$)']],
@@ -1645,7 +1640,6 @@ async function exportJobToPDF(job) {
       },
     });
 
-    // Observação final
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text(
@@ -1654,43 +1648,21 @@ async function exportJobToPDF(job) {
       doc.lastAutoTable.finalY + 12
     );
 
-    // Baixa o arquivo
     doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
   };
 
-  // Se não logado, gera sem logo
+  // Se não logado, gera PDF sem logo
   if (!user) return gerarPDF();
 
   try {
     const docSnap = await firebase.firestore().collection('usuarios').doc(user.uid).get();
-    const logoUrl = docSnap.data()?.logoUrl;
-
-    if (!logoUrl) return gerarPDF();
-
-    const response = await fetch(logoUrl);
-    const blob = await response.blob();
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      const base64 = reader.result;
-      gerarPDF(base64);
-    };
-
-    reader.onerror = () => {
-      console.error("Erro ao converter a logo em base64.");
-      gerarPDF();
-    };
-
-    reader.readAsDataURL(blob);
+    const logoBase64 = docSnap.data()?.logoBase64 || null;
+    gerarPDF(logoBase64);
   } catch (err) {
-    console.error("Erro ao buscar logo ou gerar PDF:", err);
+    console.error("Erro ao buscar logo do Firestore:", err);
     gerarPDF();
   }
 }
-
-
-
-
 
 
 
@@ -1832,29 +1804,25 @@ async function exportJobToPDF(job) {
   const user = firebase.auth().currentUser;
 
   const gerarPDF = (logoBase64 = null) => {
-    // Insere logo à direita, se existir
     if (logoBase64) {
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const logoWidth = 40;
-      const logoHeight = 20;
-      const logoX = pageWidth - logoWidth - 14;
-      const logoY = 10;
-
       try {
-        doc.addImage(logoBase64, 'PNG', logoX, logoY, logoWidth, logoHeight);
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const logoWidth = 40;
+        const logoHeight = 20;
+        const logoX = pageWidth - logoWidth - 14;
+
+        doc.addImage(logoBase64, 'PNG', logoX, 10, logoWidth, logoHeight);
       } catch (err) {
-        console.error('Erro ao adicionar imagem ao PDF:', err);
+        console.error('Erro ao adicionar logo no PDF:', err);
       }
     }
 
     const contentStartY = logoBase64 ? 35 : 20;
 
-    // Título
     doc.setFontSize(18);
     doc.setTextColor(33, 37, 41);
     doc.text(title, 14, contentStartY);
 
-    // Informações básicas
     doc.setFontSize(12);
     doc.setTextColor(55, 65, 81);
     doc.text(`Cliente: ${job.client || 'Não informado'}`, 14, contentStartY + 10);
@@ -1862,7 +1830,6 @@ async function exportJobToPDF(job) {
     doc.text(`Gerado em: ${date}`, 14, contentStartY + 26);
     doc.text(`Categoria: ${job.category || 'Outro'}`, 14, contentStartY + 34);
 
-    // Tabela
     doc.autoTable({
       startY: contentStartY + 45,
       head: [['Item', 'Valor (R$)']],
@@ -1885,7 +1852,6 @@ async function exportJobToPDF(job) {
       },
     });
 
-    // Observação final
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text(
@@ -1894,39 +1860,22 @@ async function exportJobToPDF(job) {
       doc.lastAutoTable.finalY + 12
     );
 
-    // Baixa o arquivo
     doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
   };
 
-  // Se não logado, gera sem logo
+  // Se não logado, gera PDF sem logo
   if (!user) return gerarPDF();
 
   try {
     const docSnap = await firebase.firestore().collection('usuarios').doc(user.uid).get();
-    const logoUrl = docSnap.data()?.logoUrl;
-
-    if (!logoUrl) return gerarPDF();
-
-    const response = await fetch(logoUrl);
-    const blob = await response.blob();
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      const base64 = reader.result;
-      gerarPDF(base64);
-    };
-
-    reader.onerror = () => {
-      console.error("Erro ao converter a logo em base64.");
-      gerarPDF();
-    };
-
-    reader.readAsDataURL(blob);
+    const logoBase64 = docSnap.data()?.logoBase64 || null;
+    gerarPDF(logoBase64);
   } catch (err) {
-    console.error("Erro ao buscar logo ou gerar PDF:", err);
+    console.error("Erro ao buscar logo do Firestore:", err);
     gerarPDF();
   }
 }
+
 
 
 
