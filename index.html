@@ -2438,15 +2438,19 @@ closeNotify?.addEventListener('click', () => notifyModal.classList.add('hidden')
 
 
 function agruparFaturamentoPorMes(jobs) {
-  const resultado = {};
+  const agrupado = {};
 
   jobs.forEach(job => {
-    const data = new Date(job.date);
-    const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`; // Ex: "2024-05"
-    resultado[chave] = (resultado[chave] || 0) + (parseFloat(job.value) || 0);
+    if (!job.date) return;
+
+    const [dia, mes, ano] = job.date.split('/');
+    if (!dia || !mes || !ano) return;
+
+    const chave = `${ano}-${mes.padStart(2, '0')}`; // ex: 2025-05
+    agrupado[chave] = (agrupado[chave] || 0) + job.value;
   });
 
-  return resultado;
+  return agrupado;
 }
 
 function gerarGraficoEvolucao() {
@@ -2454,35 +2458,62 @@ function gerarGraficoEvolucao() {
   if (!ctx || !appData.jobs) return;
 
   const agrupado = agruparFaturamentoPorMes(appData.jobs);
+  const todasChavesOrdenadas = Object.keys(agrupado).sort();
 
-  const labels = Object.keys(agrupado).sort(); // ordena por mês
-  const valores = labels.map(label => agrupado[label]);
+  const ultimosMeses = todasChavesOrdenadas.slice(-6);
+  const valores = ultimosMeses.map(m => agrupado[m]);
+
+  const labelsFormatados = ultimosMeses.map(m => {
+    const [ano, mes] = m.split('-');
+    return `${mes.padStart(2, '0')}/${ano}`;
+  });
+
+  // ✅ Captura a cor do texto atual do tema
+  const computedStyles = getComputedStyle(document.documentElement);
+  const textColor = computedStyles.getPropertyValue('--text').trim();
 
   new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: labels.map(label => {
-        const [ano, mes] = label.split('-');
-        return `${mes}/${ano}`;
-      }),
+      labels: labelsFormatados,
       datasets: [{
         label: 'Faturamento (R$)',
         data: valores,
-        backgroundColor: '#4F46E5'
+        backgroundColor: '#6366f1',
+        borderRadius: 8,
+        barPercentage: 0.6
       }]
     },
     options: {
       responsive: true,
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: ctx => `R$ ${ctx.raw.toFixed(2)}` } }
+        tooltip: {
+          callbacks: {
+            label: ctx => `R$ ${ctx.raw.toFixed(2)}`
+          }
+        }
       },
       scales: {
-        y: { beginAtZero: true }
+        x: {
+          ticks: {
+            color: textColor,
+            font: { size: 12, weight: '500' }
+          }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: textColor,
+            callback: val => `R$ ${val.toLocaleString('pt-BR')}`
+          }
+        }
       }
     }
   });
 }
+
+
 
 
 
