@@ -2444,44 +2444,64 @@ document.getElementById('backToTop')?.addEventListener('click', () => {
 // Script para upload de logo
 
 document.addEventListener('DOMContentLoaded', () => {
-const logoInput = document.getElementById('logo-upload');
-const logoPreview = document.getElementById('logo-preview');
-const uploadLogoBtn = document.getElementById('upload-logo-btn');
+  const logoInput = document.getElementById('logo-upload');
+  const logoPreview = document.getElementById('logo-preview');
+  const uploadLogoBtn = document.getElementById('upload-logo-btn');
 
-let logoBase64 = null;
+  let logoBase64 = null;
 
-logoInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  // Mostrar logo já salva ao carregar
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+      try {
+        const docSnap = await firebase.firestore().collection('users').doc(user.uid).get();
+        const savedLogo = docSnap.data()?.logoBase64;
+        if (savedLogo) {
+          logoBase64 = savedLogo;
+          logoPreview.src = logoBase64;
+          logoPreview.classList.remove('hidden');
+          uploadLogoBtn.classList.add('hidden'); // já está salva
+        }
+      } catch (err) {
+        console.error('Erro ao buscar logo salva:', err);
+      }
+    }
+  });
 
-  const reader = new FileReader();
-  reader.onload = (event) => {
-    logoBase64 = event.target.result; // base64 string
-    logoPreview.src = logoBase64;
-    logoPreview.classList.remove('hidden');
-    uploadLogoBtn.classList.remove('hidden');
-  };
-  reader.readAsDataURL(file);
+  // Preview da nova imagem
+  logoInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      logoBase64 = event.target.result;
+      logoPreview.src = logoBase64;
+      logoPreview.classList.remove('hidden');
+      uploadLogoBtn.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Salvar logo no Firestore
+  uploadLogoBtn.addEventListener('click', async () => {
+    const user = firebase.auth().currentUser;
+    if (!user || !logoBase64) return;
+
+    try {
+      await firebase.firestore().collection('users').doc(user.uid).set({
+        logoBase64: logoBase64
+      }, { merge: true });
+
+      showToast('Logo salva com sucesso!', 'success');
+      uploadLogoBtn.classList.add('hidden');
+    } catch (err) {
+      console.error('Erro ao salvar logo:', err);
+      showToast('Erro ao salvar logo no PDF.', 'error');
+    }
+  });
 });
 
-uploadLogoBtn.addEventListener('click', async () => {
-  const user = firebase.auth().currentUser;
-  if (!user || !logoBase64) return;
-
-  try {
-+ firebase.firestore().collection('usuarios').doc(user.uid).set({
-   logoBase64: logoBase64 },
-    { merge: true });
-
-    showToast('Logo salva com sucesso!', 'success');
-    uploadLogoBtn.classList.add('hidden');
-  } catch (err) {
-    console.error('Erro ao salvar logo:', err);
-    showToast('Erro ao salvar logo no PDF.', 'error');
-  }
-});
-
-});
 
 
 
