@@ -1584,83 +1584,67 @@ window.addEventListener('DOMContentLoaded', () => {
 }
 
 
-async function exportJobToPDF(job) {
+function exportJobToPDF(job) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  //const logoUrl = '/icons/LOGO-ICONE.png'; // ou pegue do appData.logo
-
   const title = `Orçamento: ${job.description}`;
   const date = new Date().toLocaleDateString('pt-BR');
 
   const user = firebase.auth().currentUser;
-  let logoUrl = null;
 
-const logoBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...";
-doc.addImage(logoBase64, 'JPEG', 14, 10, 40, 20);
+  const gerarPDF = (logoData = null) => {
+    if (logoData) {
+      doc.addImage(logoData, 'PNG', 14, 10, 40, 20);
+    }
 
-  if (user) {
-    try {
-      const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
-      logoUrl = userDoc.data()?.logoUrl || null;
-    } catch (err) {
+    const contentStartY = logoData ? 35 : 20;
+
+    doc.setFontSize(18);
+    doc.text(title, 14, contentStartY);
+    doc.setFontSize(12);
+    doc.text(`Cliente: ${job.client || 'Não informado'}`, 14, contentStartY + 10);
+    doc.text(`Data do evento: ${job.eventDate || 'Não definida'}`, 14, contentStartY + 18);
+    doc.text(`Data de geração: ${date}`, 14, contentStartY + 26);
+    doc.text(`Categoria: ${job.category || 'Outro'}`, 14, contentStartY + 34);
+
+    doc.autoTable({
+      startY: contentStartY + 45,
+      head: [['Descrição', 'Valor (R$)']],
+      body: [
+        ['Horas estimadas', `${job.hours || 0}h`],
+        ['Logística', `R$ ${(job.logistics || 0).toFixed(2)}`],
+        ['Equipamentos', `R$ ${(job.equipment || 0).toFixed(2)}`],
+        ['Assistência', `R$ ${(job.assistance || 0).toFixed(2)}`],
+        ['Custo total', `R$ ${((job.logistics || 0) + (job.equipment || 0) + (job.assistance || 0)).toFixed(2)}`],
+        ['Valor do serviço', `R$ ${(job.value || 0).toFixed(2)}`],
+      ],
+      theme: 'striped',
+    });
+
+    doc.setFontSize(11);
+    doc.text(
+      'Este orçamento é uma estimativa com base nas informações fornecidas.',
+      14,
+      doc.lastAutoTable.finalY + 10
+    );
+
+    doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
+  };
+
+  // Buscar base64 da logo no Firestore
+  if (!user) return gerarPDF();
+
+  firebase.firestore().collection('users').doc(user.uid).get()
+    .then(docSnap => {
+      const logoBase64 = docSnap.data()?.logoBase64 || null;
+      gerarPDF(logoBase64);
+    })
+    .catch(err => {
       console.error("Erro ao buscar logo:", err);
-    }
-  }
-
-  // 🔽 Inserir logo se existir e for carregável
-  let contentStartY = 20;
-
-  if (logoUrl) {
-    try {
-      const response = await fetch(logoUrl);
-      const blob = await response.blob();
-      const base64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = () => reject("Erro ao converter imagem em base64");
-        reader.readAsDataURL(blob);
-      });
-
-      doc.addImage(base64, 'JPEG', 14, 10, 40, 20, 180); // ajuste tamanho aqui se necessário
-      contentStartY = 35;
-    } catch (err) {
-      console.error("Erro ao carregar a logo para o PDF:", err);
-    }
-  }
-
-  doc.setFontSize(18);
-  doc.text(title, 14, contentStartY);
-
-  doc.setFontSize(12);
-  doc.text(`Cliente: ${job.client || 'Não informado'}`, 14, contentStartY + 10);
-  doc.text(`Data do evento: ${job.eventDate || 'Não definida'}`, 14, contentStartY + 18);
-  doc.text(`Data de geração: ${date}`, 14, contentStartY + 26);
-  doc.text(`Categoria: ${job.category || 'Outro'}`, 14, contentStartY + 34);
-
-  // 🔽 Tabela de custos
-  doc.autoTable({
-    startY: contentStartY + 45,
-    head: [['Descrição', 'Valor (R$)']],
-    body: [
-      ['Horas estimadas', `${job.hours || 0}h`],
-      ['Logística', `R$ ${(job.logistics || 0).toFixed(2)}`],
-      ['Equipamentos', `R$ ${(job.equipment || 0).toFixed(2)}`],
-      ['Assistência', `R$ ${(job.assistance || 0).toFixed(2)}`],
-      ['Custo total', `R$ ${((job.logistics || 0) + (job.equipment || 0) + (job.assistance || 0)).toFixed(2)}`],
-      ['Valor do serviço', `R$ ${(job.value || 0).toFixed(2)}`],
-    ],
-    theme: 'striped',
-  });
-
-  doc.setFontSize(11);
-  doc.text(
-    'Este orçamento é uma estimativa com base nas informações fornecidas.',
-    14,
-    doc.lastAutoTable.finalY + 10
-  );
-
-  doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
+      gerarPDF();
+    });
 }
+
 
 
 
@@ -2442,57 +2426,45 @@ document.getElementById('backToTop')?.addEventListener('click', () => {
 // Script para upload de logo
 
 document.addEventListener('DOMContentLoaded', () => {
-  const logoInput = document.getElementById('logo-upload');
-  const logoPreview = document.getElementById('logo-preview');
-  const uploadLogoBtn = document.getElementById('upload-logo-btn');
-  let selectedLogoFile = null;
+const logoInput = document.getElementById('logo-upload');
+const logoPreview = document.getElementById('logo-preview');
+const uploadLogoBtn = document.getElementById('upload-logo-btn');
 
-  logoInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+let logoBase64 = null;
 
-    selectedLogoFile = file;
+logoInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      logoPreview.src = ev.target.result;
-      logoPreview.classList.remove('hidden');
-      uploadLogoBtn.classList.remove('hidden');
-    };
-    reader.readAsDataURL(file);
-  });
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    logoBase64 = event.target.result; // base64 string
+    logoPreview.src = logoBase64;
+    logoPreview.classList.remove('hidden');
+    uploadLogoBtn.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+});
 
 uploadLogoBtn.addEventListener('click', async () => {
-  firebase.auth().onAuthStateChanged(async (user) => {
-    if (!user) {
-      alert('Você precisa estar logado.');
-      return;
-    }
+  const user = firebase.auth().currentUser;
+  if (!user || !logoBase64) return;
 
-    if (!selectedLogoFile) {
-      alert('Nenhum arquivo de logo selecionado.');
-      return;
-    }
+  try {
+    await firebase.firestore().collection('users').doc(user.uid).set({
+      logoBase64: logoBase64
+    }, { merge: true });
 
-    try {
-      const storageRef = firebase.storage().ref(`logos/${user.uid}.png`);
-      await storageRef.put(selectedLogoFile);
-      const logoUrl = await storageRef.getDownloadURL();
-
-      await firebase.firestore().collection('users').doc(user.uid).set({
-        logoUrl: logoUrl
-      }, { merge: true });
-
-      showToast('Logo salva com sucesso! Será usada nos próximos PDFs.', 'success');
-      uploadLogoBtn.classList.add('hidden');
-    } catch (err) {
-      console.error('Erro ao salvar logo:', err);
-      showToast('Erro ao salvar a logo.', 'error');
-    }
-  });
+    showToast('Logo salva com sucesso!', 'success');
+    uploadLogoBtn.classList.add('hidden');
+  } catch (err) {
+    console.error('Erro ao salvar logo:', err);
+    showToast('Erro ao salvar logo no PDF.', 'error');
+  }
 });
 
 });
+
 
 
 
