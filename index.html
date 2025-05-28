@@ -2451,9 +2451,9 @@ uploadLogoBtn.addEventListener('click', async () => {
   if (!user || !logoBase64) return;
 
   try {
-    await firebase.firestore().collection('users').doc(user.uid).set({
-      logoBase64: logoBase64
-    }, { merge: true });
++ firebase.firestore().collection('usuarios').doc(user.uid).set({
+   logoBase64: logoBase64 },
+    { merge: true });
 
     showToast('Logo salva com sucesso!', 'success');
     uploadLogoBtn.classList.add('hidden');
