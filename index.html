@@ -1593,14 +1593,7 @@ function exportJobToPDF(job) {
 
   const gerarPDF = (logoData = null) => {
     if (logoData) {
-      doc.addImage({
-        imageData: logoData,
-        format: 'PNG',
-        x: 14,
-        y: 10,
-        width: 40,
-        height: 20
-      });
+      doc.addImage(logoData, 'PNG', 14, 10, 40, 20);
     }
 
     const contentStartY = logoData ? 35 : 20;
@@ -1649,18 +1642,39 @@ function exportJobToPDF(job) {
     doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
   };
 
+  // Se não estiver logado, gera PDF sem logo
   if (!user) return gerarPDF();
 
+  // Busca a URL da logo no Firestore
   firebase.firestore().collection('usuarios').doc(user.uid).get()
-    .then(docSnap => {
-      const logoBase64 = docSnap.data()?.logoBase64 || null;
-      gerarPDF(logoBase64);
+    .then(async docSnap => {
+      const logoUrl = docSnap.data()?.logoUrl || null;
+
+      if (!logoUrl) return gerarPDF();
+
+      try {
+        const response = await fetch(logoUrl);
+        const blob = await response.blob();
+
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+
+        gerarPDF(base64);
+      } catch (err) {
+        console.error("Erro ao converter logo:", err);
+        gerarPDF();
+      }
     })
     .catch(err => {
-      console.error("Erro ao buscar logo:", err);
+      console.error("Erro ao buscar logo do Firestore:", err);
       gerarPDF();
     });
 }
+
 
 
 
