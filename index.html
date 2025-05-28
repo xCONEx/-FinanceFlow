@@ -2454,7 +2454,7 @@ document.addEventListener('DOMContentLoaded', () => {
   firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
       try {
-        const docSnap = await firebase.firestore().collection('users').doc(user.uid).get();
+        const docSnap = await firebase.firestore().collection('usuarios').doc(user.uid).get();
         const savedLogo = docSnap.data()?.logoBase64;
         if (savedLogo) {
           logoBase64 = savedLogo;
