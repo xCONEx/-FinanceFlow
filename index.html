@@ -11,6 +11,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
 
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -62,6 +66,61 @@
   --primary: #6366f1;    /* roxo padrão (fixo) */
   --border: #3F4754;     /* bordas suaves */
   --bg-jobHis: #1f2937;  /* fundo do histórico de jobs */
+}
+
+[data-theme="azul"] {
+  --bg: #e0f2fe;
+  --card-bg: #bae6fd;
+  --text: #0c4a6e;
+  --input-bg: #dbeafe;
+  --primary: #0284c7;
+  --border: #7dd3fc;
+  --bg-jobHis: #dbeafe;
+}
+
+[data-theme="neutro"] {
+  --bg: #f4f4f5;
+  --card-bg: #e5e7eb;
+  --text: #1f2937;
+  --input-bg: #f1f5f9;
+  --primary: #6b7280;
+  --border: #d1d5db;
+  --bg-jobHis: #e5e7eb;
+}
+
+[data-theme="verde"] {
+  --bg: #ecfdf5;
+  --card-bg: #d1fae5;
+  --text: #064e3b;
+  --input-bg: #ccfbf1;
+  --primary: #10b981;
+  --border: #a7f3d0;
+  --bg-jobHis: #ccfbf1;
+}
+
+.theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border);
+}
+
+.theme-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-block;
 }
 
 
@@ -133,15 +192,30 @@
     }
   }
 
-  .job-history-modal {
-    max-height: 80vh;
-    overflow-y: auto;
-    background: var(--bg);
-    border-radius: 12px;
-    padding: 1rem;
-  }
+.job-history-modal {
+  border-radius: 16px;
+  background: var(--card-bg);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  padding: 1.5rem;
+  animation: fadeIn 0.4s ease-in-out;
+}
 
   .job-item {
+  transition: all 0.2s ease;
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.job-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+  .job-item2 {
     transition: all 0.2s ease;
     background: var(--bg);
     border-radius: 10px;
@@ -150,7 +224,7 @@
     border: 1px solid var(--border);
   }
 
-  .job-item:hover {
+  .job-item2:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
                 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -178,7 +252,7 @@
     transition: all 0.3s ease;
   }
 
-  button {
+  button2 {
     background: var(--primary);
     color: #fff;
     padding: 12px 20px;
@@ -188,6 +262,23 @@
     cursor: pointer;
   }
 
+button {
+  transition: all 0.3s ease;
+  background: linear-gradient(to right, #6366f1, #4f46e5);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+}
+
+button:hover {
+  filter: brightness(1.05);
+}
+
+button:active {
+  transform: scale(0.97);
+}
 
 [data-theme="dark"] .text-dark {
   color: var(--text) !important;
@@ -259,7 +350,40 @@
   40% { opacity: 1; transform: scale(1.2); }
 }
 
+nav a {
+  font-weight: 500;
+  opacity: 0.85;
+  transition: all 0.3s ease;
+}
 
+nav a:hover {
+  opacity: 1;
+  color: var(--primary);
+}
+
+nav a.active {
+  color: var(--primary);
+  font-weight: bold;
+}
+
+
+#toast.show {
+  display: block;
+  animation: fadeInOut 3s forwards;
+}
+
+@keyframes fadeInOut {
+  0%   { opacity: 0; transform: translateY(20px); }
+  10%  { opacity: 1; transform: translateY(0); }
+  90%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(20px); }
+}
+
+/* já embutido no exemplo acima via classes utilitárias, mas se necessário: */
+#upload-logo-btn.hidden,
+#logo-preview.hidden {
+  display: none;
+}
 
 
 </style>
@@ -337,11 +461,14 @@
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div style="border-color: var(--border)" class="pt-safe-top sidebar background: var(--card-bg) w-64 border-r  flex flex-col ">
-            <div style="border-color: var(--border)" class="p-4 flex items-center justify-between border-b">
+            <div style="border-color: var(--border)" class="p-5 flex items-center justify-between border-b">
                 <div class="flex items-center space-x-2">
+                  
                     <i class="fas fa-wallet text-indigo-600 text-lg"></i>
                     <span class="text-xl font-bold color: var(--text)">FinanceFlow</span>
                 </div>
+
+
                 <button id="close-sidebar" class="md:hidden color: var(--text); opacity: 0.6 hover:color: var(--text)">
                     <i class="fas fa-times"></i>
                 </button>
@@ -396,7 +523,7 @@
         <!-- Main content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Top navigation -->
-            <header class="flex items-center justify-between p-4" style="background: var(--bg); border-bottom: 1px solid var(--border);">
+            <header class="flex items-center justify-between p-3" style="background: var(--bg); border-bottom: 1px solid var(--border);">
 
                 <div class="flex items-center space-x-3">
                     <button id="open-sidebar" style="border-color: var(--border)" class="hidden md:block color: var(--text); opacity: 0.6 hover:color: var(--text)">
@@ -855,7 +982,58 @@
     </button>
   </div>
 
+  <div class="mt-6">
+   <label class="block text-lg font-semibold text-white mb-1">Selecione um Tema</label>
+
+
+  <div id="theme-options" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+  <button class="theme-btn" data-theme="default">
+    <span class="color-dot bg-white border border-gray-400"></span> Claro
+  </button>
+  <button class="theme-btn" data-theme="dark">
+    <span class="color-dot bg-[#101826]"></span> Escuro
+  </button>
+  <button class="theme-btn" data-theme="azul">
+    <span class="color-dot bg-[#bae6fd]"></span> Azul
+  </button>
+  <button class="theme-btn" data-theme="neutro">
+    <span class="color-dot bg-[#e5e7eb]"></span> Neutro
+  </button>
+  <button class="theme-btn" data-theme="verde">
+    <span class="color-dot bg-[#d1fae5]"></span> Verde
+  </button>
+</div>
+</div>
+
+<!--
+<div class="mt-6">
+  <label class="block text-lg font-semibold text-white mb-1">Logo para PDF (Premium)</label>
+
+  <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+   
+    <label for="logo-upload" class="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+      Selecionar Logo
+      <input type="file" id="logo-upload" accept="image/*" class="hidden">
+    </label>
+
+   
+    <img id="logo-preview" src="" alt="Preview da Logo" class="h-14 rounded border border-gray-600 hidden">
+
+    
+    <button id="upload-logo-btn" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition hidden">
+      Salvar logo no PDF
+    </button>
+  </div>
+</div>
+--> 
+
+
   <!-- Sobre o App -->
+   <div class="mt-6">
+
+   
+   <label class="block text-lg font-semibold text-white mb-1">Sobre o Finance Flow</label>
+
   <div style="border-color: var(--border)" class="pt-6 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 space-y-1">
     <p><strong>📱 FinanceFlow</strong> — Sistema de gestão e precificação para audiovisual</p>
     <p>🛠️ Desenvolvido por <strong>Yuri Adriel</strong></p>
@@ -863,6 +1041,8 @@
     <p>📸 Instagram: <a href="https://instagram.com/euyuriadriel" target="_blank" class="text-primary hover:underline hover:text-indigo-600">@euyuriadriel</a></p>
   
 </div>
+</div>
+
 </div>
 </section>
 
@@ -943,6 +1123,66 @@
 
 
     <script>
+
+
+// Mudar tema
+const themeButtons = document.querySelectorAll('.theme-btn');
+
+// Carrega tema salvo
+const currentTheme = localStorage.getItem('theme') || 'default';
+document.documentElement.setAttribute('data-theme', currentTheme);
+
+// Marcar tema atual visualmente (opcional)
+themeButtons.forEach(btn => {
+  if (btn.dataset.theme === currentTheme) {
+    btn.classList.add('ring', 'ring-primary');
+  }
+});
+
+// Trocar tema
+themeButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const selected = btn.dataset.theme;
+    document.documentElement.setAttribute('data-theme', selected);
+    localStorage.setItem('theme', selected);
+
+    // Atualizar visual
+    themeButtons.forEach(b => b.classList.remove('ring', 'ring-primary'));
+    btn.classList.add('ring', 'ring-primary');
+  });
+});
+
+
+// Mostrar notificação de sucesso
+
+
+function showToast(message, type = 'info') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+
+  // Cores por tipo
+  toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded shadow-md z-50 text-white';
+  toast.classList.add('show');
+
+  if (type === 'warning') {
+    toast.classList.add('bg-yellow-500');
+  } else if (type === 'error') {
+    toast.classList.add('bg-red-600');
+  } else if (type === 'success') {
+    toast.classList.add('bg-green-600');
+  } else {
+    toast.classList.add('bg-gray-800');
+  }
+
+  // Remove após 3s
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+
+
+// Importar dados do arquivo JSON
 
 document.getElementById('export-data-settings')?.addEventListener('click', () => {
   const data = JSON.stringify(appData, null, 2);
@@ -1111,7 +1351,10 @@ function saveData() {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const target = link.getAttribute('href').substring(1);
-                
+                navLinks.forEach(link => {
+  link.classList.remove('active');
+});
+e.target.classList.add('active');
                 // Hide all sections
                 Object.values(sections).forEach(section => {
                     section.classList.add('hidden');
@@ -1330,46 +1573,77 @@ window.addEventListener('DOMContentLoaded', () => {
 }
 
 
-function exportJobToPDF(job) {
-    const { jsPDF } = window.jspdf;
-     const doc = new jsPDF();
+async function exportJobToPDF(job) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-    const title = `Orçamento: ${job.description}`;
-    const date = new Date().toLocaleDateString('pt-BR');
+  const title = `Orçamento: ${job.description}`;
+  const date = new Date().toLocaleDateString('pt-BR');
 
-    doc.setFontSize(18);
-    doc.text(title, 14, 20);
+  const user = firebase.auth().currentUser;
+  let logoUrl = null;
 
-    doc.setFontSize(12);
-    doc.text(`Cliente: ${job.client || 'Não informado'}`, 14, 30);
-    doc.text(`Data do evento: ${job.eventDate || 'Não definida'}`, 14, 38);
-    doc.text(`Data de geração: ${date}`, 14, 46);
-    doc.text(`Categoria: ${job.category || 'Outro'}`, 14, 54);
+  if (user) {
+    try {
+      const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+      logoUrl = userDoc.data()?.logoUrl || null;
+    } catch (err) {
+      console.error("Erro ao buscar logo:", err);
+    }
+  }
 
-    // Tabela de custos
-    doc.autoTable({
-        startY: 65,
-        head: [['Descrição', 'Valor (R$)']],
-        body: [
-            ['Horas estimadas', `${job.hours}h`],
-            ['Logística', `R$ ${job.logistics.toFixed(2)}`],
-            ['Equipamentos', `R$ ${job.equipment.toFixed(2)}`],
-            ['Assistência', `R$ ${job.assistance.toFixed(2)}`],
-            ['Custo total', `R$ ${(job.logistics + job.equipment + job.assistance).toFixed(2)}`],
-            ['Valor do serviço', `R$ ${(job.value).toFixed(2)}`],
-            
-        ],
-        theme: 'striped',
+  // 🔽 Inserir logo, se existir
+  if (logoUrl) {
+    const img = new Image();
+    img.src = logoUrl;
+
+    await new Promise(resolve => {
+      img.onload = resolve;
+      img.onerror = resolve; // continua mesmo com erro
     });
 
-    doc.setFontSize(11);
-    doc.text('Este orçamento é uma estimativa com base nas informações fornecidas.', 14, doc.lastAutoTable.finalY + 10);
-    doc.text('Este orçamento é válido por 15 dias.', 14, doc.lastAutoTable.finalY + 15);
+    doc.addImage(img, 'PNG', 14, 10, 40, 20);
+  }
 
-    doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
+  // Ajusta posição do conteúdo abaixo da logo
+  const contentStartY = logoUrl ? 35 : 20;
+
+  doc.setFontSize(18);
+  doc.text(title, 14, contentStartY);
+
+  doc.setFontSize(12);
+  doc.text(`Cliente: ${job.client || 'Não informado'}`, 14, contentStartY + 10);
+  doc.text(`Data do evento: ${job.eventDate || 'Não definida'}`, 14, contentStartY + 18);
+  doc.text(`Data de geração: ${date}`, 14, contentStartY + 26);
+  doc.text(`Categoria: ${job.category || 'Outro'}`, 14, contentStartY + 34);
+
+  // 🔽 Tabela de custos
+  doc.autoTable({
+    startY: contentStartY + 45,
+    head: [['Descrição', 'Valor (R$)']],
+    body: [
+      ['Horas estimadas', `${job.hours || 0}h`],
+      ['Logística', `R$ ${(job.logistics || 0).toFixed(2)}`],
+      ['Equipamentos', `R$ ${(job.equipment || 0).toFixed(2)}`],
+      ['Assistência', `R$ ${(job.assistance || 0).toFixed(2)}`],
+      ['Custo total', `R$ ${((job.logistics || 0) + (job.equipment || 0) + (job.assistance || 0)).toFixed(2)}`],
+      ['Valor do serviço', `R$ ${(job.value || 0).toFixed(2)}`],
+    ],
+    theme: 'striped',
+  });
+
+  doc.setFontSize(11);
+  doc.text(
+    'Este orçamento é uma estimativa com base nas informações fornecidas.',
+    14,
+    doc.lastAutoTable.finalY + 10
+  );
+
+  doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
 }
 
 
+// Atualiza o dashboard com os dados mais recentes
 
 function renderJobHistory() {
     const jobHistoryList = document.getElementById('job-history-list');
@@ -1422,7 +1696,7 @@ function renderJobHistory() {
                 <div class="flex gap-2 mt-3 text-lg">
                     <button class="btn-edit" title="Editar nome">✏️</button>
                     <button class="btn-delete" title="Excluir">🗑️</button>
-                    <button class="btn-pdf" title="Exportar Orçamento em PDF">📄</button>
+                    <button class="btn-pdf" id="exportar-data" title="Exportar Orçamento em PDF">📄</button>
                 </div>
             ` : `<div class="mt-2 text-green-500">✅ Aprovado</div>`}
         `;
@@ -1533,7 +1807,6 @@ function exportJobToPDF(job) {
 
     doc.setFontSize(11);
     doc.text('Este orçamento é uma estimativa com base nas informações fornecidas.', 14, doc.lastAutoTable.finalY + 10);
-    doc.text('Este orçamento é válido por 15 dias.', 14, doc.lastAutoTable.finalY + 10);
 
     doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
 }
@@ -1951,10 +2224,25 @@ function exportJobToPDF(job) {
                   difficulty: difficultyLevel
             };
 
+            // ✅ Auto-reset da calculadora
+              jobCalculatorForm.reset();
+              document.getElementById('job-description').focus();
+
             appData.jobs.push(job);
             saveData();
             renderRecentJobs();
             updateDashboard();
+            reset();
+// Salvar no Firestore se logado
+const user = firebase.auth().currentUser;
+if (user) {
+  db.collection("users")
+    .doc(user.uid)
+    .collection("jobs")
+    .add(job)
+    .then(() => console.log("✅ Job salvo no Firestore"))
+    .catch(err => console.error("❌ Erro ao salvar job:", err));
+}
 
             // Update jobs count
             document.getElementById('jobs-count').textContent = appData.jobs.length;
@@ -2130,6 +2418,51 @@ document.getElementById('backToTop')?.addEventListener('click', () => {
 });
 
 
+// Script para upload de logo
+
+const logoInput = document.getElementById('logo-upload');
+const logoPreview = document.getElementById('logo-preview');
+const uploadLogoBtn = document.getElementById('upload-logo-btn');
+
+let selectedLogoFile = null;
+
+logoInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  selectedLogoFile = file;
+
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    logoPreview.src = ev.target.result;
+    logoPreview.classList.remove('hidden');
+    uploadLogoBtn.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+});
+
+uploadLogoBtn.addEventListener('click', async () => {
+  if (!selectedLogoFile) return;
+  const user = firebase.auth().currentUser;
+  if (!user) return alert('Você precisa estar logado.');
+
+  try {
+    const storageRef = firebase.storage().ref(`logos/${user.uid}.png`);
+    await storageRef.put(selectedLogoFile);
+    const logoUrl = await storageRef.getDownloadURL();
+
+    await firebase.firestore().collection('users').doc(user.uid).set({
+      logoUrl: logoUrl
+    }, { merge: true });
+
+    showToast('Logo salva com sucesso! Será usada nos próximos PDFs.', 'success');
+    uploadLogoBtn.classList.add('hidden');
+  } catch (err) {
+    console.error('Erro ao salvar logo:', err);
+    showToast('Erro ao salvar a logo.', 'error');
+  }
+});
+
 
 
 </script>
@@ -2151,7 +2484,8 @@ document.getElementById('backToTop')?.addEventListener('click', () => {
     messagingSenderId: "970984329138",
     appId: "1:970984329138:web:429a185b8bab1971991eab"
   };
-
+    firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
@@ -2276,6 +2610,44 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+
+
+document.addEventListener('keydown', (e) => {
+  // Ctrl + H → abrir histórico
+  if (e.ctrlKey && e.key.toLowerCase() === 'h') {
+    e.preventDefault();
+    document.getElementById('job-history-modal').classList.remove('hidden');
+    renderJobHistory();
+  }
+
+  // Ctrl + N → foco na descrição do novo job
+  if (e.ctrlKey && e.key.toLowerCase() === 'n') {
+    e.preventDefault();
+    const input = document.getElementById('job-description');
+    if (input) {
+      input.focus();
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  // Ctrl + E → abre o modal de edição (se visível)
+  if (e.ctrlKey && e.key.toLowerCase() === 'e') {
+    e.preventDefault();
+    const btn = document.querySelector('.btn-edit');
+    if (btn) btn.click();
+  }
+
+  // Esc → fecha modais se abertos
+  if (e.key === 'Escape') {
+    const modals = ['editModal', 'job-history-modal', 'expense-modal', 'equipment-modal', 'help-modal', 'notify-modal'];
+    modals.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el.classList.contains('hidden')) {
+        el.classList.add('hidden');
+      }
+    });
+  }
+});
 
 
 </script>
@@ -2543,6 +2915,99 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+
+<!-- 1. BOTÃO PREMIUM FIXO -->
+<button id="open-premium-modal" class="fixed bottom-20 right-4 bg-yellow-400 text-black font-semibold px-4 py-2 rounded-full shadow-lg z-50 hover:bg-yellow-300 transition">✨ Liberar Premium</button>
+
+<!-- 2. MODAL DE ASSINATURA -->
+<div id="premium-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 px-4 flex items-center justify-center">
+  <div class="bg-white dark:bg-[var(--card-bg)] rounded-xl p-6 max-w-lg w-full text-center">
+    <h2 class="text-2xl font-bold mb-4">Liberar Versão Premium</h2>
+    <p class="text-sm mb-6">Desbloqueie recursos como exportação em PDF, backup em nuvem, filtros avançados e muito mais.</p>
+
+    <div class="grid grid-cols-2 text-sm gap-4 mb-6">
+      <div class="p-4 border rounded-lg">
+        <h3 class="font-semibold mb-2">Grátis</h3>
+        <ul class="text-left list-disc list-inside space-y-1 text-gray-600">
+          <li>Cálculo de Jobs</li>
+          <li>Histórico básico</li>
+        </ul>
+      </div>
+      <div class="p-4 border-2 border-yellow-500 rounded-lg">
+        <h3 class="font-semibold mb-2 text-yellow-600">✨ Premium</h3>
+        <ul class="text-left list-disc list-inside space-y-1">
+          <li>Exportação em PDF</li>
+          <li>Backup em nuvem</li>
+          <li>Filtros por categoria</li>
+          <li>Suporte prioritário</li>
+        </ul>
+      </div>
+    </div>
+
+    <button id="activate-premium" class="bg-yellow-500 text-black font-semibold px-6 py-2 rounded-full hover:bg-yellow-400">Ativar Premium</button>
+    <p class="text-xs mt-3 opacity-60">Simulação local - não processa pagamento.</p>
+    <button id="close-premium-modal" class="mt-4 text-sm text-red-500">Fechar</button>
+  </div>
+</div>
+
+<script>
+  const premiumBtn = document.getElementById('open-premium-modal');
+  const premiumModal = document.getElementById('premium-modal');
+  const closePremiumModal = document.getElementById('close-premium-modal');
+  const activatePremium = document.getElementById('activate-premium');
+
+  premiumBtn.addEventListener('click', () => premiumModal.classList.remove('hidden'));
+  closePremiumModal.addEventListener('click', () => premiumModal.classList.add('hidden'));
+
+  activatePremium.addEventListener('click', () => {
+    localStorage.setItem('isPremium', 'true');
+    showToast('Parabéns! Versão Premium ativada ✨', 'sucess');
+    premiumModal.classList.add('hidden');
+    location.reload();
+  });
+
+  const isPremium = localStorage.getItem('isPremium') === 'true';
+
+  // BLOQUEIOS PARA USUÁRIOS GRATUITOS
+  window.addEventListener('DOMContentLoaded', () => {
+    if (!isPremium) {
+      // Botões de exportação individuais nos cards do histórico (ícone PDF)
+      const exportButtons = document.querySelectorAll('.btn-pdf');
+      exportButtons.forEach(btn => {
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          showToast('Exportação de PDF é exclusiva para usuários Premium.', 'warning');
+          
+        });
+      });
+
+      // Botão de exportação geral
+      const exportBtn = document.getElementById('exportar-data');
+      if (exportBtn) {
+        exportBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        exportBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          showToast('Recurso exclusivo para usuários Premium.', 'warning');
+        });
+      }
+
+      // Backup em nuvem
+      const cloudBtn = document.getElementById('save-data');
+      if (cloudBtn) {
+        cloudBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        cloudBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          showToast('Backup em nuvem é um recurso Premium.', 'warning');
+        });
+      }
+    }
+  });
+</script>
+
+<div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-4 py-2 rounded shadow-md hidden z-50"></div>
+
 
 
 
