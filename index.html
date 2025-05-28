@@ -2362,7 +2362,7 @@ async function exportJobToPDF(job) {
 // Salvar no Firestore se logado
 const user = firebase.auth().currentUser;
 if (user) {
-  db.collection("users")
+  db.collection("usuarios")
     .doc(user.uid)
     .collection("jobs")
     .add(job)
@@ -2870,41 +2870,42 @@ document.addEventListener('keydown', (e) => {
   });
 
   // Salvar dados ao clicar no botão
-  document.getElementById("save-data")?.addEventListener("click", () => {
-    try {
-      appData.expenses = [...expenses];
-      appData.equipments = [...equipments];
+document.getElementById("save-data")?.addEventListener("click", () => {
+  try {
+    appData.expenses = [...expenses];
+    appData.equipments = [...equipments];
 
-      if (routineResults && !routineResults.classList.contains('hidden')) {
-        appData.routine = {
-          desiredSalary: parseFloat(document.getElementById('desired-salary').value),
-          workDays: parseInt(document.getElementById('work-days').value),
-          dailyHours: parseInt(document.getElementById('daily-hours').value),
-          dailyValue: parseFloat(document.getElementById('daily-value').textContent),
-          hourlyValue: parseFloat(document.getElementById('hourly-value').textContent)
-        };
-      }
-
-      localStorage.setItem("financeFlowData", JSON.stringify(appData));
-
-      if (window.currentUser && window.db) {
-        const ref = doc(window.db, "usuarios", window.currentUser.uid);
-        setDoc(ref, appData)
-          .then(() => {
-            console.log("✅ Dados salvos na nuvem.");
-            showToast("✅ Dados salvos na nuvem!", "success");
-          })
-          .catch((err) => {
-            console.error("Erro ao salvar na nuvem:", err);
-            showToast("❌ Erro ao salvar na nuvem!", "error");
-          });
-      }
-    } catch (err) {
-      console.error("❌ Erro em saveData():", err);
-      alert("Erro: " + err.message);
+    if (routineResults && !routineResults.classList.contains('hidden')) {
+      appData.routine = {
+        desiredSalary: parseFloat(document.getElementById('desired-salary').value),
+        workDays: parseInt(document.getElementById('work-days').value),
+        dailyHours: parseInt(document.getElementById('daily-hours').value),
+        dailyValue: parseFloat(document.getElementById('daily-value').textContent),
+        hourlyValue: parseFloat(document.getElementById('hourly-value').textContent)
+      };
     }
-  });
-  
+
+    localStorage.setItem("financeFlowData", JSON.stringify(appData));
+
+    if (window.currentUser && window.db) {
+      const ref = doc(window.db, "usuarios", window.currentUser.uid);
+      setDoc(ref, appData, { merge: true }) // ← ESSA LINHA É A CORREÇÃO
+        .then(() => {
+          console.log("✅ Dados salvos na nuvem.");
+          showToast("✅ Dados salvos na nuvem!", "success");
+        })
+        .catch((err) => {
+          console.error("Erro ao salvar na nuvem:", err);
+          showToast("❌ Erro ao salvar na nuvem!", "error");
+        });
+    }
+  } catch (err) {
+    console.error("❌ Erro em saveData():", err);
+    alert("Erro: " + err.message);
+  }
+});
+
+
 </script>
 
 
