@@ -8,12 +8,18 @@
 <link rel="manifest" href="/manifest.json" />
 <meta name="theme-color" content="#6366f1" />
 <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
 <!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+<!-- compat (recomendado para seu projeto atual) -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+
+
 
 
 <!-- Chart.js CDN -->
@@ -22,9 +28,9 @@
 
 
     <title>FinanceFlow - Gerenciamento Financeiro</title>
+    <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css" />
 
 
     <script>
@@ -123,6 +129,11 @@
   display: inline-block;
 }
 
+html, body {
+  overscroll-behavior-y: contain;
+  touch-action: manipulation;
+  height: 100%;
+}
 
 
   body {
@@ -983,7 +994,7 @@ nav a.active {
   </div>
 
   <div class="mt-6">
-   <label class="block text-lg font-semibold text-white mb-1">Selecione um Tema</label>
+   <label style="color: var(--text);" class="block text-lg font-semibold mb-1">Selecione um Tema</label>
 
 
   <div id="theme-options" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
@@ -1005,13 +1016,13 @@ nav a.active {
 </div>
 </div>
 
-<!--
+
 <div class="mt-6">
-  <label class="block text-lg font-semibold text-white mb-1">Logo para PDF (Premium)</label>
+  <label style="color: var(--text);"  class="block text-lg font-semibold  mb-1">Logo para PDF (Premium)</label>
 
   <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
    
-    <label for="logo-upload" class="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+    <label for="logo-upload" style="color: var(--text);"  class="cursor-pointer px-4 py-2 bg-blue-600 rounded hover:bg-blue-700 transition">
       Selecionar Logo
       <input type="file" id="logo-upload" accept="image/*" class="hidden">
     </label>
@@ -1020,21 +1031,21 @@ nav a.active {
     <img id="logo-preview" src="" alt="Preview da Logo" class="h-14 rounded border border-gray-600 hidden">
 
     
-    <button id="upload-logo-btn" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition hidden">
+    <button id="upload-logo-btn" style="color: var(--text);" class="px-4 py-2 bg-green-600 rounded hover:bg-green-700 transition hidden">
       Salvar logo no PDF
     </button>
   </div>
 </div>
---> 
+
 
 
   <!-- Sobre o App -->
    <div class="mt-6">
 
    
-   <label class="block text-lg font-semibold text-white mb-1">Sobre o Finance Flow</label>
+   <label style="color: var(--text);"  class="block text-lg font-semibold mb-1">Sobre o Finance Flow</label>
 
-  <div style="border-color: var(--border)" class="pt-6 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+  <div style="border-color: var(--border); color: var(--text)" class="pt-6 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 space-y-1">
     <p><strong>📱 FinanceFlow</strong> — Sistema de gestão e precificação para audiovisual</p>
     <p>🛠️ Desenvolvido por <strong>Yuri Adriel</strong></p>
     <p>🔢 Versão: <span class="text-primary font-semibold">1.0.0</span></p>
@@ -1374,10 +1385,10 @@ e.target.classList.add('active');
                 // Update active link
                 navLinks.forEach(navLink => {
                     navLink.classList.remove('bg-primary', 'text-white');
-                    navLink.classList.add('color: var(--text)', 'hover:bg-gray-100');
+                    navLink.classList.add('text-gray', 'hover:bg-gray-100');
                 });
                 
-                link.classList.remove('color: var(--text)', 'hover:bg-gray-100');
+                link.classList.remove('text-gray', 'hover:bg-gray-100');
                 link.classList.add('bg-primary', 'text-white');
             });
         });
@@ -1576,12 +1587,16 @@ window.addEventListener('DOMContentLoaded', () => {
 async function exportJobToPDF(job) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+  //const logoUrl = '/icons/LOGO-ICONE.png'; // ou pegue do appData.logo
 
   const title = `Orçamento: ${job.description}`;
   const date = new Date().toLocaleDateString('pt-BR');
 
   const user = firebase.auth().currentUser;
   let logoUrl = null;
+
+const logoBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...";
+doc.addImage(logoBase64, 'JPEG', 14, 10, 40, 20);
 
   if (user) {
     try {
@@ -1592,21 +1607,26 @@ async function exportJobToPDF(job) {
     }
   }
 
-  // 🔽 Inserir logo, se existir
+  // 🔽 Inserir logo se existir e for carregável
+  let contentStartY = 20;
+
   if (logoUrl) {
-    const img = new Image();
-    img.src = logoUrl;
+    try {
+      const response = await fetch(logoUrl);
+      const blob = await response.blob();
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = () => reject("Erro ao converter imagem em base64");
+        reader.readAsDataURL(blob);
+      });
 
-    await new Promise(resolve => {
-      img.onload = resolve;
-      img.onerror = resolve; // continua mesmo com erro
-    });
-
-    doc.addImage(img, 'PNG', 14, 10, 40, 20);
+      doc.addImage(base64, 'JPEG', 14, 10, 40, 20, 180); // ajuste tamanho aqui se necessário
+      contentStartY = 35;
+    } catch (err) {
+      console.error("Erro ao carregar a logo para o PDF:", err);
+    }
   }
-
-  // Ajusta posição do conteúdo abaixo da logo
-  const contentStartY = logoUrl ? 35 : 20;
 
   doc.setFontSize(18);
   doc.text(title, 14, contentStartY);
@@ -1641,6 +1661,7 @@ async function exportJobToPDF(job) {
 
   doc.save(`${job.description.replace(/\s+/g, '_')}_orcamento.pdf`);
 }
+
 
 
 // Atualiza o dashboard com os dados mais recentes
@@ -2420,48 +2441,59 @@ document.getElementById('backToTop')?.addEventListener('click', () => {
 
 // Script para upload de logo
 
-const logoInput = document.getElementById('logo-upload');
-const logoPreview = document.getElementById('logo-preview');
-const uploadLogoBtn = document.getElementById('upload-logo-btn');
+document.addEventListener('DOMContentLoaded', () => {
+  const logoInput = document.getElementById('logo-upload');
+  const logoPreview = document.getElementById('logo-preview');
+  const uploadLogoBtn = document.getElementById('upload-logo-btn');
+  let selectedLogoFile = null;
 
-let selectedLogoFile = null;
+  logoInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-logoInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+    selectedLogoFile = file;
 
-  selectedLogoFile = file;
-
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    logoPreview.src = ev.target.result;
-    logoPreview.classList.remove('hidden');
-    uploadLogoBtn.classList.remove('hidden');
-  };
-  reader.readAsDataURL(file);
-});
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      logoPreview.src = ev.target.result;
+      logoPreview.classList.remove('hidden');
+      uploadLogoBtn.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  });
 
 uploadLogoBtn.addEventListener('click', async () => {
-  if (!selectedLogoFile) return;
-  const user = firebase.auth().currentUser;
-  if (!user) return alert('Você precisa estar logado.');
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (!user) {
+      alert('Você precisa estar logado.');
+      return;
+    }
 
-  try {
-    const storageRef = firebase.storage().ref(`logos/${user.uid}.png`);
-    await storageRef.put(selectedLogoFile);
-    const logoUrl = await storageRef.getDownloadURL();
+    if (!selectedLogoFile) {
+      alert('Nenhum arquivo de logo selecionado.');
+      return;
+    }
 
-    await firebase.firestore().collection('users').doc(user.uid).set({
-      logoUrl: logoUrl
-    }, { merge: true });
+    try {
+      const storageRef = firebase.storage().ref(`logos/${user.uid}.png`);
+      await storageRef.put(selectedLogoFile);
+      const logoUrl = await storageRef.getDownloadURL();
 
-    showToast('Logo salva com sucesso! Será usada nos próximos PDFs.', 'success');
-    uploadLogoBtn.classList.add('hidden');
-  } catch (err) {
-    console.error('Erro ao salvar logo:', err);
-    showToast('Erro ao salvar a logo.', 'error');
-  }
+      await firebase.firestore().collection('users').doc(user.uid).set({
+        logoUrl: logoUrl
+      }, { merge: true });
+
+      showToast('Logo salva com sucesso! Será usada nos próximos PDFs.', 'success');
+      uploadLogoBtn.classList.add('hidden');
+    } catch (err) {
+      console.error('Erro ao salvar logo:', err);
+      showToast('Erro ao salvar a logo.', 'error');
+    }
+  });
 });
+
+});
+
 
 
 
@@ -2854,33 +2886,33 @@ document.addEventListener('keydown', (e) => {
 
 <!-- Modal -->
 <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-  <div class="bg-[#1e1e2f] text-white rounded-xl p-6 shadow-lg w-full max-w-lg space-y-4 border border-gray-700">
-    <h2 class="text-2xl font-bold text-white">Editar Job</h2>
+  <div style="border-color: var(--border); background: var(--card-bg); color: var(--text)" class="rounded-xl p-6 shadow-lg w-full max-w-lg space-y-4 border">
+    <h2 class="text-2xl font-bold">Editar Job</h2>
 
     <div class="space-y-3">
       <div>
         <label class="text-sm font-medium">Descrição</label>
-        <input id="editJobDescription" type="text" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+        <input id="editJobDescription" type="text" style="border-color: var(--border);" class="w-full rounded-md border  px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600" />
       </div>
 
       <div>
         <label class="text-sm font-medium">Cliente</label>
-        <input id="editJobClient" type="text" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2" />
+        <input id="editJobClient" type="text" style="border-color: var(--border);" class="w-full rounded-md  border px-4 py-2" />
       </div>
 
       <div>
         <label class="text-sm font-medium">Data do Evento</label>
-        <input id="editJobDate" type="date" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2" />
+        <input id="editJobDate" type="date" style="border-color: var(--border);"class="w-full rounded-md  border px-4 py-2" />
       </div>
 
       <div>
         <label class="text-sm font-medium">Horas Estimadas</label>
-        <input id="editEstimatedHours" type="number" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2" />
+        <input id="editEstimatedHours" type="number" style="border-color: var(--border);" class="w-full rounded-md  border px-4 py-2" />
       </div>
 
       <div>
         <label class="text-sm font-medium">Nível de Dificuldade</label>
-        <select id="editDifficultyLevel" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2">
+        <select id="editDifficultyLevel" class="w-full rounded-md border px-4 py-2">
           <option value="1">Fácil</option>
           <option value="1.25">Médio</option>
           <option value="1.5">Difícil</option>
@@ -2890,17 +2922,17 @@ document.addEventListener('keydown', (e) => {
 
       <div>
         <label class="text-sm font-medium">Logística (R$)</label>
-        <input id="editLogisticsCost" type="number" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2" />
+        <input id="editLogisticsCost" type="number" style="border-color: var(--border);" class="w-full rounded-md border px-4 py-2" />
       </div>
 
       <div>
         <label class="text-sm font-medium">Equipamentos (R$)</label>
-        <input id="editEquipmentCost" type="number" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2" />
+        <input id="editEquipmentCost" type="number" style="border-color: var(--border);" class="w-full rounded-md border px-4 py-2" />
       </div>
 
       <div>
         <label class="text-sm font-medium">Assistência (R$)</label>
-        <input id="editAssistanceCost" type="number" class="w-full rounded-md bg-[#2a2a40] border border-gray-600 px-4 py-2" />
+        <input id="editAssistanceCost" type="number" style="border-color: var(--border);" class="w-full rounded-md border px-4 py-2" />
       </div>
     </div>
 
