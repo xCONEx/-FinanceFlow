@@ -1587,7 +1587,7 @@ window.addEventListener('DOMContentLoaded', () => {
 function exportJobToPDF(job) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  const title = `📄 Orçamento: ${job.description}`;
+  const title = `Orçamento: ${job.description}`;
   const date = new Date().toLocaleDateString('pt-BR');
   const user = firebase.auth().currentUser;
 
@@ -1604,10 +1604,10 @@ function exportJobToPDF(job) {
 
     doc.setFontSize(12);
     doc.setTextColor(55, 65, 81);
-    doc.text(`👤 Cliente: ${job.client || 'Não informado'}`, 14, contentStartY + 10);
-    doc.text(`📅 Evento: ${job.eventDate || 'Não definida'}`, 14, contentStartY + 18);
-    doc.text(`🕒 Gerado em: ${date}`, 14, contentStartY + 26);
-    doc.text(`📂 Categoria: ${job.category || 'Outro'}`, 14, contentStartY + 34);
+doc.text(`Cliente: ${job.client || 'Não informado'}`, 14, contentStartY + 10);
+doc.text(`Evento: ${job.eventDate || 'Não definida'}`, 14, contentStartY + 18);
+doc.text(`Gerado em: ${date}`, 14, contentStartY + 26);
+doc.text(`Categoria: ${job.category || 'Outro'}`, 14, contentStartY + 34);
 
     doc.autoTable({
       startY: contentStartY + 45,
@@ -1618,7 +1618,7 @@ function exportJobToPDF(job) {
         ['Equipamentos', `R$ ${(job.equipment || 0).toFixed(2)}`],
         ['Assistência', `R$ ${(job.assistance || 0).toFixed(2)}`],
         ['Custo total', `R$ ${((job.logistics || 0) + (job.equipment || 0) + (job.assistance || 0)).toFixed(2)}`],
-        ['💰 Valor total', `R$ ${(job.value || 0).toFixed(2)}`],
+        ['Valor total', `R$ ${(job.value || 0).toFixed(2)}`],
       ],
       theme: 'grid',
       headStyles: {
@@ -1813,7 +1813,7 @@ btnEdit.addEventListener('click', () => {
 function exportJobToPDF(job) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  const title = `📄 Orçamento: ${job.description}`;
+  const title = `Orçamento: ${job.description}`;
   const date = new Date().toLocaleDateString('pt-BR');
   const user = firebase.auth().currentUser;
 
@@ -1830,10 +1830,10 @@ function exportJobToPDF(job) {
 
     doc.setFontSize(12);
     doc.setTextColor(55, 65, 81);
-    doc.text(`👤 Cliente: ${job.client || 'Não informado'}`, 14, contentStartY + 10);
-    doc.text(`📅 Evento: ${job.eventDate || 'Não definida'}`, 14, contentStartY + 18);
-    doc.text(`🕒 Gerado em: ${date}`, 14, contentStartY + 26);
-    doc.text(`📂 Categoria: ${job.category || 'Outro'}`, 14, contentStartY + 34);
+doc.text(`Cliente: ${job.client || 'Não informado'}`, 14, contentStartY + 10);
+doc.text(`Evento: ${job.eventDate || 'Não definida'}`, 14, contentStartY + 18);
+doc.text(`Gerado em: ${date}`, 14, contentStartY + 26);
+doc.text(`Categoria: ${job.category || 'Outro'}`, 14, contentStartY + 34);
 
     doc.autoTable({
       startY: contentStartY + 45,
@@ -1844,7 +1844,7 @@ function exportJobToPDF(job) {
         ['Equipamentos', `R$ ${(job.equipment || 0).toFixed(2)}`],
         ['Assistência', `R$ ${(job.assistance || 0).toFixed(2)}`],
         ['Custo total', `R$ ${((job.logistics || 0) + (job.equipment || 0) + (job.assistance || 0)).toFixed(2)}`],
-        ['💰 Valor total', `R$ ${(job.value || 0).toFixed(2)}`],
+        ['Valor total', `R$ ${(job.value || 0).toFixed(2)}`],
       ],
       theme: 'grid',
       headStyles: {
