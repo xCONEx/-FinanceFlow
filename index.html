@@ -1593,8 +1593,13 @@ function exportJobToPDF(job) {
 
   const gerarPDF = (logoData = null) => {
     if (logoData) {
-      doc.addImage(logoData, 'PNG', 14, 10, 40, 20);
-    }
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const imageWidth = 40;
+  const imageHeight = 20;
+  const imageX = pageWidth - imageWidth - 14; // alinhado à direita com margem
+
+  doc.addImage(logoData, 'PNG', imageX, 10, imageWidth, imageHeight);
+}
 
     const contentStartY = logoData ? 35 : 20;
 
@@ -1818,9 +1823,14 @@ function exportJobToPDF(job) {
   const user = firebase.auth().currentUser;
 
   const gerarPDF = (logoData = null) => {
-    if (logoData) {
-      doc.addImage(logoData, 'PNG', 14, 10, 40, 20);
-    }
+if (logoData) {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const imageWidth = 40;
+  const imageHeight = 20;
+  const imageX = pageWidth - imageWidth - 14; // alinhado à direita com margem
+
+  doc.addImage(logoData, 'PNG', imageX, 10, imageWidth, imageHeight);
+}
 
     const contentStartY = logoData ? 35 : 20;
 
