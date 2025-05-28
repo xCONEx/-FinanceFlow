@@ -2358,7 +2358,7 @@ async function exportJobToPDF(job) {
             saveData();
             renderRecentJobs();
             updateDashboard();
-            reset();
+        
 // Salvar no Firestore se logado
 const user = firebase.auth().currentUser;
 if (user) {
@@ -2904,6 +2904,7 @@ document.addEventListener('keydown', (e) => {
       alert("Erro: " + err.message);
     }
   });
+  
 </script>
 
 
