@@ -130,10 +130,12 @@
 }
 
 html, body {
-  overscroll-behavior-y: contain;
-  touch-action: manipulation;
   height: 100%;
+  overflow-x: hidden;
+    touch-action: manipulation;
+  -webkit-overflow-scrolling: touch; /* para suavizar no iOS */
 }
+
 
 
   body {
@@ -2487,12 +2489,11 @@ function gerarGraficoEvolucao() {
 let startY = 0;
 let isPulling = false;
 
-document.addEventListener("touchstart", (e) => {
+document.addEventListener('touchstart', function (e) {
   if (window.scrollY === 0) {
-    startY = e.touches[0].clientY;
-    isPulling = true;
+    window.scrollTo(0, 1); // empurra 1px para baixo
   }
-});
+}, false);
 
 document.addEventListener("touchmove", (e) => {
   if (!isPulling) return;
@@ -2608,6 +2609,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+function autoSave() {
+  try {
+    localStorage.setItem("financeFlowData", JSON.stringify(appData));
+
+    if (window.currentUser && window.db) {
+      const ref = doc(window.db, "usuarios", window.currentUser.uid);
+      setDoc(ref, appData, { merge: true });
+      console.log("🟢 AutoSave executado");
+    }
+  } catch (err) {
+    console.warn("Erro no AutoSave:", err);
+  }
+}
+
 
 
 </script>
@@ -2639,6 +2654,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const userName = document.getElementById("user-name");
     const logoutBtn = document.getElementById("logout-btn");
 
+    
     if (user) {
       // Preenche o usuário
       if (userName) userName.textContent = user.displayName || user.email;
@@ -3152,6 +3168,29 @@ document.getElementById("save-data")?.addEventListener("click", () => {
     }
   });
 </script>
+
+
+<script>
+  // Espera 5 segundos após carregamento para garantir que Firebase já inicializou
+  setTimeout(() => {
+    if (!window.currentUser || !window.db || !window.appData) {
+      console.warn("⚠️ Firebase ainda não está pronto para AutoSave.");
+      return;
+    }
+
+    setInterval(() => {
+      try {
+        const ref = window.db.collection('usuarios').doc(window.currentUser.uid);
+        ref.set(window.appData, { merge: true });
+        console.log("🟢 AutoSave executado");
+      } catch (err) {
+        console.warn("Erro no AutoSave:", err);
+      }
+    }, 30000);
+  }, 5000);
+</script>
+
+
 
 <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-4 py-2 rounded shadow-md hidden z-50"></div>
 
