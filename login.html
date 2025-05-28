@@ -5,18 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login • FinanceFlow</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" type="image/x-icon" href="/icons/favicon.ico">
+
 </head>
 <body class="bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center min-h-screen">
 
-  <div class="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
-    <h1 class="text-2xl font-bold text-gray-800 mb-4">Entrar no FinanceFlow</h1>
-    <p class="text-sm text-gray-500 mb-6">Conecte com sua conta Google para sincronizar seus dados.</p>
-    <button id="login-google" class="w-full py-3 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center justify-center gap-2">
-      <i class="fab fa-google"></i>
-      Entrar com Google
-    </button>
-    <p class="mt-4 text-sm text-gray-400">Seus dados são salvos automaticamente na nuvem ☁️</p>
+  <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center animate-fade-in">
+    <i class="fas fa-wallet text-indigo-600 text-3xl"></i>
+    <h1 class="text-3xl font-extrabold text-gray-800 mb-2">FinanceFlow</h1>
+    <p class="text-sm text-gray-500 mb-6">Gerencie seus jobs com inteligência financeira.</p>
+
+    <div class="flex flex-col gap-3">
+      <button id="login-google" class="py-3 bg-red-500 text-white rounded hover:bg-red-600 flex items-center justify-center gap-2">
+        <i class="fab fa-google"></i> Entrar com Google
+      </button>
+
+      <hr class="my-4 border-gray-300">
+
+      <input type="email" id="email" placeholder="Seu e-mail" class="w-full px-4 py-2 border rounded text-sm" />
+      <input type="password" id="password" placeholder="Sua senha" class="w-full px-4 py-2 border rounded text-sm" />
+
+      <button id="login-email" class="py-3 bg-gray-800 text-white rounded hover:bg-gray-900">
+        Entrar com e-mail
+      </button>
+      <button id="register-email" class="text-sm text-indigo-500 hover:underline mt-2">Criar nova conta</button>
+    </div>
+
+    <p class="mt-6 text-xs text-gray-400">Seus dados são salvos automaticamente na nuvem ☁️</p>
   </div>
+
 
   <!-- Loading Overlay -->
   <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
@@ -30,60 +47,115 @@
   <!-- Firebase Login -->
 
 
-  <script type="module">
+ <script type="module">
+  import {
+    initializeApp
+  } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import {
+    getAuth,
+    signInWithPopup,
+    GoogleAuthProvider,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword
+  } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc
+  } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
+    authDomain: "financeflow-e0fae.firebaseapp.com",
+    projectId: "financeflow-e0fae",
+    storageBucket: "financeflow-e0fae.firebasestorage.app",
+    messagingSenderId: "970984329138",
+    appId: "1:970984329138:web:429a185b8bab1971991eab"
+  };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
-      authDomain: "financeflow-e0fae.firebaseapp.com",
-      projectId: "financeflow-e0fae",
-      storageBucket: "financeflow-e0fae.firebasestorage.app",
-      messagingSenderId: "970984329138",
-      appId: "1:970984329138:web:429a185b8bab1971991eab"
-    };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
+  const overlay = document.getElementById("loading-overlay");
 
-    const btn = document.getElementById("login-google");
-    const overlay = document.getElementById("loading-overlay");
+  // ✅ Função comum para salvar ou carregar dados
+  async function handleUserLogin(user) {
+    const ref = doc(db, "usuarios", user.uid);
+    const docSnap = await getDoc(ref);
 
-    btn?.addEventListener("click", async () => {
-      overlay.classList.remove("hidden");
-      try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
+    if (docSnap.exists()) {
+      localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
+    } else {
+      const emptyData = {
+        jobs: [],
+        expenses: [],
+        equipments: [],
+        routine: {}
+      };
+      await setDoc(ref, emptyData);
+      localStorage.setItem("financeFlowData", JSON.stringify(emptyData));
+    }
 
-        const ref = doc(db, "usuarios", user.uid);
-        const docSnap = await getDoc(ref);
+    window.location.href = "index.html";
+  }
 
-        if (docSnap.exists()) {
-          localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
-        } else {
-          const emptyData = {
-            jobs: [],
-            expenses: [],
-            equipments: [],
-            routine: {}
-          };
-          await setDoc(ref, emptyData);
-          localStorage.setItem("financeFlowData", JSON.stringify(emptyData));
-        }
-
-        window.location.href = "index.html";
-      } catch (err) {
-            console.error("Erro ao fazer login com Google:", err);
-            alert("Erro ao entrar com Google: " + err.message);
+  // ✅ Google Login
+  document.getElementById("login-google")?.addEventListener("click", async () => {
+    overlay.classList.remove("hidden");
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      await handleUserLogin(result.user);
+    } catch (err) {
+      alert("Erro ao entrar com Google: " + err.message);
     } finally {
-        overlay.classList.add("hidden");
-      }
-    });
-  </script>
+      overlay.classList.add("hidden");
+    }
+  });
+
+
+  // ✅ Login com e-mail e senha
+  document.getElementById("login-email")?.addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!email || !password) return alert("Preencha e-mail e senha");
+
+    overlay.classList.remove("hidden");
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      await handleUserLogin(result.user);
+    } catch (err) {
+      alert("Erro ao fazer login: " + err.message);
+    } finally {
+      overlay.classList.add("hidden");
+    }
+  });
+
+  // ✅ Cadastro com e-mail e senha
+  document.getElementById("register-email")?.addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!email || !password) return alert("Preencha e-mail e senha para se cadastrar");
+
+    overlay.classList.remove("hidden");
+  try {
+  const result = await createUserWithEmailAndPassword(auth, email, password);
+  await handleUserLogin(result.user);
+} catch (err) {
+  if (err.code === 'auth/email-already-in-use') {
+    alert("Esse e-mail já está cadastrado. Faça login com sua senha.");
+  } else {
+    alert("Erro ao criar conta: " + err.message);
+  }
+} finally {
+  overlay.classList.add("hidden");
+}
+  });
+</script>
 
 
 </body>
