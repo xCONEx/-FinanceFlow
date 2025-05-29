@@ -669,6 +669,11 @@ nav a.active {
                 <section id="custos-mensais" class="mt-12 space-y-6 hidden fade-in">
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold text-dark">Custos Mensais</h2>
+                        <button onclick="exportCustosMensaisToPDF()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2">
+  <i class="fas fa-file-pdf"></i>
+  <span>Exportar PDF</span>
+</button>
+
                         <button id="add-expense" class="bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg flex items-center space-x-2">
                             <i class="fas fa-plus"></i>
                             <span>Adicionar Despesa</span>
@@ -742,6 +747,11 @@ nav a.active {
                 <section id="equipamentos" class="mt-12 space-y-6 hidden fade-in">
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold text-dark">Itens de Trabalho</h2>
+                        <button onclick="exportEquipamentosToPDF()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2">
+  <i class="fas fa-file-pdf"></i>
+  <span>Exportar PDF</span>
+</button>
+
                         <button id="add-equipment" class="bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg flex items-center space-x-2">
                             <i class="fas fa-plus"></i>
                             <span>Adicionar Item</span>
@@ -791,6 +801,7 @@ nav a.active {
                                         <option value="Software">Software</option>
                                         <option value="Iluminação">Iluminação</option>
                                         <option value="Audio">Audio</option>
+                                        <option value="Acessórios">Acessórios</option>
                                         <option value="Outros">Outros</option>
                                     </select>
                                 </div>
@@ -1140,6 +1151,198 @@ nav a.active {
 
     <script>
 
+
+// EXPORTAR PDF - Relatório de Custos Mensais
+async function exportCustosMensaisToPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const user = firebase.auth().currentUser;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 14;
+  const date = new Date().toLocaleDateString('pt-BR');
+
+  const gerarPDF = (logoBase64 = null) => {
+    let contentStartY = 20;
+
+    if (logoBase64) {
+      const img = new Image();
+      img.src = logoBase64;
+
+      img.onload = () => {
+        const maxWidth = 40;
+        const maxHeight = 20;
+
+        let width = img.width;
+        let height = img.height;
+
+        const widthRatio = maxWidth / width;
+        const heightRatio = maxHeight / height;
+        const scale = Math.min(widthRatio, heightRatio);
+
+        width *= scale;
+        height *= scale;
+
+        const x = pageWidth - width - margin;
+        const y = contentStartY;
+
+        doc.addImage(logoBase64, 'PNG', x, y, width, height);
+
+        renderTexto(y + height + 10);
+      };
+    } else {
+      renderTexto(contentStartY);
+    }
+
+    function renderTexto(startY) {
+      doc.setFontSize(18);
+      doc.setTextColor(33, 37, 41);
+      doc.text("Relatório de Custos Mensais", margin, startY);
+
+      doc.setFontSize(12);
+      doc.setTextColor(55, 65, 81);
+      doc.text(`Gerado em: ${date}`, margin, startY + 8);
+
+      const despesas = appData?.expenses || [];
+
+      const body = despesas.map(item => [
+        item.description || '',
+        item.category || '',
+        `R$ ${(parseFloat(item.value) || 0).toFixed(2).replace('.', ',')}`
+      ]);
+
+      const total = despesas.reduce((sum, item) => sum + parseFloat(item.value || 0), 0);
+
+      doc.autoTable({
+        startY: startY + 20,
+        head: [['Descrição', 'Categoria', 'Valor (R$)']],
+        body,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [99, 102, 241],
+          textColor: 255,
+          fontSize: 12
+        },
+        bodyStyles: {
+          fontSize: 11
+        }
+      });
+
+      doc.setFontSize(12);
+      doc.setTextColor(20, 20, 20);
+      doc.text(`Total: R$ ${total.toFixed(2).replace('.', ',')}`, margin, doc.lastAutoTable.finalY + 10);
+
+      doc.save('relatorio_custos_mensais.pdf');
+    }
+  };
+
+  if (!user) return gerarPDF();
+
+  try {
+    const docSnap = await firebase.firestore().collection('usuarios').doc(user.uid).get();
+    const logoBase64 = docSnap.data()?.logoBase64 || null;
+    gerarPDF(logoBase64);
+  } catch (err) {
+    console.error("Erro ao buscar logo do Firestore:", err);
+    gerarPDF();
+  }
+}
+
+
+
+// EXPORTAR PDF - Relatório de Equipamentos
+async function exportEquipamentosToPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const user = firebase.auth().currentUser;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 14;
+  const date = new Date().toLocaleDateString('pt-BR');
+
+  const gerarPDF = (logoBase64 = null) => {
+    let contentStartY = 20;
+
+    if (logoBase64) {
+      const img = new Image();
+      img.src = logoBase64;
+
+      img.onload = () => {
+        const maxWidth = 40;
+        const maxHeight = 20;
+
+        let width = img.width;
+        let height = img.height;
+
+        const widthRatio = maxWidth / width;
+        const heightRatio = maxHeight / height;
+        const scale = Math.min(widthRatio, heightRatio);
+
+        width = width * scale;
+        height = height * scale;
+
+        const x = pageWidth - width - margin;
+        const y = contentStartY;
+
+        doc.addImage(logoBase64, 'PNG', x, y, width, height);
+
+        renderTexto(y + height + 10); // após logo
+      };
+    } else {
+      renderTexto(contentStartY);
+    }
+
+    function renderTexto(startY) {
+      doc.setFontSize(18);
+      doc.setTextColor(33, 37, 41);
+      doc.text("Relatório de Equipamentos", margin, startY);
+
+      doc.setFontSize(12);
+      doc.setTextColor(55, 65, 81);
+      doc.text(`Gerado em: ${date}`, margin, startY + 8);
+
+      const equipamentos = appData?.equipments || [];
+
+      const body = equipamentos.map(eq => [
+        eq.description || '',
+        eq.category || '',
+        `R$ ${(parseFloat(eq.value) || 0).toFixed(2).replace('.', ',')}`
+      ]);
+
+      const total = equipamentos.reduce((sum, eq) => sum + parseFloat(eq.value || 0), 0);
+
+      doc.autoTable({
+        startY: startY + 20,
+        head: [['Descrição', 'Categoria', 'Valor (R$)']],
+        body,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [99, 102, 241],
+          textColor: 255,
+          fontSize: 12
+        },
+        bodyStyles: {
+          fontSize: 11
+        }
+      });
+
+      doc.setFontSize(12);
+      doc.setTextColor(20, 20, 20);
+      doc.text(`Total: R$ ${total.toFixed(2).replace('.', ',')}`, margin, doc.lastAutoTable.finalY + 10);
+
+      doc.save('relatorio_equipamentos.pdf');
+    }
+  };
+
+  if (!user) return gerarPDF();
+
+  try {
+    const docSnap = await firebase.firestore().collection('usuarios').doc(user.uid).get();
+    const logoBase64 = docSnap.data()?.logoBase64 || null;
+    gerarPDF(logoBase64);
+  } catch (err) {
+    console.error("Erro ao buscar logo para PDF:", err);
+    gerarPDF();
+  }
+}
 
 
 
@@ -2195,6 +2398,7 @@ async function exportJobToPDF(job) {
                 'Software': 'bg-green-100 text-green-800',
                 'Iluminação': 'bg-yellow-100 text-yellow-800',
                 'Audio': 'bg-purple-100 text-purple-800',
+                'Acessórios': 'bg-purple-100 text-purple-800',
                 'Outros': 'bg-gray-100 text-gray-800'
             };
 
