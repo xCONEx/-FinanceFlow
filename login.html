@@ -81,25 +81,37 @@
   const overlay = document.getElementById("loading-overlay");
 
   // ✅ Função comum para salvar ou carregar dados
-  async function handleUserLogin(user) {
-    const ref = doc(db, "usuarios", user.uid);
-    const docSnap = await getDoc(ref);
+ async function handleUserLogin(user) {
+  const ref = doc(db, "usuarios", user.uid);
+  const docSnap = await getDoc(ref);
 
-    if (docSnap.exists()) {
-      localStorage.setItem("financeFlowData", JSON.stringify(docSnap.data()));
-    } else {
-      const emptyData = {
-        jobs: [],
-        expenses: [],
-        equipments: [],
-        routine: {}
-      };
-      await setDoc(ref, emptyData);
-      localStorage.setItem("financeFlowData", JSON.stringify(emptyData));
-    }
+  const userData = {
+    email: user.email,
+    uid: user.uid
+  };
 
-    window.location.href = "index.html";
+  if (docSnap.exists()) {
+    // Atualiza o e-mail caso não esteja salvo
+    await setDoc(ref, userData, { merge: true });
+
+    const dataExistente = docSnap.data();
+    localStorage.setItem("financeFlowData", JSON.stringify(dataExistente));
+  } else {
+    // Cria o usuário com e-mail e dados vazios
+    const emptyData = {
+      ...userData,
+      jobs: [],
+      expenses: [],
+      equipments: [],
+      routine: {}
+    };
+    await setDoc(ref, emptyData);
+    localStorage.setItem("financeFlowData", JSON.stringify(emptyData));
   }
+
+  window.location.href = "index.html";
+}
+
 
   // ✅ Google Login
   document.getElementById("login-google")?.addEventListener("click", async () => {
