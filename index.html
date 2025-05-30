@@ -659,7 +659,7 @@ label[for="email-convite"] {
       <div class="flex items-center justify-between">
         <div>
           <p class="opacity-70">Valor Hora</p>
-          <h3 class="text-2xl font-bold mt-1">R$ <span id="valor-hora">0,00</span></h3>
+          <h3 class="text-2xl font-bold mt-1"><span id="valor-hora">0,00</span></h3>
         </div>
         <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-500">
           <i class="fas fa-clock text-xl"></i>
@@ -902,13 +902,13 @@ label[for="email-convite"] {
                             <div class="p-4 bg-blue-50 rounded-lg">
                                 <div class="flex justify-between items-center">
                                     <span class="font-medium text-blue-700">Valor por Dia:</span>
-                                    <span class="font-bold text-xl text-blue-900">R$ <span id="daily-value">0,00</span></span>
+                                    <span class="font-bold text-xl text-blue-900"><span id="daily-value">0,00</span></span>
                                 </div>
                             </div>
                             <div class="p-4 bg-green-50 rounded-lg">
                                 <div class="flex justify-between items-center">
                                     <span class="font-medium text-green-700">Valor por Hora:</span>
-                                    <span class="font-bold text-xl text-green-900">R$ <span id="hourly-value">0,00</span></span>
+                                    <span class="font-bold text-xl text-green-900"><span id="hourly-value">0,00</span></span>
                                 </div>
                             </div>
                         </div>
@@ -933,15 +933,15 @@ label[for="email-convite"] {
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label for="logistics-cost" class="block text-sm font-medium color: var(--text) mb-1">Logística (R$)</label>
-                                    <input type="number" step="0.01" id="logistics-cost" style="border-color: var(--border);" class="w-full px-4 py-2 borde rounded-lg focus:ring-primary focus:border-primary">
+                                    <input type="text" step="0.01" id="logistics-cost" style="border-color: var(--border);" class="currency-format w-full px-4 py-2 borde rounded-lg focus:ring-primary focus:border-primary">
                                 </div>
                                 <div>
                                     <label for="equipment-cost" class="block text-sm font-medium color: var(--text) mb-1">Equipamentos (R$)</label>
-                                    <input type="number" step="0.01" id="equipment-cost" style="border-color: var(--border);" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
+                                    <input type="text" step="0.01" id="equipment-cost" style="border-color: var(--border);" class="currency-format w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                                 </div>
                                 <div>
                                     <label for="assistance-cost" class="block text-sm font-medium color: var(--text) mb-1">Assistência (R$)</label>
-                                    <input type="number" step="0.01" id="assistance-cost" style="border-color: var(--border);" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
+                                    <input type="text" step="0.01" id="assistance-cost" style="border-color: var(--border);" class="currency-format w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
                                 </div>
                             </div>
                             
@@ -984,25 +984,25 @@ label[for="email-convite"] {
                             <div class="p-4 bg-gray-50 rounded-lg">
                                 <div class="flex justify-between items-center">
                                     <span class="font-medium text-blue-700">Custos Totais:</span>
-                                    <span class="font-bold text-blue-900">R$ <span id="total-costs">0,00</span></span>
+                                    <span class="font-bold text-blue-900"><span id="total-costs">R$ 0,00</span></span>
                                 </div>
                             </div>
                             <div class="p-4 bg-blue-50 rounded-lg">
                                 <div class="flex justify-between items-center">
                                     <span class="font-medium text-blue-700">Valor do Serviço:</span>
-                                    <span class="font-bold text-xl text-blue-900">R$ <span id="service-value">0,00</span></span>
+                                    <span class="font-bold text-xl text-blue-900"><span id="service-value">R$ 0,00</span></span>
                                 </div>
                             </div>
                             <div class="p-4 bg-green-50 rounded-lg">
                                 <div class="flex justify-between items-center">
                                     <span class="font-medium text-green-700">Valor com Desconto:</span>
-                                    <span class="font-bold text-xl text-green-900">R$ <span id="final-value">0,00</span></span>
+                                    <span class="font-bold text-xl text-green-900"><span id="final-value">R$ 0,00</span></span>
                                 </div>
                             </div>
                             <div class="p-4 bg-purple-50 rounded-lg">
                                 <div class="flex justify-between items-center">
                                     <span class="font-medium text-purple-700">Margem de Lucro:</span>
-                                    <span class="font-bold text-xl text-purple-900">R$ <span id="profit-margin">0,00</span></span>
+                                    <span class="font-bold text-xl text-purple-900"><span id="profit-margin">R$ 0,00</span></span>
                                 </div>
                             </div>
                             <div class="p-4 bg-yellow-50 rounded-lg">
@@ -1221,6 +1221,33 @@ label[for="email-convite"] {
     
 
     <script>
+
+//REAL moeda
+document.addEventListener('DOMContentLoaded', () => {
+  const currencyInputs = document.querySelectorAll('.currency-format');
+
+  currencyInputs.forEach(input => {
+    input.addEventListener('input', e => {
+      let raw = e.target.value.replace(/\D/g, '');
+
+      if (!raw) raw = '0';
+
+      const floatValue = parseInt(raw, 10) / 100;
+
+      // Armazena valor limpo para cálculos
+      e.target.setAttribute('data-raw', floatValue);
+
+      // Mostra formatado visualmente
+      e.target.value = floatValue.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    });
+  });
+});
+
+
+
 
 
 // EXPORTAR PDF - Relatório de Custos Mensais
@@ -1508,30 +1535,6 @@ document.getElementById('export-data-settings')?.addEventListener('click', () =>
 
 
 
-function formatCurrencyInput(input) {
-  let value = input.value.replace(/\D/g, ''); // remove tudo que não for número
-  if (value === '') {
-    input.value = 'R$ 0,00';
-    return;
-  }
-
-  value = (parseInt(value, 10) / 100).toFixed(2); // divide por 100 para obter centavos
-  value = value.replace('.', ','); // troca ponto por vírgula
-  value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // adiciona pontos de milhar
-  input.value = `R$ ${value}`;
-}
-
-function parseBRL(value) {
-  if (!value) return 0;
-  return parseFloat(
-    value.replace(/\s/g, '') // remove espaços
-         .replace('R$', '')  // remove símbolo
-         .replace(/\./g, '') // remove pontos
-         .replace(',', '.') // troca vírgula por ponto
-  );
-}
-
-
 
 
 
@@ -1774,37 +1777,43 @@ function renderRecentJobs() {
 
   const recentJobs = appData.jobs.slice(-3).reverse();
 
-  recentJobs.forEach((job, i) => {
-    const index = appData.jobs.length - 1 - i;
-    const jobElement = document.createElement('div');
-    jobElement.className = 'p-4 rounded-lg job-item border mb-2';
-    jobElement.style.background = 'var(--bg)';
-    jobElement.style.color = 'var(--text)';
-    jobElement.style.borderColor = 'var(--border)';
+recentJobs.forEach((job, i) => {
+  const index = appData.jobs.length - 1 - i;
+  const jobElement = document.createElement('div');
+  jobElement.className = 'p-4 rounded-lg job-item border mb-2';
+  jobElement.style.background = 'var(--bg)';
+  jobElement.style.color = 'var(--text)';
+  jobElement.style.borderColor = 'var(--border)';
 
-    jobElement.innerHTML = `
-      <div class="flex justify-between items-start">
-        <div>
-          <h4 class="font-bold job-desc break-words max-w-[130px]">${job.description}</h4>
-          <p class="text-sm opacity-60">${job.date}</p>
-        </div>
-        <span class="flex flex-col text-sm items-end">
-      <span style="opacity: 0.9;">R$ ${job.value.toFixed(2)}</span>
-      <span style="opacity: 0.6; font-size: 0.75rem;">${job.category}</span>
-    </span>
+  const valorFormatado = job.value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const lucroFormatado = job.profit.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const margemLucro = job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) : '0';
+
+  jobElement.innerHTML = `
+    <div class="flex justify-between items-start">
+      <div>
+        <h4 class="font-bold job-desc break-words max-w-[130px]">${job.description}</h4>
+        <p class="text-sm opacity-60">${job.date}</p>
       </div>
-      <div class="mt-1 text-sm flex justify-between">
-        <span class="text-green-600">Lucro: R$ ${job.profit.toFixed(2)}</span>
-        <span class="opacity-60">${job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) : '0'}% margem</span>
+      <span class="flex flex-col text-sm items-end">
+        <span style="opacity: 0.9;">${valorFormatado}</span>
+        <span style="opacity: 0.6; font-size: 0.75rem;">${job.category}</span>
+      </span>
+    </div>
+    <div class="mt-1 text-sm flex justify-between">
+      <span class="text-green-600">Lucro: ${lucroFormatado}</span>
+      <span class="opacity-60">${margemLucro}% margem</span>
+    </div>
+    ${job.status !== 'fechado' ? `
+      <div class="flex gap-2 mt-3 text-lg">
+        <button class="btn-edit" title="Editar nome">✏️</button>
+        <button class="btn-delete" title="Excluir">🗑️</button>
+        <button class="btn-pdf" title="Exportar Orçamento em PDF">📄</button>
       </div>
-      ${job.status !== 'fechado' ? `
-        <div class="flex gap-2 mt-3 text-lg">
-          <button class="btn-edit" title="Editar nome">✏️</button>
-          <button class="btn-delete" title="Excluir">🗑️</button>
-          <button class="btn-pdf" title="Exportar Orçamento em PDF">📄</button>
-        </div>
-      ` : `<div class="mt-2 text-green-500">✅ Aprovado</div>`}
-    `;
+    ` : `<div class="mt-2 text-green-500">✅ Aprovado</div>`}
+  `;
+
+
 
     // Editar nome
     if (job.status !== 'fechado') {
@@ -1944,11 +1953,24 @@ async function exportJobToPDF(job) {
         head: [['Item', 'Valor (R$)']],
         body: [
           ['Horas estimadas', `${job.hours || 0}h`],
-          ['Logística', `R$ ${(job.logistics || 0).toFixed(2)}`],
-          ['Equipamentos', `R$ ${(job.equipment || 0).toFixed(2)}`],
-          ['Assistência', `R$ ${(job.assistance || 0).toFixed(2)}`],
-          ['Custo total', `R$ ${((job.logistics || 0) + (job.equipment || 0) + (job.assistance || 0)).toFixed(2)}`],
-          ['Valor total', `R$ ${(job.value || 0).toFixed(2)}`],
+          ['Logística', (job.logistics || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })]
+
+         // ['Logística', `R$ ${(job.logistics || 0).toFixed(2)}`],
+          ['Equipamentos', (job.equipment || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })]
+
+          //['Equipamentos', `R$ ${(job.equipment || 0).toFixed(2)}`],
+          ['Assistência', (job.assistance || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })]
+          //['Assistência', `R$ ${(job.assistance || 0).toFixed(2)}`],
+         [
+  'Custo total',
+  ((job.logistics || 0) + (job.equipment || 0) + (job.assistance || 0)).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  })
+]
+         // ['Custo total', `R$ ${((job.logistics || 0) + (job.equipment || 0) + (job.assistance || 0)).toFixed(2)}`],
+          ['Valor total', (job.value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })]
+          //['Valor total', `R$ ${(job.value || 0).toFixed(2)}`],
         ],
         theme: 'grid',
         headStyles: {
@@ -2017,36 +2039,41 @@ function renderJobHistory() {
 
     let totalValue = 0;
 
-    sortedJobs.forEach((job, i) => {
-        const index = appData.jobs.indexOf(job);
-        const jobElement = document.createElement('div');
-        jobElement.className = 'p-4 rounded-lg job-item border mb-2';
-        jobElement.style.background = 'var(--bg)';
-        jobElement.style.color = 'var(--text)';
-        jobElement.style.borderColor = 'var(--border)';
+sortedJobs.forEach((job, i) => {
+  const index = appData.jobs.indexOf(job);
+  const jobElement = document.createElement('div');
+  jobElement.className = 'p-4 rounded-lg job-item border mb-2';
+  jobElement.style.background = 'var(--bg)';
+  jobElement.style.color = 'var(--text)';
+  jobElement.style.borderColor = 'var(--border)';
 
-        totalValue += job.value;
+  totalValue += job.value;
 
-        jobElement.innerHTML = `
-            <div class="flex justify-between items-center mb-1">
-                <span class="flex flex-col job-desc">
-                    <strong>${job.description}</strong>
-                    <span style="opacity: 0.6; font-size: 0.75rem;">${job.category || ''}</span>
-                </span>
-                <span class="text-sm opacity-90">R$ ${job.value.toFixed(2)}</span>
-            </div>
-            <div class="mt-1 text-sm flex justify-between">
-                <span class="text-green-600">Lucro: R$ ${job.profit.toFixed(2)}</span>
-                <span class="opacity-60">${job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) : '0'}% margem</span>
-            </div>
-            ${job.status !== 'fechado' ? `
-                <div class="flex gap-2 mt-3 text-lg">
-                    <button class="btn-edit" title="Editar nome">✏️</button>
-                    <button class="btn-delete" title="Excluir">🗑️</button>
-                    <button class="btn-pdf" id="exportar-data" title="Exportar Orçamento em PDF">📄</button>
-                </div>
-            ` : `<div class="mt-2 text-green-500">✅ Aprovado</div>`}
-        `;
+  const valorFormatado = job.value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const lucroFormatado = job.profit.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const margemLucro = job.value > 0 ? ((job.profit / job.value) * 100).toFixed(1) : '0';
+
+  jobElement.innerHTML = `
+    <div class="flex justify-between items-center mb-1">
+      <span class="flex flex-col job-desc">
+        <strong>${job.description}</strong>
+        <span style="opacity: 0.6; font-size: 0.75rem;">${job.category || ''}</span>
+      </span>
+      <span class="text-sm opacity-90">${valorFormatado}</span>
+    </div>
+    <div class="mt-1 text-sm flex justify-between">
+      <span class="text-green-600">Lucro: ${lucroFormatado}</span>
+      <span class="opacity-60">${margemLucro}% margem</span>
+    </div>
+    ${job.status !== 'fechado' ? `
+      <div class="flex gap-2 mt-3 text-lg">
+        <button class="btn-edit" title="Editar nome">✏️</button>
+        <button class="btn-delete" title="Excluir">🗑️</button>
+        <button class="btn-pdf" id="exportar-data" title="Exportar Orçamento em PDF">📄</button>
+      </div>
+    ` : `<div class="mt-2 text-green-500">✅ Aprovado</div>`}
+  `;
+
 
         // Apenas se não estiver fechado, ativa botões
         if (job.status !== 'fechado') {
@@ -2306,31 +2333,41 @@ async function exportJobToPDF(job) {
             expenses.forEach(expense => {
                 total += expense.value;
                 
-                const expenseElement = document.createElement('div');
-               expenseElement.className = 'grid grid-cols-12 gap-4 p-4 items-center';
-                expenseElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
-                expenseElement.innerHTML = `
-                    <div class="col-span-5 font-medium  break-words max-w-[130px]">${expense.description}</div>
-                    <div class="col-span-3">
-                        <span class="px-3 py-1 rounded-full text-xs ${getCategoryColor(expense.category)}">${expense.category}</span>
-                    </div>
-                    <div class="col-span-2 text-right font-medium ">R$ ${expense.value.toFixed(2)}</div>
-                    <div class="col-span-2 flex justify-center space-x-2">
-                        <button class="edit-expense p-2 text-blue-500 hover:text-blue-700" data-id="${expense.id}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="delete-expense p-2 text-red-500 hover:text-red-700" data-id="${expense.id}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
+const expenseElement = document.createElement('div');
+expenseElement.className = 'grid grid-cols-12 gap-4 p-4 items-center';
+expenseElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
+
+const valorFormatado = expense.value.toLocaleString('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+});
+
+expenseElement.innerHTML = `
+  <div class="col-span-5 font-medium break-words max-w-[130px]">${expense.description}</div>
+  <div class="col-span-3">
+    <span class="px-3 py-1 rounded-full text-xs ${getCategoryColor(expense.category)}">${expense.category}</span>
+  </div>
+  <div class="col-span-2 text-right font-medium">${valorFormatado}</div>
+  <div class="col-span-2 flex justify-center space-x-2">
+    <button class="edit-expense p-2 text-blue-500 hover:text-blue-700" data-id="${expense.id}">
+      <i class="fas fa-edit"></i>
+    </button>
+    <button class="delete-expense p-2 text-red-500 hover:text-red-700" data-id="${expense.id}">
+      <i class="fas fa-trash"></i>
+    </button>
+  </div>
+`;
+
                 
                 expensesList.appendChild(expenseElement);
-            });
+});
             
-            monthlyTotal.textContent = total.toFixed(2);
-            updateDashboard();
-            updateChart();
+monthlyTotal.textContent = total.toLocaleString('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+});
+updateDashboard();
+updateChart();
         }
         
         function getCategoryColor(category) {
@@ -2366,7 +2403,9 @@ async function exportJobToPDF(job) {
             const id = expenseForm.dataset.id ? parseInt(expenseForm.dataset.id) : Date.now();
             const description = document.getElementById('expense-description').value;
             const category = document.getElementById('expense-category').value;
-            const value = parseFloat(document.getElementById('expense-value').value);
+            //const value = parseFloat(document.getElementById('expense-value').value);
+            const valor = parseFloat(document.getElementById('expense-value').dataset.raw) || 0;
+
             
             if (!description || isNaN(value)) {
                 alert('Por favor, preencha todos os campos corretamente.');
@@ -2434,30 +2473,42 @@ async function exportJobToPDF(job) {
             equipments.forEach(equipment => {
                 total += equipment.value;
                 
-                const equipmentElement = document.createElement('div');
-                equipmentElement.className = 'grid grid-cols-12 gap-4 p-4 items-center';
-                   equipmentElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
-                equipmentElement.innerHTML = `
-                    <div class="col-span-6 font-medium break-words max-w-[130px]">${equipment.description}</div>
-                    <div class="col-span-3">
-                        <span class="px-3 py-1 rounded-full text-xs ${getEquipmentCategoryColor(equipment.category)}">${equipment.category}</span>
-                    </div>
-                    <div class="col-span-2 text-right font-medium ">R$ ${equipment.value.toFixed(2)}</div>
-                    <div class="col-span-1 flex justify-center">
-                        <button class="edit-equipment p-2 text-blue-500 hover:text-blue-700" data-id="${equipment.id}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="delete-equipment p-2 text-red-500 hover:text-red-700" data-id="${equipment.id}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
+const equipmentElement = document.createElement('div');
+equipmentElement.className = 'grid grid-cols-12 gap-4 p-4 items-center';
+equipmentElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
+
+const valorFormatado = equipment.value.toLocaleString('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+});
+
+equipmentElement.innerHTML = `
+  <div class="col-span-5 font-medium break-words max-w-[130px]">${equipment.description}</div>
+  <div class="col-span-3">
+    <span class="px-3 py-1 rounded-full text-xs ${getEquipmentCategoryColor(equipment.category)}">${equipment.category}</span>
+  </div>
+  <div class="col-span-2 text-right font-medium">${valorFormatado}</div>
+  <div class="col-span-2 flex justify-center space-x-2">
+    <button class="edit-equipment p-2 text-blue-500 hover:text-blue-700" data-id="${equipment.id}">
+      <i class="fas fa-edit"></i>
+    </button>
+    <button class="delete-equipment p-2 text-red-500 hover:text-red-700" data-id="${equipment.id}">
+      <i class="fas fa-trash"></i>
+    </button>
+  </div>
+`;
+
+
                 
                 equipmentList.appendChild(equipmentElement);
-            });
-            
-            equipmentTotal.textContent = total.toFixed(2);
-            updateDashboard();
+});
+equipmentTotal.textContent = total.toLocaleString('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+});
+
+updateDashboard();
+
         }
         
         function getEquipmentCategoryColor(category) {
@@ -2556,28 +2607,49 @@ async function exportJobToPDF(job) {
         const dailyValue = document.getElementById('daily-value');
         const hourlyValue = document.getElementById('hourly-value');
         
-        function calculateRoutineValues() {
-            const desiredSalary = parseFloat(document.getElementById('desired-salary').value);
-            const workDays = parseInt(document.getElementById('work-days').value);
-            const dailyHours = parseInt(document.getElementById('daily-hours').value);
-            
-            if (isNaN(desiredSalary) || isNaN(workDays) || isNaN(dailyHours)) {
-                alert('Por favor, preencha todos os campos corretamente.');
-                return;
-            }
-            
-            const daily = desiredSalary / workDays;
-            const hourly = daily / dailyHours;
-            
-            dailyValue.textContent = daily.toFixed(2);
-            hourlyValue.textContent = hourly.toFixed(2);
-            
-            routineResults.classList.remove('hidden');
-            
-            // Update dashboard
-            updateDashboard();
-            saveData();
-        }
+function calculateRoutineValues() {
+  const rawSalary = document.getElementById('desired-salary').value;
+
+  // Converte R$ 10.000,00 -> 10000.00
+  const desiredSalary = parseFloat(
+    rawSalary.replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '')
+  );
+  const workDays = parseInt(document.getElementById('work-days').value);
+  const dailyHours = parseInt(document.getElementById('daily-hours').value);
+
+  if (isNaN(desiredSalary) || isNaN(workDays) || isNaN(dailyHours) || desiredSalary <= 0) {
+    alert('Por favor, preencha todos os campos corretamente.');
+    return;
+  }
+
+  const daily = desiredSalary / workDays;
+  const hourly = daily / dailyHours;
+
+  // Atualiza campos de exibição
+  document.getElementById('daily-value').textContent = daily.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+
+  document.getElementById('hourly-value').textContent = hourly.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+
+  // Atualiza valor-hora da dashboard diretamente aqui também
+  document.getElementById('valor-hora').textContent = hourly.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+
+  document.getElementById('routine-results').classList.remove('hidden');
+
+  updateDashboard(); // mantém
+  saveData(); // mantém
+}
+
+
+
         
         routineForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -2596,15 +2668,24 @@ async function exportJobToPDF(job) {
         jobCalculatorForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
-            const logisticsCost = parseFloat(document.getElementById('logistics-cost').value) || 0;
-            const equipmentCost = parseFloat(document.getElementById('equipment-cost').value) || 0;
-            const assistanceCost = parseFloat(document.getElementById('assistance-cost').value) || 0;
+            function parseBRL(inputId) {
+  const raw = document.getElementById(inputId).value;
+  return parseFloat(raw.replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '')) || 0;
+}
+
+const logisticsCost = parseBRL('logistics-cost');
+const equipmentCost = parseBRL('equipment-cost');
+const assistanceCost = parseBRL('assistance-cost');
+
+
             const estimatedHours = parseFloat(document.getElementById('estimated-hours').value) || 0;
             const difficultyLevel = parseFloat(document.getElementById('difficulty-level').value);
             const discountPercentage = parseFloat(document.getElementById('discount-percentage').value) || 0;
             
             
-            const hourlyRate = parseFloat(document.getElementById('hourly-value').textContent) || 0;
+            const hourlyRateText = document.getElementById('hourly-value').textContent;
+const hourlyRate = parseFloat(hourlyRateText.replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '')) || 0;
+
             const jobDescription = document.getElementById('job-description').value || 'Job sem descrição';
             const categoryInput = document.getElementById('job-category');
             const category = categoryInput ? categoryInput.value : 'Outro';
@@ -2621,10 +2702,22 @@ async function exportJobToPDF(job) {
             const totalWithDiscount = totalBeforeDiscount - discountAmount;
             const profit = totalWithDiscount - totalDirectCosts;
 
-            totalCosts.textContent = totalDirectCosts.toFixed(2);
-            serviceValue.textContent = serviceCost.toFixed(2);
-            finalValue.textContent = totalWithDiscount.toFixed(2);
-            profitMargin.textContent = profit.toFixed(2);
+totalCosts.textContent = totalDirectCosts.toLocaleString('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+});
+serviceValue.textContent = serviceCost.toLocaleString('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+});
+finalValue.textContent = totalWithDiscount.toLocaleString('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+});
+profitMargin.textContent = profit.toLocaleString('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+});
 
             jobResults.classList.remove('hidden');
 
@@ -2678,24 +2771,47 @@ function calculateTotalJobs() {
     }
 
     const total = appData.jobs.reduce((sum, job) => sum + job.value, 0);
-    document.getElementById('total-jobs').textContent = total.toFixed(2);
+    //document.getElementById('total-jobs').textContent = total.toFixed(2);
+    document.getElementById('total-jobs').textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
 }
         
-        // Update dashboard with all current values
-        function updateDashboard() {
-            // Update expenses total
-            const totalExpenses = expenses.reduce((sum, expense) => sum + expense.value, 0);
-            document.getElementById('total-custos').textContent = totalExpenses.toFixed(2);
-            
-            // Update equipment total
-            const totalEquipments = equipments.reduce((sum, equipment) => sum + equipment.value, 0);
-            document.getElementById('total-equipamentos').textContent = totalEquipments.toFixed(2);
-            
-            // Update hourly rate if calculated
-            if (routineResults && !routineResults.classList.contains('hidden')) {
-                const hourlyRate = parseFloat(document.getElementById('hourly-value').textContent);
-                document.getElementById('valor-hora').textContent = hourlyRate.toFixed(2);
-            }
+function updateDashboard() {
+  // Update expenses total
+  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.value, 0);
+  document.getElementById('total-custos').textContent = totalExpenses.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+
+  // Update equipment total
+  const totalEquipments = equipments.reduce((sum, equipment) => sum + equipment.value, 0);
+  document.getElementById('total-equipamentos').textContent = totalEquipments.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+
+  // Update hourly rate if calculated
+  if (routineResults && !routineResults.classList.contains('hidden')) {
+    const hourlyText = document.getElementById('hourly-value').textContent;
+
+    const hourlyRate = parseFloat(
+      hourlyText.replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '')
+    );
+
+    document.getElementById('valor-hora').textContent = hourlyRate.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
+  
+
+  // Update total jobs
+  calculateTotalJobs();
+
+  // Update jobs count
+  document.getElementById('jobs-count').textContent = appData.jobs.length;
+}
+
             
             // Update total jobs
             calculateTotalJobs();
@@ -2784,7 +2900,9 @@ function gerarGraficoEvolucao() {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: ctx => `R$ ${ctx.raw.toFixed(2)}`
+            //label: ctx => `R$ ${ctx.raw.toFixed(2)}`
+            label: ctx => ctx.raw.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
           }
         }
       },
@@ -2806,8 +2924,6 @@ function gerarGraficoEvolucao() {
     }
   });
 }
-
-
 
 
 
@@ -2949,6 +3065,33 @@ function autoSave() {
 }
 
  
+
+ document.addEventListener('DOMContentLoaded', () => {
+  const currencyInputs = document.querySelectorAll('.currency-format');
+
+  currencyInputs.forEach(input => {
+    input.addEventListener('input', e => {
+      let value = e.target.value;
+
+      // Remove tudo que não for número
+      value = value.replace(/\D/g, '');
+
+      // Converte para float dividindo por 100 (pra ter 2 casas decimais)
+      value = (parseInt(value, 10) / 100).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
+      e.target.value = value;
+    });
+  });
+});
+
+function parseBrazilianCurrency(value) {
+  let numberString = value.replace(/\./g, '').replace(',', '.');
+  return parseFloat(numberString);
+}
+
 </script>
 
 <!-- FIM DO SCRIPT GERAL -->
@@ -3216,13 +3359,13 @@ document.getElementById("save-data")?.addEventListener("click", () => {
     appData.equipments = [...equipments];
 
     if (routineResults && !routineResults.classList.contains('hidden')) {
-      appData.routine = {
-        desiredSalary: parseFloat(document.getElementById('desired-salary').value),
-        workDays: parseInt(document.getElementById('work-days').value),
-        dailyHours: parseInt(document.getElementById('daily-hours').value),
-        dailyValue: parseFloat(document.getElementById('daily-value').textContent),
-        hourlyValue: parseFloat(document.getElementById('hourly-value').textContent)
-      };
+appData.routine = {
+  desiredSalary: parseFloat(document.getElementById('desired-salary').value.replace(/\./g, '').replace(',', '.')),
+  workDays: parseInt(document.getElementById('work-days').value),
+  dailyHours: parseInt(document.getElementById('daily-hours').value),
+  dailyValue: parseFloat(document.getElementById('daily-value').textContent.replace(/\./g, '').replace(',', '.')),
+  hourlyValue: parseFloat(document.getElementById('hourly-value').textContent.replace(/\./g, '').replace(',', '.'))
+};
     }
 
     localStorage.setItem("financeFlowData", JSON.stringify(appData));
