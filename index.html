@@ -3455,56 +3455,53 @@ document.getElementById("save-data")?.addEventListener("click", () => {
 
 
 <script type="module">
-  import {
-    auth,
-    db,
-    onAuthStateChanged,
-    collection,
-    query,
-    where,
-    getDocs
-  } from './firebase.js';
+import { auth, db, onAuthStateChanged, collection, getDocs } from './firebase.js';
 
-  const infoAgenciaEl = document.getElementById("info-agencia");
+const infoAgenciaEl = document.getElementById("info-agencia");
 
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
 
-    // Buscar todas as agências
-    const agenciasSnap = await getDocs(collection(db, "agencias"));
-    let nomeAgencia = "";
-    let tipo = "";
+  const agenciasSnap = await getDocs(collection(db, "agencias"));
 
-    agenciasSnap.forEach(docSnap => {
-      const data = docSnap.data();
+  let nomeAgencia = null;
+  let tipo = null;
 
-      if (data.ownerUID === user.uid) {
-        nomeAgencia = data.nome || "Agência";
-        tipo = "Dono";
-      } else if (data.colaboradores && data.colaboradores[user.email]) {
-        nomeAgencia = data.nome || "Agência";
-        tipo = "Colaborador";
-      }
-    });
+  agenciasSnap.forEach(doc => {
+    const data = doc.data();
 
-if (nomeAgencia) {
-  infoAgenciaEl.innerHTML = `
-    <div style="
-      margin-top: 1rem;
-      padding: 0.75rem;
-      background-color: var(--card-bg);
-      border-radius: 0.5rem;
-      font-size: 0.875rem;
-      color: var(--text);
-      border: 1px solid var(--border);
-    ">
-      <strong>${nomeAgencia}</strong> — ${tipo}
-    </div>
-  `;
-}
-
+    if (data.ownerUID === user.uid) {
+      nomeAgencia = data.nome;
+      tipo = "Owner";
+    } else if (Array.isArray(data.colaboradores) && data.colaboradores.includes(user.email)) {
+      nomeAgencia = data.nome;
+      tipo = "Colaborador";
+    }
   });
+
+  if (nomeAgencia) {
+    infoAgenciaEl.innerHTML = `
+      <div style="
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: var(--card-bg);
+        color: var(--text);
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+      ">
+        📌 <strong>${nomeAgencia}</strong> — ${tipo}
+      </div>
+    `;
+  } else {
+    infoAgenciaEl.innerHTML = `
+      <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem;">
+        Você ainda não está associado a nenhuma agência.
+      </div>
+    `;
+  }
+});
 </script>
+
 
 
 
