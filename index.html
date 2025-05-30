@@ -3515,6 +3515,7 @@ document.getElementById("save-data")?.addEventListener("click", () => {
 </script>
 
 
+<!-- Script Principal -->
 <script type="module">
   import { auth, db } from './firebase.js';
   import {
@@ -3553,7 +3554,6 @@ document.getElementById("save-data")?.addEventListener("click", () => {
     if (!user) return;
 
     const agenciasSnap = await getDocs(collection(db, "agencias"));
-
     let nomeAgencia = null;
     tipoUsuario = null;
     let agenciaAtual = null;
@@ -3593,9 +3593,8 @@ document.getElementById("save-data")?.addEventListener("click", () => {
       const conviteModal = document.getElementById("convite-pendente");
       conviteModal.classList.remove("hidden");
 
-      // Remove event listeners anteriores para evitar duplicação
       const btnAceitar = document.getElementById("btn-aceitar-convite");
-      btnAceitar.replaceWith(btnAceitar.cloneNode(true)); // clone para limpar listeners
+      btnAceitar.replaceWith(btnAceitar.cloneNode(true));
       const novoBtnAceitar = document.getElementById("btn-aceitar-convite");
 
       novoBtnAceitar.addEventListener("click", async () => {
@@ -3633,15 +3632,14 @@ document.getElementById("save-data")?.addEventListener("click", () => {
       `;
 
       const btnAbrirModal = document.getElementById("abrir-modal-colaboradores");
-      if (btnAbrirModal) {
-        btnAbrirModal.addEventListener("click", async () => {
-          const agenciaRef = doc(db, "agencias", agenciaSelecionada);
-          const agenciaSnap = await getDoc(agenciaRef);
-          mostrarEmails(agenciaSnap, tipoUsuario);
-          atualizarVisibilidadeConvite();
-          modalColabs.classList.remove("hidden");
-        });
-      }
+      btnAbrirModal?.addEventListener("click", async () => {
+        const agenciaRef = doc(db, "agencias", agenciaSelecionada);
+        const agenciaSnap = await getDoc(agenciaRef);
+        mostrarEmails(agenciaSnap, tipoUsuario);
+        atualizarVisibilidadeConvite();
+        modalColabs.classList.remove("hidden");
+      });
+
     } else {
       infoAgenciaEl.innerHTML = `
         <div class="text-sm mt-4" style="color: var(--text-muted);">
@@ -3654,26 +3652,19 @@ document.getElementById("save-data")?.addEventListener("click", () => {
   async function mostrarEmails(agenciaDoc, tipoUsuario) {
     const data = agenciaDoc.data();
     const colabs = data.colaboradores || [];
-    const linhas = [];
-
-    for (const c of colabs) {
-      const email = c.email || "(sem email)";
-      const permissao = c.permissao || "-";
-
-      linhas.push(`
-        <div class="flex justify-between items-center p-2 rounded" style="background-color: var(--input-bg); color: var(--text);">
-          <div>
-            📧 <strong>${email}</strong><br>
-            <span class="text-xs" style="color: var(--text-muted);">Permissão: ${permissao}</span>
-          </div>
-          ${tipoUsuario === "Owner" ? `
-          <div class="space-x-2 text-right">
-            <button onclick="alterarPermissao('${c.uid}')" class="text-xs hover:underline cursor-pointer" style="color: var(--primary);">🔄 Alterar</button>
-            <button onclick="removerColaborador('${c.uid}')" class="text-xs hover:underline cursor-pointer" style="color: red;">❌ Remover</button>
-          </div>` : ''}
+    const linhas = colabs.map(c => `
+      <div class="flex justify-between items-center p-2 rounded" style="background-color: var(--input-bg); color: var(--text);">
+        <div>
+          📧 <strong>${c.email}</strong><br>
+          <span class="text-xs" style="color: var(--text-muted);">Permissão: ${c.permissao}</span>
         </div>
-      `);
-    }
+        ${tipoUsuario === "Owner" ? `
+        <div class="space-x-2 text-right">
+          <button onclick="alterarPermissao('${c.uid}')" class="text-xs hover:underline cursor-pointer" style="color: var(--primary);">🔄 Alterar</button>
+          <button onclick="removerColaborador('${c.uid}')" class="text-xs hover:underline cursor-pointer" style="color: red;">❌ Remover</button>
+        </div>` : ''}
+      </div>
+    `);
 
     listaColabs.innerHTML = linhas.length
       ? linhas.join("")
@@ -3745,13 +3736,7 @@ document.getElementById("save-data")?.addEventListener("click", () => {
   configurarSelectPermissao();
 </script>
 
-
-
-
-
-
-
-<!-- Modal para aceitar convite pendente -->
+<!-- Modal de Convite Pendente -->
 <div id="convite-pendente" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
   <div style="background-color: var(--card-bg); color: var(--text);" class="p-6 rounded shadow max-w-md w-full text-center">
     <p class="text-lg mb-4">
@@ -3767,7 +3752,7 @@ document.getElementById("save-data")?.addEventListener("click", () => {
   </div>
 </div>
 
-<!-- Modal com formulário de convite e lista de colaboradores -->
+<!-- Modal de Colaboradores -->
 <div id="modal-colaboradores" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center px-4">
   <div style="background-color: var(--card-bg); color: var(--text);" class="p-6 rounded-lg max-w-md w-full shadow-xl">
     <h2 class="text-xl font-semibold mb-4 text-center">👥 Colaboradores da Agência</h2>
@@ -3802,6 +3787,7 @@ document.getElementById("save-data")?.addEventListener("click", () => {
     </button>
   </div>
 </div>
+
 
 
 
