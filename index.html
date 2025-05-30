@@ -20,8 +20,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
 
 
-
-
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -67,7 +65,7 @@
   --bg: #101826;         /* fundo geral (layout) */
   --card-bg: #1f2937;    /* fundo dos cards/boxes */
   --text: #f1f5f9;       /* texto branco principal */
-  --text-muted: #3f4754; /* texto secundário leve */
+  --text-muted: #5c6779; /* texto secundário leve */
   --input-bg: #475569;   /* fundo de input */
   --primary: #6366f1;    /* roxo padrão (fixo) */
   --border: #3F4754;     /* bordas suaves */
@@ -399,6 +397,60 @@ nav a.active {
 }
 
 
+/* Input de email */
+#email-convite {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #3b82f6;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e40af;
+  box-shadow: 0 2px 6px rgb(59 130 246 / 0.25);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  outline-offset: 2px;
+  flex-grow: 1;
+  min-width: 0;
+}
+#email-convite:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 8px 2px rgba(37, 99, 235, 0.5);
+  outline: none;
+}
+
+/* Label do convite para alinhar com o input e select */
+label[for="email-convite"] {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+  color: #1e40af;
+}
+
+/* Botão enviar convite */
+#enviar-convite {
+  margin-left: 8px;
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+#enviar-convite:hover {
+  background-color: #2563eb;
+}
+
+/* Container que contém o input, select e botão - ajuste para alinhar em linha */
+#container-convite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+
+
 </style>
 
 
@@ -553,7 +605,24 @@ nav a.active {
 
                 </div>
                 <div class="flex items-center space-x-4">
+<!-- 
+                <div class="relative" id="dropdown-modo-wrapper">
+  <button id="dropdown-modo-toggle" class="flex items-center gap-2 px-3 py-1 text-sm rounded cursor-pointer border" style="color: var(--text); border-color: var(--border); background: var(--card-bg);">
+    ⚙️ Modo
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+  <div id="dropdown-modo" class="absolute right-0 mt-2 w-40 rounded shadow hidden z-50" style="background: var(--card-bg); border: 1px solid var(--border);">
+    <button data-modo="pessoal" class="w-full text-left px-4 py-2 text-sm hover:opacity-80" style="color: var(--text);">👤 Modo Pessoal</button>
+    <button data-modo="agencia" class="w-full text-left px-4 py-2 text-sm hover:opacity-80" style="color: var(--text);">🏢 Modo Agência</button>
+  </div>
+                </div>
 
+                <div id="badge-modo-atual" class="inline-block text-xs px-3 py-1 rounded-full mt-2 font-medium" style="background: var(--input-bg); color: var(--text);">
+  🔍 Modo: carregando...
+</div>
+--> 
                    <button id="open-notify" class=
                    "p-2 rounded-full hover:bg-gray-100 color: var(--text); opacity: 0.6 hover:text-green-700" title="Notificações">
                 <i class="fas fa-bell"></i>
@@ -989,7 +1058,17 @@ nav a.active {
 
 <div class="mt-6"> 
        
-        <div id="info-agencia"></div>
+        <!-- Exibe info da agência -->
+<div id="info-agencia" class="mt-4"></div>
+
+
+        <div id="botao-ver-colaboradores" class="hidden mt-3">
+  <button onclick="mostrarEmails()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+    📧 Ver Colaboradores da Agência
+  </button>
+  
+</div>
+
 </div>
 
     <!-- Botões principais -->
@@ -1156,6 +1235,7 @@ nav a.active {
 
 
 
+    
 
     <script>
 
@@ -3452,12 +3532,39 @@ document.getElementById("save-data")?.addEventListener("click", () => {
 </script>
 
 
-
-
 <script type="module">
-import { auth, db, onAuthStateChanged, collection, getDocs } from './firebase.js';
+  import { auth, db } from './firebase.js';
+  import {
+    collection, getDocs, getDoc, doc, updateDoc, arrayUnion, arrayRemove
+  } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+  import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
 
-const infoAgenciaEl = document.getElementById("info-agencia");
+  const infoAgenciaEl = document.getElementById("info-agencia");
+  const modalColabs = document.getElementById("modal-colaboradores");
+  const listaColabs = document.getElementById("lista-colabs");
+  const btnFecharModal = document.getElementById("fechar-modal-colaboradores");
+  const inputConvite = document.getElementById("email-convite");
+  const btnEnviarConvite = document.getElementById("enviar-convite");
+  const selectPermissao = document.getElementById("select-permissao");
+  const labelConvite = document.querySelector('label[for="email-convite"]');
+  const containerConvite = document.getElementById("container-convite");
+
+  let agenciaSelecionada = null;
+  let tipoUsuario = null;
+
+  function configurarSelectPermissao() {
+    selectPermissao.innerHTML = `
+      <option value="leitura">🔍 Leitor</option>
+      <option value="edicao">✏️ Editor</option>
+    `;
+  }
+
+  function atualizarVisibilidadeConvite() {
+    const visible = tipoUsuario === "Owner";
+    labelConvite.style.display = visible ? "block" : "none";
+    containerConvite.style.display = visible ? "flex" : "none";
+    btnEnviarConvite.style.display = visible ? "block" : "none";
+  }
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
@@ -3465,42 +3572,347 @@ onAuthStateChanged(auth, async (user) => {
   const agenciasSnap = await getDocs(collection(db, "agencias"));
 
   let nomeAgencia = null;
-  let tipo = null;
+  tipoUsuario = null;
+  let agenciaAtual = null;
+  let convitePendentesInfo = null;
 
-  agenciasSnap.forEach(doc => {
-    const data = doc.data();
+  for (const docSnap of agenciasSnap.docs) {
+    const data = docSnap.data();
 
     if (data.ownerUID === user.uid) {
       nomeAgencia = data.nome;
-      tipo = "Owner";
-    } else if (Array.isArray(data.colaboradores) && data.colaboradores.includes(user.email)) {
+      tipoUsuario = "Owner";
+      agenciaAtual = docSnap;
+      break;
+    } else if (Array.isArray(data.colaboradores) && data.colaboradores.some(c => c.uid === user.uid)) {
       nomeAgencia = data.nome;
-      tipo = "Colaborador";
+      tipoUsuario = "Colaborador";
+      agenciaAtual = docSnap;
+      break;
     }
-  });
+  }
 
-  if (nomeAgencia) {
+  if (!nomeAgencia) {
+    for (const docSnap of agenciasSnap.docs) {
+      const data = docSnap.data();
+      const convite = (data.convitesPendentes || []).find(c => c.email === user.email);
+      if (convite) {
+        convitePendentesInfo = { agenciaId: docSnap.id, agenciaNome: data.nome, permissao: convite.permissao };
+        break;
+      }
+    }
+  }
+
+  if (convitePendentesInfo) {
+    document.getElementById("nome-agencia-convite").textContent = convitePendentesInfo.agenciaNome;
+    document.getElementById("permissao-convite").textContent = convitePendentesInfo.permissao;
+    const conviteModal = document.getElementById("convite-pendente");
+    conviteModal.classList.remove("hidden");
+
+    document.getElementById("btn-aceitar-convite").onclick = async () => {
+      const ref = doc(db, "agencias", convitePendentesInfo.agenciaId);
+      const snap = await getDoc(ref);
+
+      await updateDoc(ref, {
+        colaboradores: arrayUnion({ uid: user.uid, email: user.email, permissao: convitePendentesInfo.permissao }),
+        convitesPendentes: arrayRemove({ email: user.email, permissao: convitePendentesInfo.permissao })
+      });
+
+      conviteModal.classList.add("hidden");
+      location.reload();
+    };
+
+    return;
+  }
+
+  const modoVisualizacao = localStorage.getItem("modo-visualizacao") || "pessoal";
+
+  if (modoVisualizacao === "agencia" && nomeAgencia && agenciaAtual) {
+    agenciaSelecionada = agenciaAtual.id;
+
     infoAgenciaEl.innerHTML = `
-      <div style="
-        margin-top: 1rem;
-        padding: 0.75rem;
-        background: var(--card-bg);
-        color: var(--text);
-        border-radius: 0.5rem;
-        font-size: 0.9rem;
-      ">
-        📌 <strong>${nomeAgencia}</strong> — ${tipo}
+      <div class="mt-4 p-4 rounded-lg shadow" style="background: var(--card-bg); color: var(--text);">
+        <h3 class="text-lg font-semibold">🏢 Dashboard da Agência</h3>
+        <p>📌 <strong>${nomeAgencia}</strong> — ${tipoUsuario}</p>
+        <button id="abrir-modal-colaboradores" class="mt-3 px-4 py-2 rounded cursor-pointer" style="background: var(--primary); color: white;">
+          📧 Ver Colaboradores
+        </button>
       </div>
     `;
+
+    const btnAbrirModal = document.getElementById("abrir-modal-colaboradores");
+    if (btnAbrirModal) {
+      btnAbrirModal.addEventListener("click", async () => {
+        const agenciaRef = doc(db, "agencias", agenciaSelecionada);
+        const agenciaSnap = await getDoc(agenciaRef);
+        mostrarEmails(agenciaSnap, tipoUsuario);
+        atualizarVisibilidadeConvite();
+        modalColabs.classList.remove("hidden");
+      });
+    }
   } else {
     infoAgenciaEl.innerHTML = `
-      <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem;">
-        Você ainda não está associado a nenhuma agência.
+      <div class="mt-4 p-4 rounded-lg shadow" style="background: var(--card-bg); color: var(--text);">
+        <h3 class="text-lg font-semibold">👤 Dashboard Pessoal</h3>
+        <p>🔒 Seus dados pessoais e configurações.</p>
       </div>
     `;
   }
 });
+
+  async function mostrarEmails(agenciaDoc, tipoUsuario) {
+    const data = agenciaDoc.data();
+    const colabs = data.colaboradores || [];
+    const linhas = [];
+
+    for (const c of colabs) {
+      const email = c.email || "(sem email)";
+      const permissao = c.permissao || "-";
+
+      linhas.push(`
+        <div class="flex justify-between items-center p-2 rounded" style="background-color: var(--input-bg); color: var(--text);">
+          <div>
+            📧 <strong>${email}</strong><br>
+            <span class="text-xs" style="color: var(--text-muted);">Permissão: ${permissao}</span>
+          </div>
+          ${tipoUsuario === "Owner" ? `
+          <div class="space-x-2 text-right">
+            <button onclick="alterarPermissao('${c.uid}')" class="text-xs hover:underline cursor-pointer" style="color: var(--primary);">🔄 Alterar</button>
+            <button onclick="removerColaborador('${c.uid}')" class="text-xs hover:underline cursor-pointer" style="color: red;">❌ Remover</button>
+          </div>` : ''}
+        </div>
+      `);
+    }
+
+    listaColabs.innerHTML = linhas.length
+      ? linhas.join("")
+      : `<p class="text-center text-sm" style="color: var(--text-muted);">Nenhum colaborador cadastrado.</p>`;
+  }
+
+  window.alterarPermissao = async function(uid) {
+    const novaPermissao = prompt("Digite a nova permissão (leitura ou edicao):");
+    if (!novaPermissao || !["leitura", "edicao"].includes(novaPermissao.toLowerCase())) {
+      alert("Permissão inválida. Use 'leitura' ou 'edicao'.");
+      return;
+    }
+
+    const ref = doc(db, "agencias", agenciaSelecionada);
+    const snap = await getDoc(ref);
+    const data = snap.data();
+
+    const atualizados = data.colaboradores.map(c =>
+      c.uid === uid ? { ...c, permissao: novaPermissao.toLowerCase() } : c
+    );
+
+    await updateDoc(ref, { colaboradores: atualizados });
+    mostrarEmails(snap, tipoUsuario);
+  };
+
+  window.removerColaborador = async function(uid) {
+    if (!confirm("Deseja remover este colaborador?")) return;
+
+    const ref = doc(db, "agencias", agenciaSelecionada);
+    const snap = await getDoc(ref);
+    const data = snap.data();
+
+    const atualizados = data.colaboradores.filter(c => c.uid !== uid);
+    await updateDoc(ref, { colaboradores: atualizados });
+    mostrarEmails(snap, tipoUsuario);
+  };
+
+  btnFecharModal.addEventListener("click", () => {
+    modalColabs.classList.add("hidden");
+  });
+
+  btnEnviarConvite.addEventListener("click", async () => {
+    const email = inputConvite.value.trim();
+    if (!email) return alert("Digite um e-mail válido.");
+    if (!selectPermissao.value) return alert("Selecione uma permissão.");
+
+    const permissao = selectPermissao.value;
+    const ref = doc(db, "agencias", agenciaSelecionada);
+    const snap = await getDoc(ref);
+    const data = snap.data();
+
+    if ((data.convitesPendentes || []).some(c => c.email.toLowerCase() === email.toLowerCase())) {
+      alert("Este e-mail já foi convidado.");
+      return;
+    }
+    if ((data.colaboradores || []).some(c => c.email.toLowerCase() === email.toLowerCase())) {
+      alert("Este e-mail já é colaborador.");
+      return;
+    }
+
+    await updateDoc(ref, {
+      convitesPendentes: arrayUnion({ email, permissao })
+    });
+
+    inputConvite.value = "";
+    alert(`Convite enviado para ${email} com permissão \"${permissao}\"`);
+  });
+
+  configurarSelectPermissao();
+
 </script>
+
+
+
+<!--  Seleçao de modo 
+
+  // Botões de seleção de modo
+const botoesModo = document.querySelectorAll('[data-modo]');
+const modoAtual = localStorage.getItem("modo-visualizacao") || "pessoal";
+
+// Destacar o modo atual visualmente
+botoesModo.forEach(btn => {
+  if (btn.dataset.modo === modoAtual) {
+    btn.classList.add("bg-[var(--primary)]", "text-white");
+  } else {
+    btn.classList.remove("bg-[var(--primary)]", "text-white");
+  }
+});
+
+// Troca de modo
+botoesModo.forEach(btn => {
+  btn.addEventListener("click", () => {
+    const modo = btn.dataset.modo;
+    localStorage.setItem("modo-visualizacao", modo);
+    location.reload();
+  });
+});
+
+// Dropdown modo
+const toggleDropdown = document.getElementById("dropdown-modo-toggle");
+const dropdownMenu = document.getElementById("dropdown-modo");
+
+toggleDropdown.addEventListener("click", () => {
+  dropdownMenu.classList.toggle("hidden");
+});
+
+window.addEventListener("click", (e) => {
+  if (!document.getElementById("dropdown-modo-wrapper").contains(e.target)) {
+    dropdownMenu.classList.add("hidden");
+  }
+});
+
+const badge = document.getElementById("badge-modo-atual");
+if (badge) {
+  badge.textContent = modoAtual === "agencia" ? "🏢 Modo: Agência" : "👤 Modo: Pessoal";
+}
+
+
+if (modoVisualizacao === "agencia" && agenciaAtual) {
+  const data = agenciaAtual.data();
+  const colaboradores = data.colaboradores || [];
+  const convites = data.convitesPendentes || [];
+
+  const totalColaboradores = colaboradores.length;
+  const totalConvites = convites.length;
+
+  const permissaoResumo = colaboradores.reduce((acc, colab) => {
+    const perm = colab.permissao || "desconhecida";
+    acc[perm] = (acc[perm] || 0) + 1;
+    return acc;
+  }, {});
+
+  const listaPermissoes = Object.entries(permissaoResumo).map(([p, count]) => {
+    return `<li>${p.charAt(0).toUpperCase() + p.slice(1)}: ${count}</li>`;
+  }).join("");
+
+  infoAgenciaEl.innerHTML = `
+    <div class="mt-4 p-4 rounded-lg shadow" style="background: var(--card-bg); color: var(--text);">
+      <h3 class="text-lg font-semibold mb-2">🏢 Dashboard da Agência</h3>
+      <p>📛 <strong>${data.nome}</strong></p>
+      <p>👥 <strong>${totalColaboradores}</strong> colaboradores</p>
+      <p>📨 <strong>${totalConvites}</strong> convite(s) pendente(s)</p>
+
+      <div class="mt-3">
+        <h4 class="font-semibold text-sm">📊 Permissões:</h4>
+        <ul class="list-disc ml-5 text-sm" style="color: var(--text-muted);">
+          ${listaPermissoes || "<li>Nenhuma permissão registrada</li>"}
+        </ul>
+      </div>
+
+      <button id="abrir-modal-colaboradores" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 cursor-pointer">
+        📧 Ver Colaboradores
+      </button>
+    </div>
+  `;
+
+  // Reanexar evento ao botão modal
+  const btnAbrirModal = document.getElementById("abrir-modal-colaboradores");
+  if (btnAbrirModal) {
+    btnAbrirModal.addEventListener("click", async () => {
+      const agenciaRef = doc(db, "agencias", agenciaSelecionada);
+      const agenciaSnap = await getDoc(agenciaRef);
+      mostrarEmails(agenciaSnap, tipoUsuario);
+      atualizarVisibilidadeConvite();
+      modalColabs.classList.remove("hidden");
+    });
+  }
+}
+
+ 
+-->
+
+
+<!-- Modal com formulário de convite -->
+<div id="modal-colaboradores" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center px-4">
+  <div style="background-color: var(--card-bg); color: var(--text);" class="p-6 rounded-lg max-w-md w-full shadow-xl">
+    <h2 class="text-xl font-semibold mb-4 text-center">👥 Colaboradores da Agência</h2>
+
+    <div id="lista-colabs" class="space-y-3 text-sm max-h-[300px] overflow-y-auto mb-6"></div>
+
+    <div>
+      <label for="email-convite" class="block mb-1 text-sm font-semibold" style="color: var(--text);">✉️ Convidar novo colaborador</label>
+
+      <div id="container-convite" class="flex items-center gap-3 mb-3">
+        <input id="email-convite" type="email" placeholder="exemplo@dominio.com"
+          style="background-color: var(--input-bg); color: var(--text); border: 1px solid var(--border);"
+          class="flex-grow px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+
+        <select id="select-permissao"
+          style="background-color: var(--input-bg); color: var(--text); border: 1px solid var(--border);"
+          class="px-3 py-2 rounded cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </select>
+      </div>
+
+      <button id="enviar-convite"
+        class="w-full font-semibold py-2 rounded transition-colors duration-200"
+        style="background-color: var(--primary); color: white;">
+        ➕ Enviar Convite
+      </button>
+    </div>
+
+    <button id="fechar-modal-colaboradores"
+      class="mt-6 w-full py-2 rounded"
+      style="background-color: var(--border); color: var(--text);">
+      Fechar
+    </button>
+  </div>
+</div>
+
+
+
+
+
+<!-- Modal para aceitar convite pendente -->
+<div id="convite-pendente" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+  <div style="background-color: var(--card-bg); color: var(--text);" class="p-6 rounded shadow max-w-md w-full text-center">
+    <p class="text-lg mb-4">
+      Você tem um convite pendente para participar da agência
+      <strong id="nome-agencia-convite" class="font-semibold"></strong>
+      com permissão <span id="permissao-convite" class="font-semibold"></span>.
+    </p>
+    <button id="btn-aceitar-convite"
+      class="px-6 py-2 rounded transition-colors duration-200"
+      style="background-color: var(--primary); color: white;">
+      Aceitar Convite
+    </button>
+  </div>
+</div>
+
+
 
 
 
