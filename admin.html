@@ -1,0 +1,378 @@
+<!-- admin.html com login persistente e design restaurado -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | FinanceFlow</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div id="login-container" class="min-h-screen flex items-center justify-center hidden">
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm text-center">
+      <h2 class="text-xl font-bold mb-4">Login do Administrador</h2>
+      <button onclick="loginComGoogle()" class="w-full border border-gray-300 py-2 rounded hover:bg-gray-50 flex justify-center items-center gap-2">
+        <i class="fab fa-google text-red-500"></i> Entrar com Google
+      </button>
+    </div>
+  </div>
+
+  <div id="admin-panel" class="hidden max-w-7xl mx-auto px-6 py-10">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <i class="fas fa-wallet text-indigo-600 text-lg"></i>
+        <h1 class="text-3xl font-bold inline-block ml-2">Painel de Administração - FinanceFlow</h1>
+      </div>
+      <div class="flex items-center gap-4">
+        <span id="admin-email" class="text-sm text-gray-600"></span>
+        <button onclick="logout()" class="text-sm text-white bg-red-500 px-4 py-2 rounded hover:bg-red-600">Sair</button>
+      </div>
+    </div>
+
+    <!-- Formulário de nova agência -->
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-2">➕ Criar Nova Agência</h2>
+      <form id="form-nova-agencia" class="bg-white p-4 rounded-lg shadow flex flex-col gap-4 text-sm">
+        <input type="text" id="nome-agencia" placeholder="Nome da Agência" class="border px-3 py-2 rounded" required>
+        <input type="email" id="email-dono" placeholder="Email do Dono" class="border px-3 py-2 rounded" required>
+        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 w-fit">Criar Agência</button>
+      </form>
+    </section>
+
+    <!-- campo busca -->
+    <section class="mb-6">
+      <h2 class="text-xl font-semibold mb-2">🔍 Buscar Usuário</h2>
+      <input type="text" id="busca-email" oninput="buscarUsuario()" placeholder="Digite o e-mail do usuário..." class="w-full border px-3 py-2 rounded" />
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-semibold mb-2">📋 Usuários Registrados</h2>
+      <div id="lista-usuarios" class="bg-white p-4 rounded-lg shadow space-y-4 text-sm">
+        <p id="carregando-usuarios">Carregando usuários...</p>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold mb-2">🏢 Agências Cadastradas</h2>
+      <div id="lista-agencias" class="bg-white p-4 rounded-lg shadow space-y-4 text-sm">
+        <p id="carregando-agencias">Carregando agências...</p>
+      </div>
+    </section>
+
+    <!-- Modal de Adicionar / Gerenciar Colaboradores -->
+    <div id="modal-colaboradores" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center px-4">
+      <div class="bg-white p-6 rounded-lg max-w-md w-full text-gray-800">
+        <h2 class="text-xl font-semibold mb-4 text-center">➕ Gerenciar Colaboradores</h2>
+        <form id="form-colaborador" class="space-y-4 mb-4">
+          <input type="email" id="email-colaborador" placeholder="Email do colaborador" class="w-full border border-gray-300 px-3 py-2 rounded bg-white text-gray-800" required />
+          <select id="permissao-colaborador" class="w-full border border-gray-300 px-3 py-2 rounded bg-white text-gray-800" required>
+            <option value="leitura">🔍 Somente Leitura</option>
+            <option value="edicao">✏️ Edição</option>
+          </select>
+          <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Adicionar</button>
+        </form>
+        <div>
+          <h3 class="text-sm font-semibold text-gray-800">Colaboradores Atuais:</h3>
+          <div id="lista-colaboradores" class="mt-2 text-sm text-gray-700">
+            <p>Carregando...</p>
+          </div>
+        </div>
+        <button type="button" id="fechar-modal-colaborador" class="w-full mt-4 bg-gray-200 text-gray-700 py-2 rounded hover:bg-gray-300">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAIO4Qo-kuobCIpRh-XTye5Fs_-9uZmzlY",
+      authDomain: "financeflow-e0fae.firebaseapp.com",
+      projectId: "financeflow-e0fae",
+      storageBucket: "financeflow-e0fae.firebasestorage.app",
+      messagingSenderId: "970984329138",
+      appId: "1:970984329138:web:429a185b8bab1971eab"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    const EMAILS_ADM = ["adm.financeflow@gmail.com", "yuriadrskt@gmail.com"];
+
+    const admLocal = localStorage.getItem("admEmail");
+    if (admLocal && EMAILS_ADM.includes(admLocal)) {
+      document.getElementById("login-container").classList.add("hidden");
+      document.getElementById("admin-panel").classList.remove("hidden");
+      carregarAdmin();
+    } else {
+      document.getElementById("login-container").classList.remove("hidden");
+    }
+
+    function loginComGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          const user = result.user;
+          if (!EMAILS_ADM.includes(user.email)) {
+            alert("Acesso negado. Você não tem permissão para acessar esta página.");
+            auth.signOut();
+            return;
+          }
+          localStorage.setItem("admEmail", user.email);
+          document.getElementById("login-container").classList.add("hidden");
+          document.getElementById("admin-panel").classList.remove("hidden");
+          carregarAdmin();
+        })
+        .catch(err => alert("Erro ao logar com Google: " + err.message));
+    }
+
+    function logout() {
+      localStorage.removeItem("admEmail");
+      auth.signOut().then(() => {
+        location.reload();
+      });
+    }
+
+    async function carregarAdmin() {
+      const listaUsuariosEl = document.getElementById("lista-usuarios");
+      const listaAgenciasEl = document.getElementById("lista-agencias");
+
+      try {
+        const usuariosSnap = await db.collection("usuarios").get();
+        document.getElementById("carregando-usuarios").remove();
+
+        const uidToEmail = {};
+        usuariosSnap.forEach(doc => {
+          const data = doc.data();
+          const uid = doc.id;
+          const email = data.email || "(sem e-mail)";
+          uidToEmail[uid] = email;
+
+          const isPremium = !!data.logoBase64;
+          const premiumLabel = isPremium ? "✅ Premium" : "❌ Gratuito";
+          const totalJobs = data.jobs?.length || 0;
+          const totalEquip = data.equipments?.length || 0;
+
+          const div = document.createElement("div");
+          div.className = "p-3 border border-gray-200 rounded-md flex flex-col gap-2";
+          div.innerHTML = `
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>UID:</strong> ${uid}</p>
+            <p><strong>Status:</strong> ${premiumLabel}</p>
+            <p><strong>Jobs:</strong> ${totalJobs} | Equipamentos: ${totalEquip}</p>
+            <div class="flex gap-3 mt-2">
+              <button class="px-3 py-1 bg-indigo-600 text-white rounded" onclick="tornarPremium('${uid}')">Ativar Premium</button>
+              <button class="px-3 py-1 bg-gray-500 text-white rounded" onclick="removerPremium('${uid}')">Remover Premium</button>
+            </div>
+          `;
+          listaUsuariosEl.appendChild(div);
+        });
+
+        const agenciasSnap = await db.collection("agencias").get();
+        document.getElementById("carregando-agencias").remove();
+
+        for (const doc of agenciasSnap.docs) {
+          const data = doc.data();
+          const nome = data.nome || "Agência sem nome";
+          const owner = data.ownerUID || "sem dono";
+          const colabs = data.colaboradores || [];
+          const email = uidToEmail[owner] || owner;
+
+          const colabList = colabs.length > 0
+            ? colabs.map(c => {
+                const email = uidToEmail[c.uid] || c.uid;
+                return `${email} (${c.permissao})`;
+              }).join(', ')
+            : 'Nenhum';
+
+          const div = document.createElement("div");
+          div.className = "p-3 border border-gray-200 rounded-md mb-4";
+          div.innerHTML = `
+            <p><strong>Nome:</strong> ${nome}</p>
+            <p><strong>Dono:</strong> ${email}</p>
+            <p><strong>Colaboradores:</strong> ${colabList}</p>
+            <button class="mt-2 px-3 py-1 bg-red-500 text-white rounded" onclick="excluirAgencia('${doc.id}')">Excluir Agência</button>
+            <button onclick="abrirModalColaborador('${doc.id}')" class="mt-2 ml-2 px-3 py-1 bg-indigo-600 text-white rounded">Adicionar Colaborador</button>
+          `;
+          listaAgenciasEl.appendChild(div);
+        }
+
+      } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+        listaUsuariosEl.innerHTML = `<p class="text-red-500">Erro ao carregar usuários.</p>`;
+        listaAgenciasEl.innerHTML = `<p class="text-red-500">Erro ao carregar agências.</p>`;
+      }
+    }
+
+    async function tornarPremium(uid) {
+      try {
+        await db.collection("usuarios").doc(uid).set({ logoBase64: "premium" }, { merge: true });
+        alert("✅ Premium ativado para o usuário.");
+        location.reload();
+      } catch (err) {
+        alert("Erro ao ativar Premium: " + err.message);
+      }
+    }
+
+    async function removerPremium(uid) {
+      try {
+        await db.collection("usuarios").doc(uid).update({ logoBase64: firebase.firestore.FieldValue.delete() });
+        alert("❌ Premium removido.");
+        location.reload();
+      } catch (err) {
+        alert("Erro ao remover Premium: " + err.message);
+      }
+    }
+  document.getElementById("form-nova-agencia")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById("nome-agencia").value.trim();
+      const email = document.getElementById("email-dono").value.trim().toLowerCase();
+
+      if (!nome || !email) return alert("Preencha todos os campos.");
+
+      try {
+        const usuariosSnap = await db.collection("usuarios").where("email", "==", email).get();
+        if (usuariosSnap.empty) return alert("Nenhum usuário encontrado com este e-mail.");
+
+        const ownerUID = usuariosSnap.docs[0].id;
+
+        await db.collection("agencias").add({
+          nome,
+          ownerUID,
+          criadoEm: new Date().toISOString(),
+          tipo: "agencia",
+          colaboradores: [],
+          dados: {
+            jobs: [],
+            expenses: [],
+            equipments: [],
+            routine: {}
+          }
+        });
+        alert("✅ Agência criada com sucesso!");
+        location.reload();
+      } catch (err) {
+        alert("Erro ao criar agência: " + err.message);
+      }
+    });
+
+    function buscarUsuario() {
+      const termo = document.getElementById("busca-email").value.toLowerCase();
+      const usuarios = document.querySelectorAll("#lista-usuarios > div");
+      usuarios.forEach(div => {
+        const email = div.querySelector("p").innerText.toLowerCase();
+        div.style.display = email.includes(termo) ? "block" : "none";
+      });
+    }
+
+    function excluirAgencia(id) {
+      if (confirm("Tem certeza que deseja excluir esta agência?")) {
+        db.collection("agencias").doc(id).delete().then(() => {
+          alert("Agência excluída com sucesso.");
+          location.reload();
+        }).catch(err => alert("Erro ao excluir: " + err.message));
+      }
+    }
+
+    document.getElementById("admin-email").textContent = localStorage.getItem("admEmail") || "";
+
+    let agenciaSelecionada = null;
+async function abrirModalColaborador(agenciaId) {
+  agenciaSelecionada = agenciaId;
+  
+  document.getElementById("modal-colaboradores").classList.remove("hidden");
+
+    document.getElementById("fechar-modal-colaborador").addEventListener("click", () => {
+    document.getElementById("modal-colaboradores").classList.add("hidden");
+    agenciaSelecionada = null;
+  });
+  
+  const lista = document.getElementById("lista-colaboradores");
+  lista.innerHTML = "<p>Carregando...</p>";
+
+  try {
+    const agenciaSnap = await db.collection("agencias").doc(agenciaId).get();
+    const colaboradores = agenciaSnap.data().colaboradores || [];
+
+    if (colaboradores.length === 0) {
+      lista.innerHTML = "<p class='text-gray-500'>Nenhum colaborador cadastrado.</p>";
+      return;
+    }
+
+    // Buscar todos os e-mails dos UIDs
+    const emailMap = {};
+    const promessas = colaboradores.map(colab =>
+      db.collection("usuarios").doc(colab.uid).get().then(doc => {
+        emailMap[colab.uid] = doc.exists ? doc.data().email : "(email não encontrado)";
+      })
+    );
+    await Promise.all(promessas);
+
+    lista.innerHTML = "";
+    colaboradores.forEach(colab => {
+      const email = emailMap[colab.uid] || colab.uid;
+      const div = document.createElement("div");
+      div.className = "flex justify-between items-center border-b py-2";
+      div.innerHTML = `
+        <span>${email} <span class="text-xs text-gray-500 ml-2">(${colab.permissao})</span></span>
+        <button class="text-red-500 text-sm" onclick="removerColaborador('${agenciaId}', '${colab.uid}')">Remover</button>
+      `;
+      lista.appendChild(div);
+    });
+  } catch (err) {
+    console.error("Erro ao carregar colaboradores:", err);
+    lista.innerHTML = "<p class='text-red-500'>Erro ao carregar colaboradores.</p>";
+  }
+}
+
+// Adiciona novo colaborador
+document.getElementById("form-colaborador").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("email-colaborador").value.trim();
+  const permissao = document.getElementById("permissao-colaborador").value;
+
+  try {
+    const usuariosSnap = await db.collection("usuarios").where("email", "==", email).get();
+    if (usuariosSnap.empty) {
+      alert("Usuário não encontrado com esse e-mail.");
+      return;
+    }
+
+    const uid = usuariosSnap.docs[0].id;
+    const agenciaRef = db.collection("agencias").doc(agenciaSelecionada);
+
+    await agenciaRef.update({
+      colaboradores: firebase.firestore.FieldValue.arrayUnion({ uid, permissao })
+    });
+
+    alert("Colaborador adicionado com sucesso.");
+    abrirModalColaborador(agenciaSelecionada);
+  } catch (err) {
+    alert("Erro ao adicionar colaborador: " + err.message);
+  }
+});
+
+// Função para remover colaborador
+async function removerColaborador(agenciaId, uid) {
+  try {
+    const agenciaRef = db.collection("agencias").doc(agenciaId);
+    const agenciaDoc = await agenciaRef.get();
+    const colabs = agenciaDoc.data().colaboradores || [];
+
+    const novosColabs = colabs.filter(c => c.uid !== uid);
+    await agenciaRef.update({ colaboradores: novosColabs });
+
+    alert("Colaborador removido.");
+    abrirModalColaborador(agenciaId);
+  } catch (err) {
+    alert("Erro ao remover colaborador: " + err.message);
+  }
+}
+
+
+
+
+  </script>
+</body>
+</html>
