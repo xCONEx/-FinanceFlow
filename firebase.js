@@ -1,8 +1,20 @@
-
 // firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { 
+  getAuth, 
+  GoogleAuthProvider,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { 
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 // Configuração do projeto FinanceFlow
 const firebaseConfig = {
@@ -21,3 +33,15 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const provider = new GoogleAuthProvider();
+
+// Exporta as funções que você usa no seu código principal
+export {
+  onAuthStateChanged,
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc,
+  setDoc
+};
