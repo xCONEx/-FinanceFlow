@@ -1200,15 +1200,34 @@ label[for="email-convite"] {
 
   <!-- Abas de navegação -->
   <div class="flex flex-wrap gap-2 mt-4">
+    <button data-tab="dados" class="tab-btn px-4 py-2 rounded bg-green-600 text-white font-medium hover:bg-green-700">🗂️ Dados</button>
     <button data-tab="empresa" class="tab-btn px-4 py-2 rounded bg-indigo-600 text-white font-medium hover:bg-indigo-700">🏢 Empresa</button>
     <button data-tab="aparencia" class="tab-btn px-4 py-2 rounded bg-blue-600 text-white font-medium hover:bg-blue-700">🎨 Aparência</button>
-    <button data-tab="dados" class="tab-btn px-4 py-2 rounded bg-green-600 text-white font-medium hover:bg-green-700">🗂️ Dados</button>
     <button data-tab="premium" class="tab-btn px-4 py-2 rounded bg-yellow-500 text-black font-medium hover:bg-yellow-600">⭐ Premium</button>
   </div>
 
   <!-- Container Principal -->
   <div class="rounded-2xl shadow-md border border-[var(--border)] p-6 bg-[var(--card-bg)]">
 
+        <!-- Aba: Dados -->
+    <div class="tab-content hidden" id="tab-dados">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <button id="save-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow transition-all">
+          <i class="fas fa-save"></i> Salvar dados
+        </button>
+        <button id="export-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium shadow transition-all">
+          <i class="fas fa-download"></i> Exportar dados
+        </button>
+        <label for="import-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow transition-all cursor-pointer">
+          <i class="fas fa-upload"></i> Importar dados
+          <input type="file" id="import-data" accept=".json" class="hidden">
+        </label>
+        <button id="reset-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium shadow transition-all">
+          <i class="fas fa-trash-alt"></i> Resetar tudo
+        </button>
+      </div>
+    </div>
+    
     <!-- Aba: Empresa -->
     <div class="tab-content" id="tab-empresa">
       <div id="info-agencia" class="mb-4"></div>
@@ -1241,24 +1260,6 @@ label[for="email-convite"] {
       </div>
     </div>
 
-    <!-- Aba: Dados -->
-    <div class="tab-content hidden" id="tab-dados">
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <button id="save-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow transition-all">
-          <i class="fas fa-save"></i> Salvar dados
-        </button>
-        <button id="export-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium shadow transition-all">
-          <i class="fas fa-download"></i> Exportar dados
-        </button>
-        <label for="import-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium shadow transition-all cursor-pointer">
-          <i class="fas fa-upload"></i> Importar dados
-          <input type="file" id="import-data" accept=".json" class="hidden">
-        </label>
-        <button id="reset-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium shadow transition-all">
-          <i class="fas fa-trash-alt"></i> Resetar tudo
-        </button>
-      </div>
-    </div>
 
     <!-- Aba: Premium -->
     <div class="tab-content hidden" id="tab-premium">
