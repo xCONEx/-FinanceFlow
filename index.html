@@ -32,6 +32,7 @@
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 
     <title>FinanceFlow - Gerenciamento Financeiro</title>
@@ -521,6 +522,14 @@ label[for="email-convite"] {
       opacity: 1;
     }
 
+/* só um exemplo básico para mostrar o botão e as opções */
+#floating-menu button {
+  cursor: pointer;
+}
+
+#floating-expense-menu button {
+  cursor: pointer;
+}
 
 </style>
 
@@ -853,6 +862,21 @@ label[for="email-convite"] {
                 
                 <!-- Custos Mensais Section -->
                 <section id="custos-mensais" class="mt-12 space-y-6 hidden fade-in width: 100%;">
+
+
+<!-- Botão flutuante de Custos Mensais -->
+<div id="floating-expense-menu" class="fixed bottom-20 right-6 z-50 flex flex-col items-end space-y-2">
+  <div id="expense-options" class="hidden flex flex-col items-end space-y-2 mb-2">
+    <button id="add-expense-float" class="bg-gray-800 text-white px-4 py-2 rounded shadow text-sm">Adicionar</button>
+    <button id="import-expense-sheet" class="bg-gray-800 text-white px-4 py-2 rounded shadow text-sm">Importar</button>
+    <button onclick="exportCustosMensaisToPDF()" class="bg-gray-800 text-white px-4 py-2 rounded shadow text-sm">Exportar PDF</button>
+    <input type="file" id="expense-file-input" accept=".xlsx,.xls,.csv" class="hidden" />
+  </div>
+
+  <button id="main-expense-btn" class="w-14 h-14 rounded-full bg-green-600 text-white text-3xl shadow-lg flex items-center justify-center">+</button>
+</div>
+
+
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold text-dark">Custos Mensais</h2>
                         <button onclick="exportCustosMensaisToPDF()" class="bg-indigo-600 text-white px-2 py-1 rounded-lg hover:bg-indigo-700 flex items-center gap-2">
@@ -931,6 +955,20 @@ label[for="email-convite"] {
                 
                 <!-- Equipamentos Section -->
                 <section id="equipamentos" class="mt-12 space-y-6 hidden fade-in">
+
+<!-- Botão flutuante de Equipamentos -->
+<div id="floating-menu" class="fixed bottom-20 right-6 z-50 flex flex-col items-end space-y-2">
+  <div id="float-options" class="hidden flex flex-col items-end space-y-2 mb-2">
+    <button id="add-item-btn" class="bg-gray-800 text-white px-4 py-2 rounded shadow text-sm">Adicionar</button>
+    <button id="import-sheet-btn" class="bg-gray-800 text-white px-4 py-2 rounded shadow text-sm">Importar</button>
+    <button onclick="exportEquipamentosToPDF()" class="bg-gray-800 text-white px-4 py-2 rounded shadow text-sm">Exportar PDF</button>
+    <input type="file" id="file-input" accept=".xlsx,.xls,.csv" class="hidden" />
+  </div>
+
+  <button id="main-float-btn" class="w-14 h-14 rounded-full bg-blue-600 text-white text-3xl shadow-lg">+</button>
+</div>
+
+
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold text-dark">Itens de Trabalho</h2>
                         <button onclick="exportEquipamentosToPDF()" class="bg-indigo-600 text-white px-2 py-1 rounded-lg hover:bg-indigo-700 flex items-center gap-1">
@@ -1398,9 +1436,169 @@ label[for="email-convite"] {
 
 
 
-    
+    <!-- Começo Scrip Geral -->
 
     <script>
+
+//Botao Flutuante Despesas
+const mainExpenseBtn = document.getElementById('main-expense-btn');
+const expenseOptions = document.getElementById('expense-options');
+const addExpenseFloatBtn = document.getElementById('add-expense-float');
+const importExpenseSheetBtn = document.getElementById('import-expense-sheet');
+const expenseFileInput = document.getElementById('expense-file-input');
+
+mainExpenseBtn.addEventListener('click', () => {
+  expenseOptions.classList.toggle('hidden');
+});
+
+addExpenseFloatBtn.addEventListener('click', () => {
+  expenseOptions.classList.add('hidden');
+  expenseForm.reset();
+  expenseForm.dataset.id = '';
+  expenseModal.classList.remove('hidden');
+});
+
+importExpenseSheetBtn.addEventListener('click', () => {
+  expenseFileInput.click();
+  expenseOptions.classList.add('hidden');
+});
+
+expenseFileInput.addEventListener('change', async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    const data = await readSpreadsheet(file);
+    const items = parseExpensesFromSheet(data);
+    addImportedExpenses(items);
+  } catch (err) {
+    alert('Erro ao importar planilha: ' + err.message);
+  } finally {
+    expenseFileInput.value = '';
+  }
+});
+
+
+
+// Botao Flutuante Equipamentos 
+
+const mainFloatBtn = document.getElementById('main-float-btn');
+const floatOptions = document.getElementById('float-options');
+const addItemBtn = document.getElementById('add-item-btn');
+const importSheetBtn = document.getElementById('import-sheet-btn');
+const fileInput = document.getElementById('file-input');
+
+mainFloatBtn.addEventListener('click', () => {
+  floatOptions.classList.toggle('hidden');
+});
+
+addItemBtn.addEventListener('click', () => {
+  floatOptions.classList.add('hidden');
+  equipmentForm.reset();
+  equipmentForm.dataset.id = '';
+  equipmentModal.classList.remove('hidden');
+});
+
+importSheetBtn.addEventListener('click', () => {
+  fileInput.click();
+  floatOptions.classList.add('hidden');
+});
+
+fileInput.addEventListener('change', async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    const data = await readSpreadsheet(file);
+    const items = parseEquipmentsFromSheet(data);
+    addImportedEquipments(items);
+  } catch (err) {
+    alert('Erro ao importar planilha: ' + err.message);
+  } finally {
+    fileInput.value = ''; // limpa para permitir novo upload
+  }
+});
+
+// Clique no botão de importar
+document.getElementById('import-sheet-btn').addEventListener('click', () => {
+  document.getElementById('file-input').click();
+});
+
+document.getElementById('file-input').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const data = new Uint8Array(event.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet);
+
+    rows.forEach((row) => {
+      const description = row['Descrição'] || row['descricao'] || row['description'];
+      const category = row['Categoria'] || row['categoria'] || 'Outros';
+      const value = parseFloat(row['Valor'] || row['valor'] || 0);
+
+      if (description && !isNaN(value)) {
+        equipments.push({
+          id: Date.now() + Math.floor(Math.random() * 10000),
+          description,
+          category,
+          value,
+        });
+      }
+    });
+
+    renderEquipments();
+    saveData();
+    alert('Itens de equipamento importados com sucesso!');
+  };
+
+  reader.readAsArrayBuffer(file);
+});
+
+
+// Opcional: se quiser usar um input separado para custos
+// <input type="file" id="expense-file-input" ... />
+document.getElementById('import-sheet-btn').addEventListener('click', () => {
+  document.getElementById('file-input').click(); // usa o mesmo input se preferir
+});
+
+document.getElementById('file-input').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const data = new Uint8Array(event.target.result);
+    const workbook = XLSX.read(data, { type: 'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet);
+
+    rows.forEach((row) => {
+      const description = row['Descrição'] || row['descricao'] || row['description'];
+      const category = row['Categoria'] || row['categoria'] || 'Outros';
+      const value = parseFloat(row['Valor'] || row['valor'] || 0);
+
+      if (description && !isNaN(value)) {
+        expenses.push({
+          id: Date.now() + Math.floor(Math.random() * 10000),
+          description,
+          category,
+          value,
+        });
+      }
+    });
+
+    renderExpenses();
+    saveData();
+    alert('Custos mensais importados com sucesso!');
+  };
+
+  reader.readAsArrayBuffer(file);
+});
+
 
 
 
@@ -3978,8 +4176,9 @@ appData.routine = {
 
 
 <!-- 1. BOTÃO PREMIUM FIXO -->
-<button id="open-premium-modal" class="fixed bottom-20 right-8 bg-yellow-400 text-black font-semibold px-4 py-2 rounded-full shadow-lg z-50 hover:bg-yellow-300 transition">✨ Liberar Premium</button>
-         
+<button id="open-premium-modal" class="fixed bottom-20 left-4 bg-yellow-400 text-black text-sm font-semibold px-2 py-1 rounded-full shadow-lg z-50 hover:bg-yellow-300 transition">
+  ✨ Premium
+</button>        
 
 <!-- 2. MODAL DE ASSINATURA -->
 <div id="premium-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 px-4 flex items-center justify-center">
