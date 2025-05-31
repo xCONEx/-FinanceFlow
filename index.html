@@ -531,6 +531,12 @@ label[for="email-convite"] {
   cursor: pointer;
 }
 
+  .tab-btn.active-tab {
+    outline: 2px solid white;
+    opacity: 0.95;
+  }
+
+
 </style>
 
 
@@ -1210,7 +1216,7 @@ label[for="email-convite"] {
   <div class="rounded-2xl shadow-md border border-[var(--border)] p-6 bg-[var(--card-bg)]">
 
         <!-- Aba: Dados -->
-    <div class="tab-content hidden" id="tab-dados">
+    <div class="tab-content" id="tab-dados">
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <button id="save-data" class="flex items-center justify-center gap-2 p-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium shadow transition-all">
           <i class="fas fa-save"></i> Salvar dados
@@ -1229,7 +1235,7 @@ label[for="email-convite"] {
     </div>
     
     <!-- Aba: Empresa -->
-    <div class="tab-content" id="tab-empresa">
+    <div class="tab-content hidden" id="tab-empresa">
       <div id="info-agencia" class="mb-4"></div>
       <div id="botao-ver-colaboradores" class="hidden mb-6">
         <button onclick="mostrarEmails()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all">
@@ -1293,8 +1299,10 @@ label[for="email-convite"] {
   const tabButtons = document.querySelectorAll('.tab-btn');
   const tabContents = document.querySelectorAll('.tab-content');
 
-  tabButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
+tabButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabButtons.forEach(b => b.classList.remove('active-tab'));
+    btn.classList.add('active-tab');
       const tab = btn.getAttribute('data-tab');
       tabContents.forEach(c => c.classList.add('hidden'));
       document.getElementById(`tab-${tab}`).classList.remove('hidden');
