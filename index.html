@@ -2572,7 +2572,9 @@ expenseElement.innerHTML = `
             const description = document.getElementById('expense-description').value;
             const category = document.getElementById('expense-category').value;
             //const value = parseFloat(document.getElementById('expense-value').value);
-            const valor = parseFloat(document.getElementById('expense-value').dataset.raw) || 0;
+            //const valor = parseFloat(document.getElementById('expense-value').dataset.raw) || 0;
+            const valueRaw = document.getElementById('expense-value').value;
+            const value = parseBRLtoNumber(valueRaw);
 
             
             if (!description || isNaN(value)) {
@@ -2722,8 +2724,9 @@ equipmentElement.innerHTML = `
             const id = equipmentForm.dataset.id ? parseInt(equipmentForm.dataset.id) : Date.now();
             const description = document.getElementById('equipment-description').value;
             const category = document.getElementById('equipment-category').value;
-            const value = parseFloat(document.getElementById('equipment-value').value);
-            
+            //const value = parseFloat(document.getElementById('equipment-value').value);
+            const valueRaw = document.getElementById('equipment-value').value;
+const value = parseBRLtoNumber(valueRaw);
             if (!description || isNaN(value)) {
                 alert('Por favor, preencha todos os campos corretamente.');
                 return;
@@ -3393,7 +3396,13 @@ function openEditDeleteMenu(id, element, type) {
   }
 }
 
-
+function parseBRLtoNumber(valorString) {
+  return parseFloat(
+    valorString
+      .replace(/\./g, '')   // remove pontos
+      .replace(',', '.')    // troca vírgula por ponto
+  );
+}
 
 </script>
 
