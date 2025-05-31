@@ -473,9 +473,11 @@ label[for="email-convite"] {
 }
 
 .no-select {
-  user-select: none;
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none;     /* IE/Edge */
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  -webkit-touch-callout: none !important; /* BLOQUEIA o menu de toque no iOS */
 }
 
 
@@ -2507,9 +2509,13 @@ expenseElement.className = 'item-row grid grid-cols-11 gap-2 p-3 items-center cu
 expenseElement.dataset.id = expense.id;
 expenseElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
 
-// Evita o menu de copiar em long press / clique direito
-expenseElement.addEventListener('contextmenu', (e) => e.preventDefault());
-
+// Bloqueios para mobile e desktop
+['contextmenu', 'selectstart', 'mousedown'].forEach(eventType => {
+  expenseElement.addEventListener(eventType, e => e.preventDefault());
+});
+expenseElement.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 1) e.preventDefault();
+});
 const valorFormatado = expense.value.toLocaleString('pt-BR', {
   style: 'currency',
   currency: 'BRL'
@@ -2654,8 +2660,14 @@ equipmentElement.className = 'item-row grid grid-cols-11 gap-2 p-3 items-center 
 equipmentElement.dataset.id = equipment.id;
 equipmentElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
 
-// Evita o menu de copiar em long press / clique direito
-equipmentElement.addEventListener('contextmenu', (e) => e.preventDefault());
+// Bloqueios para mobile e desktop
+['contextmenu', 'selectstart', 'mousedown'].forEach(eventType => {
+  equipmentElement.addEventListener(eventType, e => e.preventDefault());
+});
+equipmentElement.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 1) e.preventDefault();
+});
+
 
 const valorFormatado = equipment.value.toLocaleString('pt-BR', {
   style: 'currency',
