@@ -472,6 +472,13 @@ label[for="email-convite"] {
   padding: 0 1rem; /* para evitar toque nas bordas */
 }
 
+.no-select {
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none;     /* IE/Edge */
+}
+
+
 </style>
 
 
@@ -2499,6 +2506,9 @@ expenseElement.className = 'item-row grid grid-cols-11 gap-2 p-3 items-center cu
 expenseElement.dataset.id = expense.id;
 expenseElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
 
+// Evita o menu de copiar em long press / clique direito
+expenseElement.addEventListener('contextmenu', (e) => e.preventDefault());
+
 const valorFormatado = expense.value.toLocaleString('pt-BR', {
   style: 'currency',
   currency: 'BRL'
@@ -2642,6 +2652,9 @@ equipmentElement.className = 'item-row grid grid-cols-11 gap-2 p-3 items-center 
 
 equipmentElement.dataset.id = equipment.id;
 equipmentElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
+
+// Evita o menu de copiar em long press / clique direito
+equipmentElement.addEventListener('contextmenu', (e) => e.preventDefault());
 
 const valorFormatado = equipment.value.toLocaleString('pt-BR', {
   style: 'currency',
