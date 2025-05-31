@@ -459,6 +459,18 @@ label[for="email-convite"] {
 }
 
 
+/* Css Dos itens e expenses */ 
+.item-row {
+  max-width: 100vw;
+  box-sizing: border-box;
+  white-space: normal; /* força quebra de linha */
+}
+
+.container {
+  max-width: 100vw;
+  overflow-x: auto;
+  padding: 0 1rem; /* para evitar toque nas bordas */
+}
 
 </style>
 
@@ -735,12 +747,12 @@ label[for="email-convite"] {
                 <section id="custos-mensais" class="mt-12 space-y-6 hidden fade-in">
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold text-dark">Custos Mensais</h2>
-                        <button onclick="exportCustosMensaisToPDF()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2">
+                        <button onclick="exportCustosMensaisToPDF()" class="bg-indigo-600 text-white px-2 py-1 rounded-lg hover:bg-indigo-700 flex items-center gap-2">
   <i class="fas fa-file-pdf"></i>
   <span>Exportar PDF</span>
 </button>
 
-                        <button id="add-expense" class="bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg flex items-center space-x-2">
+                        <button id="add-expense" class="bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 px-2 py-1 rounded-lg flex items-center space-x-1">
                             <i class="fas fa-plus"></i>
                             <span>Adicionar Despesa</span>
                         </button>
@@ -749,10 +761,10 @@ label[for="email-convite"] {
                     <div style="border-color: var(--border)" class="background: var(--card-bg) rounded-xl shadow-sm border overflow-hidden">
                         <div style="border-color: var(--border)" class="p-4 border-b">
                             <div class="grid grid-cols-12 gap-4 font-medium color: var(--text); opacity: 0.6">
-                                <div class="col-span-5">Descrição</div>
-                                <div class="col-span-3">Categoria</div>
+                                <div class="col-span-6">Descrição</div>
+                                <div class="col-span-4">Categoria</div>
                                 <div class="col-span-2 text-right">Valor</div>
-                                <div class="col-span-2 text-center">Ações</div>
+                                
                             </div>
                         </div>
                         <div id="expenses-list" class="divide-y divide-gray-200">
@@ -813,12 +825,12 @@ label[for="email-convite"] {
                 <section id="equipamentos" class="mt-12 space-y-6 hidden fade-in">
                     <div class="flex items-center justify-between">
                         <h2 class="text-2xl font-bold text-dark">Itens de Trabalho</h2>
-                        <button onclick="exportEquipamentosToPDF()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2">
+                        <button onclick="exportEquipamentosToPDF()" class="bg-indigo-600 text-white px-2 py-1 rounded-lg hover:bg-indigo-700 flex items-center gap-1">
   <i class="fas fa-file-pdf"></i>
   <span>Exportar PDF</span>
 </button>
 
-                        <button id="add-equipment" class="bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg flex items-center space-x-2">
+                        <button id="add-equipment" class="bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 px-2 py-1 rounded-lg flex items-center space-x-1">
                             <i class="fas fa-plus"></i>
                             <span>Adicionar Item</span>
                         </button>
@@ -828,10 +840,11 @@ label[for="email-convite"] {
                         <div style="border-color: var(--border)" class="p-4 border-b">
                             <div class="grid grid-cols-12 gap-4 font-medium color: var(--text); opacity: 0.6">
                                 <div class="col-span-6">Descrição</div>
-                                <div class="col-span-3">Categoria</div>
+                                <div class="col-span-4">Categoria</div>
                                 <div class="col-span-2 text-right">Valor</div>
-                                <div class="col-span-1 text-center">Ações</div>
+                                
                             </div>
+                            
                         </div>
                         <div id="equipment-list" class="divide-y divide-gray-200">
                             <!-- Equipment will be added here dynamically -->
@@ -2473,15 +2486,18 @@ async function exportJobToPDF(job) {
         
         let expenses = [];
         
-        function renderExpenses() {
-            expensesList.innerHTML = '';
-            let total = 0;
-            
-            expenses.forEach(expense => {
-                total += expense.value;
-                
+ function renderExpenses() {
+  expensesList.innerHTML = '';
+  let total = 0;
+
+  expenses.forEach(expense => {
+    total += expense.value;
+
 const expenseElement = document.createElement('div');
-expenseElement.className = 'grid grid-cols-12 gap-4 p-4 items-center';
+//expenseElement.className = 'item-row grid grid-cols-12 gap-4 p-4 items-center cursor-pointer';
+expenseElement.className = 'item-row grid grid-cols-12 gap-2 p-2 items-center cursor-pointer ';
+
+expenseElement.dataset.id = expense.id;
 expenseElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
 
 const valorFormatado = expense.value.toLocaleString('pt-BR', {
@@ -2490,32 +2506,31 @@ const valorFormatado = expense.value.toLocaleString('pt-BR', {
 });
 
 expenseElement.innerHTML = `
-  <div class="col-span-5 font-medium break-words max-w-[130px]">${expense.description}</div>
-  <div class="col-span-3">
-    <span class="px-3 py-1 rounded-full text-xs ${getCategoryColor(expense.category)}">${expense.category}</span>
+  <div class="col-span-5 truncate whitespace-nowrap overflow-hidden max-w-[110px]">
+    ${expense.description}
   </div>
-  <div class="col-span-2 text-right font-medium">${valorFormatado}</div>
-  <div class="col-span-2 flex justify-center space-x-2">
-    <button class="edit-expense p-2 text-blue-500 hover:text-blue-700" data-id="${expense.id}">
-      <i class="fas fa-edit"></i>
-    </button>
-    <button class="delete-expense p-2 text-red-500 hover:text-red-700" data-id="${expense.id}">
-      <i class="fas fa-trash"></i>
-    </button>
+  <div class="col-span-4">
+    <span class="px-1.5 py-0.5 rounded-full text-xs whitespace-nowrap ${getCategoryColor(expense.category)}">
+      ${expense.category}
+    </span>
+  </div>
+  <div class="col-span-3 text-right font-medium whitespace-nowrap">
+    ${valorFormatado}
   </div>
 `;
+    expensesList.appendChild(expenseElement);
+  });
 
-                
-                expensesList.appendChild(expenseElement);
-});
-            
-monthlyTotal.textContent = total.toLocaleString('pt-BR', {
-  style: 'currency',
-  currency: 'BRL'
-});
-updateDashboard();
-updateChart();
-        }
+  monthlyTotal.textContent = total.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+
+  updateDashboard();
+  updateChart();
+
+}
+
         
         function getCategoryColor(category) {
             const colors = {
@@ -2613,15 +2628,20 @@ updateChart();
         
         let equipments = [];
         
-        function renderEquipments() {
-            equipmentList.innerHTML = '';
-            let total = 0;
-            
-            equipments.forEach(equipment => {
-                total += equipment.value;
-                
-const equipmentElement = document.createElement('div');
-equipmentElement.className = 'grid grid-cols-12 gap-4 p-4 items-center';
+ function renderEquipments() {
+  equipmentList.innerHTML = '';
+  let total = 0;
+
+  equipments.forEach(equipment => {
+    total += equipment.value;
+
+  const equipmentElement = document.createElement('div');
+//equipmentElement.className = 'item-row grid grid-cols-12 gap-4 p-4 items-center cursor-pointer';
+equipmentElement.className = 'item-row grid grid-cols-12 gap-2 p-2 items-center cursor-pointer';
+
+
+
+equipmentElement.dataset.id = equipment.id;
 equipmentElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
 
 const valorFormatado = equipment.value.toLocaleString('pt-BR', {
@@ -2630,33 +2650,30 @@ const valorFormatado = equipment.value.toLocaleString('pt-BR', {
 });
 
 equipmentElement.innerHTML = `
-  <div class="col-span-5 font-medium break-words max-w-[130px]">${equipment.description}</div>
-  <div class="col-span-3">
-    <span class="px-3 py-1 rounded-full text-xs ${getEquipmentCategoryColor(equipment.category)}">${equipment.category}</span>
+  <div class="col-span-5 truncate whitespace-nowrap overflow-hidden max-w-[110px]">
+    ${equipment.description}
   </div>
-  <div class="col-span-2 text-right font-medium">${valorFormatado}</div>
-  <div class="col-span-2 flex justify-center space-x-2">
-    <button class="edit-equipment p-2 text-blue-500 hover:text-blue-700" data-id="${equipment.id}">
-      <i class="fas fa-edit"></i>
-    </button>
-    <button class="delete-equipment p-2 text-red-500 hover:text-red-700" data-id="${equipment.id}">
-      <i class="fas fa-trash"></i>
-    </button>
+  <div class="col-span-4">
+    <span class="px-1.5 py-0.5 rounded-full text-xs whitespace-nowrap ${getEquipmentCategoryColor(equipment.category)}">
+      ${equipment.category}
+    </span>
+  </div>
+  <div class="col-span-3 text-right font-medium whitespace-nowrap">
+    ${valorFormatado}
   </div>
 `;
 
+    equipmentList.appendChild(equipmentElement);
+  });
 
-                
-                equipmentList.appendChild(equipmentElement);
-});
-equipmentTotal.textContent = total.toLocaleString('pt-BR', {
-  style: 'currency',
-  currency: 'BRL'
-});
+  equipmentTotal.textContent = total.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
 
-updateDashboard();
+  updateDashboard();
 
-        }
+}
         
         function getEquipmentCategoryColor(category) {
             const colors = {
@@ -3242,6 +3259,114 @@ function parseBrazilianCurrency(value) {
   let numberString = value.replace(/\./g, '').replace(',', '.');
   return parseFloat(numberString);
 }
+
+
+  //MENU DE CONTEXTO
+
+document.addEventListener('DOMContentLoaded', function () {
+  const contextMenu = document.getElementById('context-menu');
+  const expenseForm = document.getElementById('expense-form');
+  const expenseModal = document.getElementById('expense-modal');
+  const equipmentForm = document.getElementById('equipment-form');
+  const equipmentModal = document.getElementById('equipment-modal');
+
+  let currentItemId = null;
+  let currentItemType = null; // 'expense' ou 'equipment'
+
+  const isMobile = () => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  // Ocultar menu ao clicar fora
+  if (contextMenu) {
+    document.addEventListener('click', () => {
+      contextMenu.classList.add('hidden');
+    });
+
+    contextMenu.addEventListener('click', (e) => {
+      const action = e.target.dataset.action;
+      if (!action) return;
+
+      contextMenu.classList.add('hidden');
+
+      if (currentItemType === 'expense') {
+        const expense = expenses.find(e => e.id === currentItemId);
+        if (!expense) return;
+
+        if (action === 'edit') {
+          document.getElementById('expense-description').value = expense.description;
+          document.getElementById('expense-category').value = expense.category;
+          document.getElementById('expense-value').value = expense.value;
+          expenseForm.dataset.id = expense.id;
+          expenseModal.classList.remove('hidden');
+        } else if (action === 'delete') {
+          if (confirm('Tem certeza que deseja excluir esta despesa?')) {
+            expenses = expenses.filter(e => e.id !== currentItemId);
+            renderExpenses();
+            saveData();
+          }
+        }
+
+      } else if (currentItemType === 'equipment') {
+        const equipment = equipments.find(e => e.id === currentItemId);
+        if (!equipment) return;
+
+        if (action === 'edit') {
+          document.getElementById('equipment-description').value = equipment.description;
+          document.getElementById('equipment-category').value = equipment.category;
+          document.getElementById('equipment-value').value = equipment.value;
+          equipmentForm.dataset.id = equipment.id;
+          equipmentModal.classList.remove('hidden');
+        } else if (action === 'delete') {
+          if (confirm('Tem certeza que deseja excluir este item?')) {
+            equipments = equipments.filter(e => e.id !== currentItemId);
+            renderEquipments();
+            saveData();
+          }
+        }
+      }
+    });
+  }
+
+  // Mostrar menu de contexto
+  function showContextMenu(x, y) {
+    if (!contextMenu) return;
+    contextMenu.style.left = `${x}px`;
+    contextMenu.style.top = `${y}px`;
+    contextMenu.classList.remove('hidden');
+  }
+
+  // Adicionar ouvintes a uma lista
+  function attachItemListeners(selector, type) {
+    const list = document.querySelector(selector);
+    if (!list) return;
+
+    let pressTimer;
+
+    list.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      const item = e.target.closest('.item-row');
+      if (!item) return;
+      currentItemId = parseInt(item.dataset.id);
+      currentItemType = type;
+      showContextMenu(e.pageX, e.pageY);
+    });
+
+    list.addEventListener('touchstart', (e) => {
+      const item = e.target.closest('.item-row');
+      if (!item) return;
+      pressTimer = setTimeout(() => {
+        currentItemId = parseInt(item.dataset.id);
+        currentItemType = type;
+        showContextMenu(e.touches[0].pageX, e.touches[0].pageY);
+      }, 600);
+    });
+
+    list.addEventListener('touchend', () => clearTimeout(pressTimer));
+  }
+
+  // Inicializa os eventos para despesas e equipamentos
+  attachItemListeners('#expenses-list', 'expense');
+  attachItemListeners('#equipment-list', 'equipment');
+});
 
 
 
@@ -4095,6 +4220,15 @@ appData.routine = {
 </div>
 
 
+
+<!-- Menu de contexto para editar/excluir -->
+
+<div id="context-menu" class="absolute z-50 hidden bg-white border rounded shadow-md text-sm text-gray-800">
+  <ul>
+    <li style="color: var(--text)" class="px-4 py-2 hover:bg-gray-100 cursor-pointer" data-action="edit">✏️ Editar</li>
+    <li style="color: var(--text)" class="px-4 py-2 hover:bg-gray-100 cursor-pointer" data-action="delete">🗑️ Excluir</li>
+  </ul>
+</div>
 
 
 
