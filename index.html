@@ -141,10 +141,6 @@ html, body {
   overflow-x: hidden;
     touch-action: manipulation;
   -webkit-overflow-scrolling: touch; /* para suavizar no iOS */
-  user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  -webkit-touch-callout: none; /* iOS: impede copiar/pesquisar */
 }
 
 
@@ -468,10 +464,6 @@ label[for="email-convite"] {
   max-width: 100vw;
   box-sizing: border-box;
   white-space: normal; /* força quebra de linha */
-    user-select: auto;
-  -webkit-user-select: auto;
-  -ms-user-select: auto;
-  -webkit-touch-callout: default;
 }
 
 .container {
@@ -480,27 +472,12 @@ label[for="email-convite"] {
   padding: 0 1rem; /* para evitar toque nas bordas */
 }
 
-.no-select {
-  user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  -webkit-touch-callout: none;
-}
-
-.allow-select {
-  user-select: auto;
-  -webkit-user-select: auto;
-  -ms-user-select: auto;
-  -webkit-touch-callout: default;
-}
-
 </style>
 
 
 </head>
 
-    <body class="font-sans " style="padding-bottom: env(safe-area-inset-bottom); padding-top: env(safe-area-inset-top);" 
-    oncontextmenu="return false" onselectstart="return false" onmousedown="return false">
+    <body class="font-sans " style="padding-bottom: env(safe-area-inset-bottom); padding-top: env(safe-area-inset-top);">
 
 <div id="splash-screen" class="fixed inset-0 flex flex-col items-center justify-center bg-indigo-600 z-[9999] text-white">
   <h1 class="text-3xl font-bold mb-4">FinanceFlow</h1>
@@ -2522,6 +2499,12 @@ expenseElement.className = 'item-row grid grid-cols-11 gap-2 p-3 items-center cu
 expenseElement.dataset.id = expense.id;
 expenseElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
 
+expenseElement.addEventListener('touchstart', (e) => {
+  longPressTimer = setTimeout(() => {
+    openEditDeleteMenu(expense.id, expenseElement, 'expense');
+  }, 500);
+});
+
 
 const valorFormatado = expense.value.toLocaleString('pt-BR', {
   style: 'currency',
@@ -2663,11 +2646,15 @@ expenseElement.innerHTML = `
 equipmentElement.className = 'item-row grid grid-cols-11 gap-2 p-3 items-center cursor-pointer';
 
 
+equipmentElement.addEventListener('touchstart', (e) => {
+  longPressTimer = setTimeout(() => {
+    openEditDeleteMenu(equipment.id, equipmentElement, 'equipment');
+  }, 500);
+});
+
 
 equipmentElement.dataset.id = equipment.id;
 equipmentElement.setAttribute("style", "background: var(--card-bg); color: var(--text);");
-
-
 
 const valorFormatado = equipment.value.toLocaleString('pt-BR', {
   style: 'currency',
@@ -3392,6 +3379,19 @@ document.addEventListener('DOMContentLoaded', function () {
   attachItemListeners('#expenses-list', 'expense');
   attachItemListeners('#equipment-list', 'equipment');
 });
+
+
+function openEditDeleteMenu(id, element, type) {
+  if (type === 'expense') {
+    // Ação para despesas
+    //console.log('Abrindo menu de expense:', id);
+    // exemplo: openExpenseMenu(id, element);
+  } else if (type === 'equipment') {
+    // Ação para equipamentos
+    //console.log('Abrindo menu de equipment:', id);
+    // exemplo: openEquipmentMenu(id, element);
+  }
+}
 
 
 
