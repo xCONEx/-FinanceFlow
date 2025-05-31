@@ -472,6 +472,56 @@ label[for="email-convite"] {
   padding: 0 1rem; /* para evitar toque nas bordas */
 }
 
+
+    .task-form {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .task-form input, .task-form select {
+      padding: 0.5rem;
+    }
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .task {
+      padding: 1rem;
+      border-radius: 8px;
+      background-color: white;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .tag {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: white;
+    }
+    .Pendente { background: gray; }
+    .Afazer { background: blue; }
+    .Urgente { background: red; }
+    .Entregue { background: green; }
+    .Alteracao { background: orange; }
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #222;
+      color: white;
+      padding: 1rem;
+      border-radius: 5px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .toast.show {
+      opacity: 1;
+    }
+
+
 </style>
 
 
@@ -739,7 +789,65 @@ label[for="email-convite"] {
       <h3 class="font-bold mb-4">📈 Evolução Mensal</h3>
       <canvas id="graficoEvolucao" height="120"></canvas>
     </div>
+  
+
+    <!-- Tarefas -->
+<div class="reveal p-6 rounded-xl shadow-sm border relative" style="background: var(--card-bg); color: var(--text); border-color: var(--border);">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="font-bold text-lg">📋 Tarefas</h3>
+    <button id="openModalBtn" style="background: var(--primary); color: white;" class="px-3 py-1 rounded">Adicionar Tarefa</button>
   </div>
+
+  <div class="task-list" id="taskList"></div>
+
+  <!-- Botão Ver todas fixo -->
+  <div class="absolute bottom-3 right-4">
+    <button id="viewAllBtn" class="text-sm underline" style="color: var(--primary);">Ver todas</button>
+  </div>
+</div>
+
+<!-- Modal Nova/Editar Tarefa -->
+<div id="taskModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+  <div class="rounded-lg w-full max-w-md p-6" style="background: var(--card-bg); color: var(--text); border: 1px solid var(--border);">
+    <h2 id="modalTitle" class="text-xl font-bold mb-4">Nova Tarefa</h2>
+    <form id="taskForm" class="flex flex-col gap-3">
+      <input type="text" id="taskInput" placeholder="Título da tarefa" required style="background: var(--input-bg); border: 1px solid var(--border); color: var(--text);" class="p-2 rounded" />
+      <textarea id="taskDescription" placeholder="Descrição da tarefa..." rows="3" style="background: var(--input-bg); border: 1px solid var(--border); color: var(--text);" class="p-2 rounded"></textarea>
+      <input type="date" id="taskDate" style="background: var(--input-bg); border: 1px solid var(--border); color: var(--text);" class="p-2 rounded" />
+      <select id="statusSelect" style="background: var(--input-bg); border: 1px solid var(--border); color: var(--text);" class="p-2 rounded">
+        <option value="Pendente">Pendente</option>
+        <option value="Afazer">A Fazer</option>
+        <option value="Urgente">Urgente</option>
+        <option value="Entregue">Entregue</option>
+        <option value="Alteracao">Alteração</option>
+      </select>
+      <div class="flex justify-end gap-2">
+        <button type="button" id="cancelBtn" class="px-3 py-1 rounded" style="background: var(--input-bg); color: var(--text); border: 1px solid var(--border);">Cancelar</button>
+        <button type="submit" class="px-3 py-1 rounded" style="background: var(--primary); color: white;">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Todas as Tarefas -->
+<div id="allTasksModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+  <div class="rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6" style="background: var(--card-bg); color: var(--text); border: 1px solid var(--border);">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">Todas as Tarefas</h2>
+      <button class="text-xl font-bold" style="color: var(--primary);" onclick="document.getElementById('allTasksModal').classList.add('hidden')">×</button>
+    </div>
+    <div id="allTaskList" class="flex flex-col gap-3"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="ffixed bottom-6 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-4 py-2 rounded shadow-md hidden z-50"
+ style="background: var(--primary); color: white;">Tarefa salva!</div>
+
+
+
+</div> 
+
 </section>
 
                 
@@ -3485,7 +3593,7 @@ function parseBRLtoNumber(valorString) {
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 
   const firebaseConfig = {
@@ -3870,7 +3978,8 @@ appData.routine = {
 
 
 <!-- 1. BOTÃO PREMIUM FIXO -->
-<button id="open-premium-modal" class="fixed bottom-20 right-4 bg-yellow-400 text-black font-semibold px-4 py-2 rounded-full shadow-lg z-50 hover:bg-yellow-300 transition">✨ Liberar Premium</button>
+<button id="open-premium-modal" class="fixed bottom-20 right-8 bg-yellow-400 text-black font-semibold px-4 py-2 rounded-full shadow-lg z-50 hover:bg-yellow-300 transition">✨ Liberar Premium</button>
+         
 
 <!-- 2. MODAL DE ASSINATURA -->
 <div id="premium-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 px-4 flex items-center justify-center">
@@ -4265,6 +4374,176 @@ appData.routine = {
 </div>
 
 
+
+
+<!-- Script de Tasks -->
+
+ <script type="module">
+  import { auth, db } from './firebase.js';
+  import {
+    collection, getDocs, getDoc, doc, addDoc, updateDoc, arrayUnion, arrayRemove
+  } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+  import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+
+  
+  const tasksCollection = collection(db, "tasks");
+
+  const openModalBtn = document.getElementById('openModalBtn');
+  const viewAllBtn = document.getElementById('viewAllBtn');
+  const taskModal = document.getElementById('taskModal');
+  const taskForm = document.getElementById('taskForm');
+  const taskInput = document.getElementById('taskInput');
+  const taskDescription = document.getElementById('taskDescription');
+  const taskDate = document.getElementById('taskDate');
+  const statusSelect = document.getElementById('statusSelect');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const taskList = document.getElementById('taskList');
+  const allTasksModal = document.getElementById('allTasksModal');
+  const toast = document.getElementById('toast');
+  const modalTitle = document.getElementById('modalTitle');
+
+  let tasks = [];
+  let editingIndex = null;
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('opacity-100');
+    setTimeout(() => toast.classList.remove('opacity-100'), 2000);
+  }
+
+  function openModal(task = null, index = null) {
+    taskModal.classList.remove('hidden');
+    if (task) {
+      modalTitle.textContent = 'Editar Tarefa';
+      taskInput.value = task.name;
+      taskDescription.value = task.description || '';
+      taskDate.value = task.date;
+      statusSelect.value = task.status;
+      editingIndex = index;
+    } else {
+      modalTitle.textContent = 'Nova Tarefa';
+      taskInput.value = '';
+      taskDescription.value = '';
+      taskDate.value = '';
+      statusSelect.value = 'Pendente';
+      editingIndex = null;
+    }
+  }
+
+  function closeModal() {
+    taskModal.classList.add('hidden');
+  }
+
+  function renderTasks() {
+    taskList.innerHTML = '';
+    const latest = tasks.slice(-3).reverse();
+    latest.forEach((task, i) => {
+      const idx = tasks.length - 1 - i;
+      taskList.innerHTML += renderTaskCard(task, idx);
+    });
+  }
+
+  function renderAllTasks() {
+    const container = document.getElementById('allTaskList');
+    container.innerHTML = '';
+    tasks.forEach((task, i) => {
+      container.innerHTML += renderTaskCard(task, i);
+    });
+  }
+
+  function renderTaskCard(task, index) {
+    return `
+      <div class="flex justify-between items-start p-3 rounded border" style="background: var(--bg); border-color: var(--border);">
+        <div>
+          <div class="font-semibold">${task.name}</div>
+          <div class="text-sm" style="color: var(--text-muted);">${formatDate(task.date) || 'Sem data'}</div>
+          <div class="text-sm italic">${task.description || ''}</div>
+          <span class="inline-block mt-1 px-2 py-1 text-xs rounded" style="background: ${getStatusColor(task.status)}; color: white;">
+            ${task.status}
+          </span>
+        </div>
+        <div class="flex gap-2">
+          <button style="color: var(--primary);" onclick="editTask(${index})">✏️</button>
+          <button style="color: red;" onclick="deleteTask(${index})">🗑️</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function getStatusColor(status) {
+    switch (status) {
+      case 'Pendente': return 'gray';
+      case 'Afazer': return 'var(--primary)';
+      case 'Urgente': return 'red';
+      case 'Entregue': return 'green';
+      case 'Alteracao': return 'orange';
+      default: return 'black';
+    }
+  }
+
+  async function fetchTasks() {
+    const snapshot = await getDocs(tasksCollection);
+    tasks = snapshot.docs.map(docSnap => ({
+      ...docSnap.data(),
+      id: docSnap.id
+    }));
+    renderTasks();
+  }
+
+  async function deleteTask(index) {
+    const task = tasks[index];
+    if (!task.id) return;
+    await deleteDoc(doc(db, "tasks", task.id));
+    tasks.splice(index, 1);
+    renderTasks();
+    renderAllTasks();
+    showToast("Tarefa removida");
+  }
+
+  window.editTask = function(index) {
+    openModal(tasks[index], index);
+    allTasksModal.classList.add('hidden');
+  }
+
+  taskForm.onsubmit = async function (e) {
+    e.preventDefault();
+    const newTask = {
+      name: taskInput.value,
+      description: taskDescription.value,
+      date: taskDate.value,
+      status: statusSelect.value
+    };
+
+    if (editingIndex !== null) {
+      const task = tasks[editingIndex];
+      await updateDoc(doc(db, "tasks", task.id), newTask);
+      tasks[editingIndex] = { ...newTask, id: task.id };
+      showToast("Tarefa atualizada!");
+    } else {
+      const docRef = await addDoc(tasksCollection, newTask);
+      tasks.push({ ...newTask, id: docRef.id });
+      showToast("Tarefa adicionada!");
+    }
+
+    renderTasks();
+    closeModal();
+  };
+
+  cancelBtn.onclick = closeModal;
+  openModalBtn.onclick = () => openModal();
+  viewAllBtn.onclick = () => {
+    renderAllTasks();
+    allTasksModal.classList.remove('hidden');
+  };
+
+  fetchTasks();
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}/${year}`;
+  }
+</script>
 
 
 
