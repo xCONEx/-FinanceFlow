@@ -4,6 +4,7 @@ import { Edit, Trash2, FileText, Calendar, DollarSign, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,7 @@ const RecentJobs = () => {
   const { formatValue } = usePrivacy();
   const [editingJob, setEditingJob] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+    const { currentTheme } = useTheme();
 
   console.log('🔍 RecentJobs - Debug inicial:', {
     jobsCount: jobs.length,
@@ -117,7 +119,8 @@ const RecentJobs = () => {
           <h3 className="text-2xl font-bold text-gray-900">Últimos Jobs Calculados</h3>
           <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="mt-1">
+              <Button  size="sm" 
+              className={`bg-gradient-to-r ${currentTheme.primary} hover:opacity-90 transition-all duration-300 hover:scale-105`} >
                 <Eye className="h-4 w-4 mr-2" />
                 Ver Histórico
               </Button>
@@ -150,7 +153,8 @@ const RecentJobs = () => {
         <CardTitle>Últimos Jobs Calculados</CardTitle>
         <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="mt-1">
+            <Button size="sm" 
+              className={`bg-gradient-to-r ${currentTheme.primary} hover:opacity-90 transition-all duration-300 hover:scale-105`}>
               <Eye className="h-4 w-4 mr-2" />
               Ver Histórico
             </Button>
