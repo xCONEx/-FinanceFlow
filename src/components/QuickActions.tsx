@@ -1,20 +1,28 @@
-
 import React, { useState } from 'react';
-import { Plus, Calculator, Calendar, FileText, Briefcase, DollarSign } from 'lucide-react';
+import {
+  Plus,
+  Calculator,
+  Calendar,
+  FileText,
+  Briefcase,
+  DollarSign
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import AddTaskModal from './AddTaskModal';
 import ExpenseModal from './ExpenseModal';
 import WorkItemModal from './WorkItemModal';
+import ManualValueModal from './ManualValueModal'; // ✅ importado
 
 interface QuickActionsProps {
-  onNavigate: (tab: string) => void;
+  onNavigate?: (tab: string) => void;
 }
 
 const QuickActions = ({ onNavigate }: QuickActionsProps) => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showItemModal, setShowItemModal] = useState(false);
+  const [showManualJobModal, setShowManualJobModal] = useState(false); // ✅ novo estado
 
   const quickActions = [
     {
@@ -26,9 +34,9 @@ const QuickActions = ({ onNavigate }: QuickActionsProps) => {
     },
     {
       title: 'Calculadora',
-      description: 'Abrir calculadora de preços',
+      description: 'Abrir calculadora manual',
       icon: Calculator,
-      action: () => onNavigate('calculator'),
+      action: () => setShowManualJobModal(true), // ✅ novo modal
       color: 'bg-purple-500 hover:bg-purple-600'
     },
     {
@@ -75,6 +83,7 @@ const QuickActions = ({ onNavigate }: QuickActionsProps) => {
       <AddTaskModal open={showTaskModal} onOpenChange={setShowTaskModal} />
       <ExpenseModal open={showExpenseModal} onOpenChange={setShowExpenseModal} />
       <WorkItemModal open={showItemModal} onOpenChange={setShowItemModal} />
+      <ManualValueModal open={showManualJobModal} onOpenChange={setShowManualJobModal} /> {/* ✅ novo modal */}
     </Card>
   );
 };
