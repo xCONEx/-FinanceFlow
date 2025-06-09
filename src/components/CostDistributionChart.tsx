@@ -1,12 +1,13 @@
-
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useAppContext } from '../contexts/AppContext';
+import { usePrivacy } from '../contexts/PrivacyContext';
 
 const CostDistributionChart = () => {
   const { monthlyCosts } = useAppContext();
+  const { formatValue } = usePrivacy(); // ✅ Pegamos a função de privacidade aqui
 
-  // Group costs by category
+  // Agrupa os custos por categoria
   const costsByCategory = monthlyCosts.reduce((acc, cost) => {
     const category = cost.category || 'Outros';
     acc[category] = (acc[category] || 0) + cost.value;
@@ -54,12 +55,14 @@ const CostDistributionChart = () => {
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
+            <Tooltip
+              formatter={(value: number) => formatValue(value)} // ✅ Privacidade no Tooltip
+            />
           </PieChart>
         </ResponsiveContainer>
       </div>
       
-      {/* Legend */}
+      {/* Legenda */}
       <div className="space-y-2">
         {data.map((entry, index) => (
           <div key={entry.name} className="flex items-center gap-2 text-sm">
@@ -69,7 +72,7 @@ const CostDistributionChart = () => {
             />
             <span className="flex-1">{entry.name}</span>
             <span className="font-semibold">
-              R$ {entry.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              {formatValue(entry.value)} {/* ✅ Privacidade na legenda */}
             </span>
           </div>
         ))}
