@@ -191,7 +191,7 @@ const RecentJobs = () => {
                       {new Date(job.eventDate).toLocaleDateString('pt-BR')}
                     </span>
                     <span className="flex items-center gap-1">
-                      <DollarSign className="h-4 w-4" />
+                      
                       {formatValue(getSafeJobValue(job))}
                     </span>
                   </div>
@@ -249,29 +249,44 @@ const RecentJobs = () => {
                   {new Date(job.eventDate).toLocaleDateString('pt-BR')}
                 </span>
                 <span className="flex items-center gap-1">
-                  <DollarSign className="h-3 w-3" />
+                  
                   {formatValue(getSafeJobValue(job))}
                 </span>
               </div>
             </div>
-            <Badge variant={job.status === 'aprovado' ? 'default' : 'secondary'}>
-              {job.status}
-            </Badge>
+            <Badge className={getStatusColor(job.status)}>
+                        {job.status}
+                      </Badge>
           </div>
           
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => handleEdit(job.id)}>
-              <Edit className="h-3 w-3 mr-1" />
-              Editar
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => handleDelete(job.id)}>
-              <Trash2 className="h-3 w-3 mr-1" />
-              Excluir
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => handlePrintPDF(job.id)}>
-              <FileText className="h-3 w-3 mr-1" />
-              PDF
-            </Button>
+            <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(job.id)}
+                      className="text-blue-600 hover:text-blue-700 text-xs"
+                    >
+                      <Edit className="h-3 w-3 mr-1" />
+                      Editar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePrintPDF(job.id)}
+                      className="text-green-600 hover:text-green-700 text-xs"
+                    >
+                      <FileText className="h-3 w-3 mr-1" />
+                      PDF
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(job.id)}
+                      className="text-red-600 hover:text-red-700 text-xs"
+                    >
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      Excluir
+                    </Button>
           </div>
         </div>
       ))}
