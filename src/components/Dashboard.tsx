@@ -11,7 +11,6 @@ import CostDistributionChart from './CostDistributionChart';
 import RecentJobs from './RecentJobs';
 import TaskList from './TaskList';
 import AddTaskModal from './AddTaskModal';
-import InviteAcceptance from './InviteAcceptance';
 import ManualValueModal from '@/components/ManualValueModal';
 import ExpenseModal from '@/components/ExpenseModal'; // ajuste o caminho se necessário
 
@@ -125,8 +124,7 @@ const [showExpenseModal, setShowExpenseModal] = useState(false);
 
   return (
     <div className="space-y-6 pb-20 md:pb-6">
-      {/* Convites pendentes só para usuários individuais */}
-      {user?.userType === 'individual' && <InviteAcceptance />}
+     
 
       {/* Header simplificado */}
       <div className="text-center space-y-4">
