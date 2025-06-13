@@ -92,6 +92,7 @@ const EntregaFlowKanban = () => {
     if (!p.dueDate) return false;
     const deadline = new Date(p.dueDate);
     const today = new Date();
+      const { currentTheme } = useTheme();
     const diffTime = deadline.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays <= 2 && diffDays >= 0;
@@ -170,32 +171,6 @@ const EntregaFlowKanban = () => {
     }
   };
 
-// Estado adicional
-const [editData, setEditData] = useState<Partial<KanbanProject> | null>(null);
-
-useEffect(() => {
-  if (selectedProject) {
-    setEditData({ ...selectedProject });
-  }
-}, [selectedProject]);
-
-const handleEditSave = async () => {
-  if (!selectedProject || !editData) return;
-
-  const updatedProjects = projects.map(p =>
-    p.id === selectedProject.id ? { ...selectedProject, ...editData, updatedAt: new Date().toISOString() } : p
-  );
-
-  setProjects(updatedProjects);
-  await saveProjects(updatedProjects);
-  toast({
-    title: "Projeto Atualizado",
-    description: `"${editData.title}" foi salvo com sucesso`
-  });
-
-  setShowEditModal(false);
-};
-
   const handleAddProject = async () => {
     if (!newProject.title || !newProject.client) {
       toast({
@@ -239,21 +214,6 @@ const handleEditSave = async () => {
       description: `"${project.title}" foi adicionado com sucesso`
     });
   };
-
-  const priorityLabels: Record<string, string> = {
-  alta: "Alta",
-  media: "Média",
-  baixa: "Baixa",
-};
-
-const priorityStyles: Record<
-  string,
-  { label: string; bgColor: string; textColor?: string }
-> = {
-  alta: { label: "Alta", bgColor: "bg-red-500", textColor: "text-white" },
-  media: { label: "Média", bgColor: "bg-yellow-400", textColor: "text-black" },
-  baixa: { label: "Baixa", bgColor: "bg-green-500", textColor: "text-white" },
-};
 
   const handleDeleteProject = async (projectId: string) => {
     const projectToDelete = projects.find(p => p.id === projectId);
@@ -319,7 +279,7 @@ const priorityStyles: Record<
 
   if (loading) {
     return (
-      <div className="space-y-6 pb-20 md:pb-6 overflow-x-hidden px-4">
+      <div className="space-y-6 pb-20 md:pb-6">
         <div className="text-center">
           <p>Carregando projetos...</p>
         </div>
@@ -328,7 +288,7 @@ const priorityStyles: Record<
   }
 
   return (
-    <div className="space-y-6 pb-20 md:pb-6 overflow-x-hidden px-4">
+    <div className="space-y-6 pb-20 md:pb-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
@@ -470,19 +430,11 @@ const priorityStyles: Record<
                                   <CardContent className="p-4">
                                     <div className="space-y-3">
                                       {/* Priority Badge */}
-                                      {project.priority && (
-  <Badge
-    className={`text-white text-xs ${
-      project.priority === 'alta'
-        ? 'bg-red-500'
-        : project.priority === 'media'
-        ? 'bg-yellow-500'
-        : 'bg-green-500'
-    }`}
-  >
-    {priorityLabels[project.priority] || project.priority}
-  </Badge>
-)}
+                                      {project.priority === 'alta' && (
+                                        <Badge className="bg-red-500 text-white text-xs">
+                                          {project.priority.charAt(0).toUpperCase() + project.priority.slice(1)}
+                                        </Badge>
+                                      )}
 
                                       {/* Project Title */}
                                       <h4 className="font-semibold text-sm line-clamp-2">
@@ -562,8 +514,7 @@ const priorityStyles: Record<
 
       {/* Add Project Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="max-w-sm sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden px-4">
-
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Novo Projeto</DialogTitle>
           </DialogHeader>
@@ -678,153 +629,102 @@ const priorityStyles: Record<
 
       {/* Edit Project Modal */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-   <DialogContent className="max-w-sm sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden px-4">
-
-    <DialogHeader>
-      <div className="flex items-center justify-between">
-        <DialogTitle className="flex items-center gap-2">
-  Editar Projeto
-  {selectedProject?.priority && (
-    <Badge
-      className={`${priorityStyles[selectedProject.priority]?.bgColor} ${
-        priorityStyles[selectedProject.priority]?.textColor || "text-white"
-      }`}
-    >
-      {priorityStyles[selectedProject.priority]?.label || selectedProject.priority}
-    </Badge>
-  )}
-  <Badge variant="outline">{selectedProject?.status}</Badge>
-</DialogTitle>
-        <Button
-          size="sm"
-          variant="destructive"
-          onClick={() => selectedProject && handleDeleteProject(selectedProject.id)}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
-    </DialogHeader>
-
-  {editData && (
-  <div className="space-y-6 p-4 md:p-6 max-w-full">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label className="text-sm font-medium text-gray-700">Título</label>
-        <Input
-          className="w-full"
-          value={editData.title || ''}
-          onChange={(e) => setEditData({ ...editData, title: e.target.value })}
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-gray-700">Cliente</label>
-        <Input
-          className="w-full"
-          value={editData.client || ''}
-          onChange={(e) => setEditData({ ...editData, client: e.target.value })}
-        />
-      </div>
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label className="text-sm font-medium text-gray-700">Data de Entrega</label>
-        <Input
-          type="date"
-          className="w-full"
-          value={editData.dueDate || ''}
-          onChange={(e) => setEditData({ ...editData, dueDate: e.target.value })}
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-gray-700">Prioridade</label>
-        <Select
-          value={editData.priority || 'media'}
-          onValueChange={(value: 'alta' | 'media' | 'baixa') =>
-            setEditData({ ...editData, priority: value })
-          }
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Selecione a prioridade" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="alta">Alta</SelectItem>
-            <SelectItem value="media">Média</SelectItem>
-            <SelectItem value="baixa">Baixa</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-
-    <div>
-      <label className="text-sm font-medium text-gray-700">Descrição</label>
-      <Textarea
-        rows={3}
-        className="w-full"
-        value={editData.description || ''}
-        onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-      />
-    </div>
-
-    {/* Links de entrega */}
-    <div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
-        <label className="text-sm font-medium text-gray-700">Links de Entrega</label>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Input
-            placeholder="Cole o link aqui"
-            value={newLink}
-            onChange={(e) => setNewLink(e.target.value)}
-            className="w-full sm:w-64"
-          />
-          <Button onClick={handleAddLink} className="bg-black text-white w-full sm:w-auto">
-            Adicionar
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        {(!selectedProject.links || selectedProject.links.length === 0) ? (
-          <p className="text-sm text-gray-500 italic">Nenhum link adicionado</p>
-        ) : (
-          selectedProject.links.map((link, index) => (
-            <div
-              key={index}
-              className="flex flex-wrap items-center gap-2 p-2 bg-gray-50 rounded"
-            >
-              <ExternalLink className="h-4 w-4 text-blue-500" />
-              <span className="text-sm text-gray-700 flex-1 min-w-0 break-words">{link}</span>
-              <Button size="sm" variant="outline" asChild>
-                <a href={link} target="_blank" rel="noopener noreferrer">
-                  Abrir
-                </a>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2">
+                Editar Projeto
+                {selectedProject?.priority === 'alta' && (
+                  <Badge className="bg-red-500 text-white">Alta</Badge>
+                )}
+                <Badge variant="outline">{selectedProject?.status}</Badge>
+              </DialogTitle>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => selectedProject && handleDeleteProject(selectedProject.id)}
+              >
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
-          ))
-        )}
-      </div>
-    </div>
+          </DialogHeader>
+          
+          {selectedProject && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Cliente</label>
+                  <p className="text-sm text-gray-900">{selectedProject.client}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Data de Entrega</label>
+                  <p className={`text-sm ${
+                    selectedProject.dueDate && isOverdue(selectedProject.dueDate) && selectedProject.status !== 'entregue' ? 
+                    'text-red-600 font-medium' : 'text-gray-900'
+                  }`}>
+                    {selectedProject.dueDate ? new Date(selectedProject.dueDate).toLocaleDateString('pt-BR') : 'Não definido'}
+                  </p>
+                </div>
+              </div>
 
-    <div className="flex flex-col sm:flex-row gap-2 pt-4">
-      <Button
-        onClick={() => setShowEditModal(false)}
-        variant="outline"
-        className="flex-1 w-full sm:w-auto"
-      >
-        Fechar
-      </Button>
-      <Button
-        onClick={handleEditSave}
-        className="flex-1 w-full sm:w-auto bg-black text-white hover:bg-gray-800"
-      >
-        Salvar Alterações
-      </Button>
-    </div>
-  </div>
-)}
+              <div>
+                <label className="text-sm font-medium text-gray-700">Descrição</label>
+                <p className="text-sm text-gray-900 mt-1">{selectedProject.description || 'Sem descrição'}</p>
+              </div>
 
-  </DialogContent>
-</Dialog>
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-sm font-medium text-gray-700">Links de Entrega</label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Cole o link aqui"
+                      value={newLink}
+                      onChange={(e) => setNewLink(e.target.value)}
+                      className="w-64"
+                    />
+                    <Button onClick={handleAddLink} className="bg-black text-white">
+                      Adicionar
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {(!selectedProject.links || selectedProject.links.length === 0) ? (
+                    <p className="text-sm text-gray-500 italic">Nenhum link adicionado</p>
+                  ) : (
+                    selectedProject.links.map((link, index) => (
+                      <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                        <ExternalLink className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm text-gray-700 flex-1">{link}</span>
+                        <Button size="sm" variant="outline" asChild>
+                          <a href={link} target="_blank" rel="noopener noreferrer">
+                            Abrir
+                          </a>
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  onClick={() => setShowEditModal(false)} 
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Fechar
+                </Button>
+                <Button 
+                  className="flex-1 bg-black text-white hover:bg-gray-800"
+                >
+                  Salvar Alterações
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
