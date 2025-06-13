@@ -624,38 +624,9 @@ const priorityStyles: Record<
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Links de Entrega</label>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Cole o link aqui"
-                  value={newLink}
-                  onChange={(e) => setNewLink(e.target.value)}
-                />
-                <Button 
-                  onClick={() => {
-                    if (newLink) {
-                      setNewProject({
-                        ...newProject,
-                        links: [...(newProject.links || []), newLink]
-                      });
-                      setNewLink('');
-                    }
-                  }}
-                  variant="outline"
-                >
-                  Adicionar
-                </Button>
-              </div>
-              {newProject.links && newProject.links.length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {newProject.links.map((link, index) => (
-                    <div key={index} className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-                      {link}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+  
+</div>
+
           </div>
 
           <div className="flex gap-2 pt-4">
@@ -699,8 +670,8 @@ const priorityStyles: Record<
           size="sm"
           variant="destructive"
           onClick={() => selectedProject && handleDeleteProject(selectedProject.id)}
-        >
-          <Trash2 className="h-4 w-4" />
+        className='mt-4'>
+          <Trash2 className="h-4 w-4 " />
         </Button>
       </div>
     </DialogHeader>
@@ -764,45 +735,6 @@ const priorityStyles: Record<
         value={editData.description || ''}
         onChange={(e) => setEditData({ ...editData, description: e.target.value })}
       />
-    </div>
-
-    {/* Links de entrega */}
-    <div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
-        <label className="text-sm font-medium text-gray-700">Links de Entrega</label>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Input
-            placeholder="Cole o link aqui"
-            value={newLink}
-            onChange={(e) => setNewLink(e.target.value)}
-            className="w-full sm:w-64"
-          />
-          <Button onClick={handleAddLink} className="bg-black text-white w-full sm:w-auto">
-            Adicionar
-          </Button>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        {(!selectedProject.links || selectedProject.links.length === 0) ? (
-          <p className="text-sm text-gray-500 italic">Nenhum link adicionado</p>
-        ) : (
-          selectedProject.links.map((link, index) => (
-            <div
-              key={index}
-              className="flex flex-wrap items-center gap-2 p-2 bg-gray-50 rounded"
-            >
-              <ExternalLink className="h-4 w-4 text-blue-500" />
-              <span className="text-sm text-gray-700 flex-1 min-w-0 break-words">{link}</span>
-              <Button size="sm" variant="outline" asChild>
-                <a href={link} target="_blank" rel="noopener noreferrer">
-                  Abrir
-                </a>
-              </Button>
-            </div>
-          ))
-        )}
-      </div>
     </div>
 
     <div className="flex flex-col sm:flex-row gap-2 pt-4">
