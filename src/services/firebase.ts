@@ -16,4 +16,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Função para forçar atualização do token com claims atualizados
+export const forceTokenRefresh = async () => {
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      await user.getIdToken(true); // força refresh do token
+      console.log('🔄 Token atualizado com sucesso');
+    } catch (error) {
+      console.error('❌ Erro ao atualizar token:', error);
+    }
+  }
+};
+
 export default app;
