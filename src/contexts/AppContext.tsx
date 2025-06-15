@@ -1,591 +1,556 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Job, MonthlyCost, WorkItem, Task, WorkRoutine } from '../types';
-import { useAuth } from './AuthContext';
-import { firestoreService } from '../services/firestore';
-import { taskService } from '../services/taskService';
+import { useSupabaseAuth } from './SupabaseAuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  priority: 'baixa' | 'média' | 'alta';
+  status: 'todo' | 'editing' | 'urgent' | 'delivered' | 'revision';
+  dueDate?: string;
+  createdAt: string;
+  userId: string;
+}
+
+interface MonthlyCost {
+  id: string;
+  description: string;
+  category: string;
+  value: number;
+  month: string;
+  createdAt: string;
+  userId: string;
+  companyId?: string;
+}
+
+interface WorkItem {
+  id: string;
+  description: string;
+  category: string;
+  value: number;
+  depreciationYears: number;
+  createdAt: string;
+  userId: string;
+  companyId?: string;
+}
+
+interface Job {
+  id: string;
+  description: string;
+  client: string;
+  eventDate: string;
+  estimatedHours: number;
+  difficultyLevel: 'fácil' | 'médio' | 'complicado' | 'difícil';
+  logistics: number;
+  equipment: number;
+  assistance: number;
+  status: 'pendente' | 'aprovado';
+  category: string;
+  discountValue: number;
+  totalCosts: number;
+  serviceValue: number;
+  valueWithDiscount: number;
+  profitMargin: number;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  companyId?: string;
+}
+
+interface WorkRoutine {
+  id: string;
+  workHoursPerDay: number;
+  workDaysPerMonth: number;
+  valuePerHour: number;
+  valuePerDay: number;
+  desiredSalary: number;
+  userId: string;
+}
+
+interface VideoProject {
+  id: string;
+  title: string;
+  description: string;
+  clientName: string;
+  deadline: string;
+  priority: 'alta' | 'média' | 'baixa';
+  projectType: 'Casamento' | 'Evento Corporativo' | 'Comercial' | 'Documentário' | 'Social Media' | 'Outro';
+  estimatedDuration: string;
+  deliveryLinks: DeliveryLink[];
+  createdAt: string;
+  assignedTo: string;
+  notes: string;
+  status: 'filmado' | 'edicao' | 'revisao' | 'entregue';
+}
+
+interface DeliveryLink {
+  id: string;
+  url: string;
+  platform: 'WeTransfer' | 'Google Drive' | 'Dropbox' | 'YouTube' | 'Vimeo' | 'Outro';
+  description: string;
+  uploadedAt: string;
+  isPublic: boolean;
+}
 
 interface AppContextType {
-  jobs: Job[];
-  addJob: (job: Omit<Job, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => void;
-  updateJob: (id: string, updates: Partial<Job>) => Promise<void>;
-  deleteJob: (id: string) => void;
-  monthlyCosts: MonthlyCost[];
-  addMonthlyCost: (cost: Omit<MonthlyCost, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
-  updateMonthlyCost: (id: string, updates: Partial<MonthlyCost>) => Promise<void>;
-  deleteMonthlyCost: (id: string) => Promise<void>;
-  workItems: WorkItem[];
-  addWorkItem: (item: Omit<WorkItem, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
-  updateWorkItem: (id: string, updates: Partial<WorkItem>) => Promise<void>;
-  deleteWorkItem: (id: string) => Promise<void>;
+  currentView: string;
+  setCurrentView: (view: string) => void;
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+  
+  // Data state
   tasks: Task[];
+  jobs: Job[];
+  monthlyCosts: MonthlyCost[];
+  workItems: WorkItem[];
+  workRoutine: WorkRoutine | null;
+  projects: VideoProject[];
+  loading: boolean;
+  
+  // Task functions
   addTask: (task: Omit<Task, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
   updateTask: (id: string, updates: Partial<Task>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
-  workRoutine: WorkRoutine | null;
-  updateWorkRoutine: (routine: Omit<WorkRoutine, 'userId'>) => void;
-  loading: boolean;
+  
+  // Job functions
+  addJob: (job: Omit<Job, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => Promise<void>;
+  updateJob: (id: string, updates: Partial<Job>) => Promise<void>;
+  deleteJob: (id: string) => Promise<void>;
+  
+  // Monthly cost functions
+  addMonthlyCost: (cost: Omit<MonthlyCost, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
+  updateMonthlyCost: (id: string, updates: Partial<MonthlyCost>) => Promise<void>;
+  deleteMonthlyCost: (id: string) => Promise<void>;
+  
+  // Work item functions
+  addWorkItem: (item: Omit<WorkItem, 'id' | 'createdAt' | 'userId'>) => Promise<void>;
+  updateWorkItem: (id: string, updates: Partial<WorkItem>) => Promise<void>;
+  deleteWorkItem: (id: string) => Promise<void>;
+
+  // Project functions
+  addProject: (project: VideoProject) => Promise<void>;
+  updateProject: (id: string, updates: Partial<VideoProject>) => Promise<void>;
+  deleteProject: (id: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const useAppContext = () => {
+export const useApp = () => {
   const context = useContext(AppContext);
   if (!context) {
-    throw new Error('useAppContext must be used within an AppProvider');
+    throw new Error('useApp must be used within an AppProvider');
   }
   return context;
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, userData, agencyData } = useAuth();
+  const { isAuthenticated, user } = useSupabaseAuth();
+  const [currentView, setCurrentView] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Data state
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [monthlyCosts, setMonthlyCosts] = useState<MonthlyCost[]>([]);
   const [workItems, setWorkItems] = useState<WorkItem[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [workRoutine, setWorkRoutine] = useState<WorkRoutine | null>(null);
+  const [projects, setProjects] = useState<VideoProject[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Carregar dados quando usuário ou dados mudarem
   useEffect(() => {
-    if (user) {
-      loadUserData();
+    if (!isAuthenticated) {
+      setCurrentView('dashboard');
     }
-  }, [user, userData, agencyData]);
+  }, [isAuthenticated]);
 
-  const loadUserData = async () => {
+  // Load data from Supabase
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadAllData();
+    }
+  }, [isAuthenticated, user]);
+
+  const loadAllData = async () => {
+    if (!user) return;
+    
     setLoading(true);
-    
-    // CORRIGIDO: Sempre usar dados pessoais do usuário (userData)
-    const currentData = userData;
-    
-    if (currentData) {
-      console.log('📦 Carregando dados pessoais do usuário:', {
-        jobs: currentData.jobs?.length || 0,
-        expenses: currentData.expenses?.length || 0,
-        equipments: currentData.equipments?.length || 0,
-        routine: currentData.routine ? 'presente' : 'ausente'
-      });
-
-      // Carregar jobs pessoais
-      if (currentData && 'jobs' in currentData && currentData.jobs) {
-        const jobsData = currentData.jobs || [];
-        console.log('📋 Jobs carregados:', jobsData);
-        setJobs(jobsData.map(job => ({
-          ...job,
-          userId: user!.id,
-          companyId: undefined
-        })));
-      }
-
-      // Carregar custos mensais pessoais (expenses)
-      if (currentData && 'expenses' in currentData) {
-        const costsData = currentData.expenses || [];
-        setMonthlyCosts(costsData.map(cost => ({
-          id: cost.id || `temp_${Date.now()}_${Math.random()}`,
-          description: cost.description || cost.name || 'Custo',
-          category: cost.category || 'Geral',
-          value: cost.value || 0,
-          month: cost.month || new Date().toISOString().slice(0, 7),
-          createdAt: cost.createdAt || new Date().toISOString(),
-          userId: user!.id,
-          companyId: undefined
-        })));
-      }
-
-      // Carregar equipamentos pessoais (equipments)
-      if (currentData && 'equipments' in currentData) {
-        const itemsData = currentData.equipments || [];
-        setWorkItems(itemsData.map(item => ({
-          id: item.id || `temp_${Date.now()}_${Math.random()}`,
-          description: item.description || item.name || 'Item',
-          category: item.category || 'Equipamento',
-          value: item.value || 0,
-          depreciationYears: item.depreciationYears || 5,
-          createdAt: item.createdAt || new Date().toISOString(),
-          userId: user!.id,
-          companyId: undefined
-        })));
-      }
-
-      // CORRIGIDO: Carregar rotina de trabalho pessoal do Firebase
-      if (currentData && 'routine' in currentData && currentData.routine) {
-        const routineData = currentData.routine;
-        console.log('⚙️ Rotina carregada do Firebase:', routineData);
-        setWorkRoutine({
-          desiredSalary: routineData.desiredSalary || 0,
-          workDaysPerMonth: routineData.workDays || 22,
-          workHoursPerDay: routineData.dailyHours || 8,
-          valuePerDay: routineData.dalilyValue || 0,
-          valuePerHour: routineData.valuePerHour || 0,
-          userId: user!.id
-        });
-      } else {
-        console.log('❌ Nenhuma rotina encontrada no Firebase');
-        setWorkRoutine(null);
-      }
-
-      // NOVO: Carregar tasks do Firebase e migrar localStorage se necessário
-      try {
-        // Primeiro, tentar migrar tasks do localStorage
-        await taskService.migrateLocalStorageTasks(user!.id);
-        
-        // Depois carregar todas as tasks do Firebase
-        const userTasks = await taskService.getUserTasks(user!.id);
-        console.log('📝 Tasks carregadas do Firebase:', userTasks.length);
-        setTasks(userTasks);
-      } catch (error) {
-        console.error('❌ Erro ao carregar/migrar tasks:', error);
-        setTasks([]);
-      }
-    }
-    
-    setLoading(false);
-  };
-
-  // CORRIGIDO: Função para salvar job pessoal no Firebase
-  const updateJob = async (id: string, updates: Partial<Job>) => {
-    if (!user) {
-      console.error('❌ Usuário não encontrado para salvar job');
-      return;
-    }
-
     try {
-      console.log('💾 Salvando job pessoal editado:', id, updates);
+      // Load jobs
+      const { data: jobsData } = await supabase
+        .from('jobs')
+        .select('*')
+        .eq('user_id', user.id);
       
-      // Atualizar no estado local primeiro
-      setJobs(prevJobs => 
-        prevJobs.map(job => 
-          job.id === id 
-            ? { ...job, ...updates, updatedAt: new Date().toISOString() }
-            : job
-        )
-      );
+      if (jobsData) {
+        setJobs(jobsData.map(job => ({
+          id: job.id,
+          description: job.description,
+          client: job.client,
+          eventDate: job.event_date || '',
+          estimatedHours: job.estimated_hours || 0,
+          difficultyLevel: job.difficulty_level || 'médio',
+          logistics: job.logistics || 0,
+          equipment: job.equipment || 0,
+          assistance: job.assistance || 0,
+          status: job.status || 'pendente',
+          category: job.category || '',
+          discountValue: job.discount_value || 0,
+          totalCosts: job.total_costs || 0,
+          serviceValue: job.service_value || 0,
+          valueWithDiscount: job.value_with_discount || 0,
+          profitMargin: job.profit_margin || 30,
+          createdAt: job.created_at,
+          updatedAt: job.updated_at,
+          userId: job.user_id
+        })));
+      }
 
-      // Buscar dados atuais do usuário
-      const currentData = await firestoreService.getUserData(user.id);
+      // Load equipment (work items)
+      const { data: equipmentData } = await supabase
+        .from('equipment')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (equipmentData) {
+        setWorkItems(equipmentData.map(item => ({
+          id: item.id,
+          description: item.description,
+          category: item.category,
+          value: Number(item.value),
+          depreciationYears: item.depreciation_years || 5,
+          createdAt: item.created_at,
+          userId: item.user_id
+        })));
+      }
 
-      if (currentData && 'jobs' in currentData && currentData.jobs) {
-        // Atualizar job no array pessoal
-        const updatedJobs = currentData.jobs.map(job => 
-          job.id === id 
-            ? { ...job, ...updates, updatedAt: new Date().toISOString() }
-            : job
-        );
+      // Load expenses (monthly costs)
+      const { data: expensesData } = await supabase
+        .from('expenses')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (expensesData) {
+        setMonthlyCosts(expensesData.map(expense => ({
+          id: expense.id,
+          description: expense.description,
+          category: expense.category,
+          value: Number(expense.value),
+          month: expense.month,
+          createdAt: expense.created_at,
+          userId: expense.user_id
+        })));
+      }
 
-        // Salvar no Firebase na coleção pessoal
-        await firestoreService.updateField('usuarios', user.id, 'jobs', updatedJobs);
-        console.log('✅ Job pessoal salvo no Firebase com sucesso');
+      // Load work routine
+      const { data: routineData } = await supabase
+        .from('work_routine')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (routineData) {
+        setWorkRoutine({
+          id: routineData.id,
+          workHoursPerDay: routineData.work_hours_per_day || 8,
+          workDaysPerMonth: routineData.work_days_per_month || 22,
+          valuePerHour: Number(routineData.value_per_hour) || 0,
+          valuePerDay: Number(routineData.value_per_day) || 0,
+          desiredSalary: Number(routineData.desired_salary) || 0,
+          userId: routineData.user_id
+        });
       }
 
     } catch (error) {
-      console.error('❌ Erro ao salvar job pessoal:', error);
-      throw error; // Re-throw para mostrar erro na UI
+      console.error('Erro ao carregar dados:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const addJob = (job: Omit<Job, 'id' | 'createdAt' | 'updatedAt' | 'userId' | 'companyId'>) => {
-    const newJob: Job = {
-      ...job,
-      id: `job_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      userId: user!.id,
-      companyId: undefined
-    };
-    setJobs(prev => [...prev, newJob]);
-    console.log('📋 Job adicionado ao estado local:', newJob.id);
+  // Job functions
+  const addJob = async (jobData: Omit<Job, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('jobs')
+      .insert({
+        user_id: user.id,
+        description: jobData.description,
+        client: jobData.client,
+        event_date: jobData.eventDate || null,
+        estimated_hours: jobData.estimatedHours,
+        difficulty_level: jobData.difficultyLevel,
+        logistics: jobData.logistics,
+        equipment: jobData.equipment,
+        assistance: jobData.assistance,
+        status: jobData.status,
+        category: jobData.category,
+        discount_value: jobData.discountValue,
+        total_costs: jobData.totalCosts,
+        service_value: jobData.serviceValue,
+        value_with_discount: jobData.valueWithDiscount,
+        profit_margin: jobData.profitMargin
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (data) {
+      const newJob: Job = {
+        id: data.id,
+        description: data.description,
+        client: data.client,
+        eventDate: data.event_date || '',
+        estimatedHours: data.estimated_hours || 0,
+        difficultyLevel: data.difficulty_level || 'médio',
+        logistics: data.logistics || 0,
+        equipment: data.equipment || 0,
+        assistance: data.assistance || 0,
+        status: data.status || 'pendente',
+        category: data.category || '',
+        discountValue: data.discount_value || 0,
+        totalCosts: data.total_costs || 0,
+        serviceValue: data.service_value || 0,
+        valueWithDiscount: data.value_with_discount || 0,
+        profitMargin: data.profit_margin || 30,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        userId: data.user_id
+      };
+      setJobs(prev => [...prev, newJob]);
+    }
+  };
+
+  const updateJob = async (id: string, updates: Partial<Job>) => {
+    const { error } = await supabase
+      .from('jobs')
+      .update({
+        description: updates.description,
+        client: updates.client,
+        event_date: updates.eventDate || null,
+        estimated_hours: updates.estimatedHours,
+        difficulty_level: updates.difficultyLevel,
+        logistics: updates.logistics,
+        equipment: updates.equipment,
+        assistance: updates.assistance,
+        status: updates.status,
+        category: updates.category,
+        discount_value: updates.discountValue,
+        total_costs: updates.totalCosts,
+        service_value: updates.serviceValue,
+        value_with_discount: updates.valueWithDiscount,
+        profit_margin: updates.profitMargin
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+    setJobs(prev => prev.map(job => 
+      job.id === id ? { ...job, ...updates, updatedAt: new Date().toISOString() } : job
+    ));
   };
 
   const deleteJob = async (id: string) => {
-    if (!user) {
-      console.error('❌ Usuário não encontrado para deletar job');
-      return;
-    }
+    const { error } = await supabase
+      .from('jobs')
+      .delete()
+      .eq('id', id);
 
-    try {
-      console.log('🗑️ Deletando job:', id);
-      
-      // Remover do estado local
-      setJobs(prev => prev.filter(job => job.id !== id));
-
-      // Buscar dados atuais do usuário
-      const currentData = await firestoreService.getUserData(user.id);
-
-      if (currentData && 'jobs' in currentData && currentData.jobs) {
-        // Remover job do array pessoal
-        const updatedJobs = currentData.jobs.filter(job => job.id !== id);
-
-        // Salvar no Firebase
-        await firestoreService.updateField('usuarios', user.id, 'jobs', updatedJobs);
-        console.log('✅ Job removido do Firebase com sucesso');
-      }
-
-    } catch (error) {
-      console.error('❌ Erro ao deletar job:', error);
-      throw error;
-    }
+    if (error) throw error;
+    setJobs(prev => prev.filter(job => job.id !== id));
   };
 
-  // CORRIGIDO: Função para adicionar custo mensal e salvar no Firebase
-  const addMonthlyCost = async (cost: Omit<MonthlyCost, 'id' | 'createdAt' | 'userId' | 'companyId'>) => {
-    if (!user) {
-      console.error('❌ Usuário não encontrado para salvar custo');
-      throw new Error('Usuário não encontrado');
-    }
+  // Work item functions
+  const addWorkItem = async (itemData: Omit<WorkItem, 'id' | 'createdAt' | 'userId'>) => {
+    if (!user) return;
 
-    const newCost: MonthlyCost = {
-      ...cost,
-      id: `cost_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      userId: user.id,
-      companyId: undefined
-    };
+    const { data, error } = await supabase
+      .from('equipment')
+      .insert({
+        user_id: user.id,
+        description: itemData.description,
+        category: itemData.category,
+        value: itemData.value,
+        depreciation_years: itemData.depreciationYears
+      })
+      .select()
+      .single();
 
-    try {
-      // Atualizar estado local primeiro
-      setMonthlyCosts(prev => [...prev, newCost]);
-
-      // Buscar dados atuais do usuário
-      const currentData = await firestoreService.getUserData(user.id);
-
-      if (currentData) {
-        const currentExpenses = currentData.expenses || [];
-        
-        // Converter para formato do Firebase
-        const firebaseExpense = {
-          id: newCost.id,
-          description: newCost.description,
-          category: newCost.category,
-          value: newCost.value,
-          month: newCost.month,
-          createdAt: newCost.createdAt
-        };
-
-        const updatedExpenses = [...currentExpenses, firebaseExpense];
-
-        // Salvar no Firebase
-        await firestoreService.updateField('usuarios', user.id, 'expenses', updatedExpenses);
-        console.log('✅ Custo mensal salvo no Firebase com sucesso');
-      }
-    } catch (error) {
-      // Reverter estado local em caso de erro
-      setMonthlyCosts(prev => prev.filter(c => c.id !== newCost.id));
-      console.error('❌ Erro ao salvar custo mensal:', error);
-      throw error;
-    }
-  };
-
-  const updateMonthlyCost = async (id: string, updates: Partial<MonthlyCost>) => {
-    if (!user) {
-      console.error('❌ Usuário não encontrado para atualizar custo');
-      throw new Error('Usuário não encontrado');
-    }
-
-    try {
-      // Atualizar estado local primeiro
-      setMonthlyCosts(prev => 
-        prev.map(cost => cost.id === id ? { ...cost, ...updates } : cost)
-      );
-
-      // Buscar dados atuais do usuário
-      const currentData = await firestoreService.getUserData(user.id);
-
-      if (currentData && currentData.expenses) {
-        // Atualizar no array de expenses
-        const updatedExpenses = currentData.expenses.map(expense => 
-          expense.id === id 
-            ? { 
-                ...expense, 
-                description: updates.description || expense.description,
-                category: updates.category || expense.category,
-                value: updates.value || expense.value,
-                month: updates.month || expense.month
-              }
-            : expense
-        );
-
-        // Salvar no Firebase
-        await firestoreService.updateField('usuarios', user.id, 'expenses', updatedExpenses);
-        console.log('✅ Custo mensal atualizado no Firebase com sucesso');
-      }
-    } catch (error) {
-      console.error('❌ Erro ao atualizar custo mensal:', error);
-      throw error;
-    }
-  };
-
-  const deleteMonthlyCost = async (id: string) => {
-    if (!user) {
-      console.error('❌ Usuário não encontrado para deletar custo');
-      throw new Error('Usuário não encontrado');
-    }
-
-    try {
-      // Remover do estado local primeiro
-      setMonthlyCosts(prev => prev.filter(cost => cost.id !== id));
-
-      // Buscar dados atuais do usuário
-      const currentData = await firestoreService.getUserData(user.id);
-
-      if (currentData && currentData.expenses) {
-        // Remover do array de expenses
-        const updatedExpenses = currentData.expenses.filter(expense => expense.id !== id);
-
-        // Salvar no Firebase
-        await firestoreService.updateField('usuarios', user.id, 'expenses', updatedExpenses);
-        console.log('✅ Custo mensal removido do Firebase com sucesso');
-      }
-    } catch (error) {
-      console.error('❌ Erro ao deletar custo mensal:', error);
-      throw error;
-    }
-  };
-
-  // CORRIGIDO: Função para adicionar item de trabalho e salvar no Firebase
-  const addWorkItem = async (item: Omit<WorkItem, 'id' | 'createdAt' | 'userId' | 'companyId'>) => {
-    if (!user) {
-      console.error('❌ Usuário não encontrado para salvar item');
-      throw new Error('Usuário não encontrado');
-    }
-
-    const newItem: WorkItem = {
-      ...item,
-      id: `item_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      userId: user.id,
-      companyId: undefined
-    };
-
-    try {
-      // Atualizar estado local primeiro
+    if (error) throw error;
+    if (data) {
+      const newItem: WorkItem = {
+        id: data.id,
+        description: data.description,
+        category: data.category,
+        value: Number(data.value),
+        depreciationYears: data.depreciation_years || 5,
+        createdAt: data.created_at,
+        userId: data.user_id
+      };
       setWorkItems(prev => [...prev, newItem]);
-
-      // Buscar dados atuais do usuário
-      const currentData = await firestoreService.getUserData(user.id);
-
-      if (currentData) {
-        const currentEquipments = currentData.equipments || [];
-        
-        // Converter para formato do Firebase
-        const firebaseEquipment = {
-          id: newItem.id,
-          description: newItem.description,
-          name: newItem.description, // Manter compatibilidade
-          category: newItem.category,
-          value: newItem.value,
-          depreciationYears: newItem.depreciationYears,
-          createdAt: newItem.createdAt
-        };
-
-        const updatedEquipments = [...currentEquipments, firebaseEquipment];
-
-        // Salvar no Firebase
-        await firestoreService.updateField('usuarios', user.id, 'equipments', updatedEquipments);
-        console.log('✅ Item de trabalho salvo no Firebase com sucesso');
-      }
-    } catch (error) {
-      // Reverter estado local em caso de erro
-      setWorkItems(prev => prev.filter(i => i.id !== newItem.id));
-      console.error('❌ Erro ao salvar item de trabalho:', error);
-      throw error;
     }
   };
 
   const updateWorkItem = async (id: string, updates: Partial<WorkItem>) => {
-    if (!user) {
-      console.error('❌ Usuário não encontrado para atualizar item');
-      throw new Error('Usuário não encontrado');
-    }
+    const { error } = await supabase
+      .from('equipment')
+      .update({
+        description: updates.description,
+        category: updates.category,
+        value: updates.value,
+        depreciation_years: updates.depreciationYears
+      })
+      .eq('id', id);
 
-    try {
-      // Atualizar estado local primeiro
-      setWorkItems(prev => 
-        prev.map(item => item.id === id ? { ...item, ...updates } : item)
-      );
-
-      // Buscar dados atuais do usuário
-      const currentData = await firestoreService.getUserData(user.id);
-
-      if (currentData && currentData.equipments) {
-        // Atualizar no array de equipments
-        const updatedEquipments = currentData.equipments.map(equipment => 
-          equipment.id === id 
-            ? { 
-                ...equipment, 
-                description: updates.description || equipment.description,
-                name: updates.description || equipment.name || equipment.description,
-                category: updates.category || equipment.category,
-                value: updates.value || equipment.value,
-                depreciationYears: updates.depreciationYears || equipment.depreciationYears
-              }
-            : equipment
-        );
-
-        // Salvar no Firebase
-        await firestoreService.updateField('usuarios', user.id, 'equipments', updatedEquipments);
-        console.log('✅ Item de trabalho atualizado no Firebase com sucesso');
-      }
-    } catch (error) {
-      console.error('❌ Erro ao atualizar item de trabalho:', error);
-      throw error;
-    }
+    if (error) throw error;
+    setWorkItems(prev => prev.map(item => 
+      item.id === id ? { ...item, ...updates } : item
+    ));
   };
 
   const deleteWorkItem = async (id: string) => {
-    if (!user) {
-      console.error('❌ Usuário não encontrado para deletar item');
-      throw new Error('Usuário não encontrado');
-    }
+    const { error } = await supabase
+      .from('equipment')
+      .delete()
+      .eq('id', id);
 
-    try {
-      // Remover do estado local primeiro
-      setWorkItems(prev => prev.filter(item => item.id !== id));
+    if (error) throw error;
+    setWorkItems(prev => prev.filter(item => item.id !== id));
+  };
 
-      // Buscar dados atuais do usuário
-      const currentData = await firestoreService.getUserData(user.id);
+  // Monthly cost functions
+  const addMonthlyCost = async (costData: Omit<MonthlyCost, 'id' | 'createdAt' | 'userId'>) => {
+    if (!user) return;
 
-      if (currentData && currentData.equipments) {
-        // Remover do array de equipments
-        const updatedEquipments = currentData.equipments.filter(equipment => equipment.id !== id);
+    const { data, error } = await supabase
+      .from('expenses')
+      .insert({
+        user_id: user.id,
+        description: costData.description,
+        category: costData.category,
+        value: costData.value,
+        month: costData.month
+      })
+      .select()
+      .single();
 
-        // Salvar no Firebase
-        await firestoreService.updateField('usuarios', user.id, 'equipments', updatedEquipments);
-        console.log('✅ Item de trabalho removido do Firebase com sucesso');
-      }
-    } catch (error) {
-      console.error('❌ Erro ao deletar item de trabalho:', error);
-      throw error;
+    if (error) throw error;
+    if (data) {
+      const newCost: MonthlyCost = {
+        id: data.id,
+        description: data.description,
+        category: data.category,
+        value: Number(data.value),
+        month: data.month,
+        createdAt: data.created_at,
+        userId: data.user_id
+      };
+      setMonthlyCosts(prev => [...prev, newCost]);
     }
   };
 
-  // CORRIGIDO: Tasks agora salvam no Firebase com validação
-  const addTask = async (task: Omit<Task, 'id' | 'createdAt' | 'userId'>) => {
-    if (!user) {
-      console.error('❌ Usuário não encontrado para salvar task');
-      throw new Error('Usuário não encontrado');
-    }
+  const updateMonthlyCost = async (id: string, updates: Partial<MonthlyCost>) => {
+    const { error } = await supabase
+      .from('expenses')
+      .update({
+        description: updates.description,
+        category: updates.category,
+        value: updates.value,
+        month: updates.month
+      })
+      .eq('id', id);
 
-    try {
-      // Salvar no Firebase primeiro
-      const firebaseId = await taskService.addTask({
-        ...task,
-        userId: user.id
-      });
-      
-      // Criar task para o estado local
-      const newTask: Task = {
-        ...task,
-        id: firebaseId,
-        createdAt: new Date().toISOString(),
-        userId: user.id
-      };
-      
-      setTasks(prev => [...prev, newTask]);
-      console.log('✅ Task adicionada e salva no Firebase');
-    } catch (error) {
-      console.error('❌ Erro ao salvar task no Firebase:', error);
-      throw error;
-    }
+    if (error) throw error;
+    setMonthlyCosts(prev => prev.map(cost => 
+      cost.id === id ? { ...cost, ...updates } : cost
+    ));
+  };
+
+  const deleteMonthlyCost = async (id: string) => {
+    const { error } = await supabase
+      .from('expenses')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    setMonthlyCosts(prev => prev.filter(cost => cost.id !== id));
+  };
+
+  // Task functions (mock for now - would need tasks table)
+  const addTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'userId'>) => {
+    const newTask: Task = {
+      ...taskData,
+      id: `task_${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      userId: user?.id || '',
+    };
+    setTasks(prev => [...prev, newTask]);
   };
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
-    if (!user) {
-      console.error('❌ Usuário não encontrado para atualizar task');
-      throw new Error('Usuário não encontrado');
-    }
-
-    try {
-      // Atualizar no Firebase
-      await taskService.updateTask(id, updates);
-      
-      // Atualizar no estado local
-      setTasks(prev => 
-        prev.map(task => 
-          task.id === id ? { ...task, ...updates } : task
-        )
-      );
-      
-      console.log('✅ Task atualizada no Firebase');
-    } catch (error) {
-      console.error('❌ Erro ao atualizar task no Firebase:', error);
-      throw error;
-    }
+    setTasks(prev => prev.map(task => 
+      task.id === id ? { ...task, ...updates } : task
+    ));
   };
 
   const deleteTask = async (id: string) => {
-    if (!user) {
-      console.error('❌ Usuário não encontrado para deletar task');
-      throw new Error('Usuário não encontrado');
-    }
-
-    try {
-      // Deletar do Firebase
-      await taskService.deleteTask(id);
-      
-      // Remover do estado local
-      setTasks(prev => prev.filter(task => task.id !== id));
-      
-      console.log('✅ Task deletada do Firebase');
-    } catch (error) {
-      console.error('❌ Erro ao deletar task do Firebase:', error);
-      throw error;
-    }
+    setTasks(prev => prev.filter(task => task.id !== id));
   };
 
-  const updateWorkRoutine = async (routine: Omit<WorkRoutine, 'userId'>) => {
-    if (!user) {
-      console.error('❌ Usuário não encontrado para salvar rotina');
-      return;
-    }
+  // Project functions (mock for now - would need projects table)
+  const addProject = async (projectData: VideoProject) => {
+    setProjects(prev => [...prev, projectData]);
+  };
 
-    const newRoutine: WorkRoutine = {
-      ...routine,
-      userId: user.id
-    };
-    
-    setWorkRoutine(newRoutine);
+  const updateProject = async (id: string, updates: Partial<VideoProject>) => {
+    setProjects(prev => prev.map(project => 
+      project.id === id ? { ...project, ...updates } : project
+    ));
+  };
 
-    try {
-      // Salvar no Firebase na estrutura correta
-      const routineData = {
-        desiredSalary: routine.desiredSalary,
-        workDays: routine.workDaysPerMonth,
-        dailyHours: routine.workHoursPerDay,
-        dalilyValue: routine.valuePerDay,
-        valuePerHour: routine.valuePerHour
-      };
-
-      await firestoreService.updateUserField(user.id, 'routine', routineData);
-      console.log('✅ Rotina salva no Firebase com sucesso');
-    } catch (error) {
-      console.error('❌ Erro ao salvar rotina no Firebase:', error);
-      throw error;
-    }
+  const deleteProject = async (id: string) => {
+    setProjects(prev => prev.filter(project => project.id !== id));
   };
 
   return (
     <AppContext.Provider value={{
-      jobs,
-      addJob,
-      updateJob,
-      deleteJob,
-      monthlyCosts,
-      addMonthlyCost,
-      updateMonthlyCost,
-      deleteMonthlyCost,
-      workItems,
-      addWorkItem,
-      updateWorkItem,
-      deleteWorkItem,
+      currentView,
+      setCurrentView,
+      sidebarOpen,
+      setSidebarOpen,
+      
+      // Data state
       tasks,
+      jobs,
+      monthlyCosts,
+      workItems,
+      workRoutine,
+      projects,
+      loading,
+      
+      // Functions
       addTask,
       updateTask,
       deleteTask,
-      workRoutine,
-      updateWorkRoutine,
-      loading
+      addJob,
+      updateJob,
+      deleteJob,
+      addMonthlyCost,
+      updateMonthlyCost,
+      deleteMonthlyCost,
+      addWorkItem,
+      updateWorkItem,
+      deleteWorkItem,
+      addProject,
+      updateProject,
+      deleteProject,
     }}>
       {children}
     </AppContext.Provider>
   );
 };
+
+export default AppProvider;
