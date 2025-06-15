@@ -6,14 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Crown, Building2, Users, Zap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useSubscription } from '../hooks/useSubscription';
 
 const SubscriptionPlans = () => {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { subscription, loading } = useSubscription();
   const [isLoading, setIsLoading] = useState<string | null>(null);
-  
-  // Simular dados de assinatura atual (substituir por dados reais do Stripe)
-  const currentPlan = 'free'; // free, premium, enterprise
 
   const plans = [
     {
@@ -25,6 +24,30 @@ const SubscriptionPlans = () => {
       icon: Zap,
       color: 'from-gray-600 to-gray-700',
       borderColor: 'border-gray-200',
+      caktoLink: null,
+      features: [
+        'Calculadora de precificação',
+        'Controle de custos mensais',
+        'Gestão de equipamentos',
+        'Relatórios básicos',
+        'Suporte por email'
+      ],
+      limitations: [
+        'Máximo 10 jobs por mês',
+        'Sem backup em nuvem',
+        'Sem recursos de equipe'
+      ]
+    },
+    {
+      id: 'basic',
+      name: 'Basic',
+      price: 'R$ 29,90',
+      period: '/mês',
+      description: 'Para começar a organizar suas finanças',
+      icon: Zap,
+      color: 'from-gray-600 to-gray-700',
+      borderColor: 'border-gray-200',
+      caktoLink: 'https://pay.cakto.com.br/yppzpjc',
       features: [
         'Calculadora de precificação',
         'Controle de custos mensais',
@@ -48,8 +71,9 @@ const SubscriptionPlans = () => {
       color: 'from-purple-600 to-blue-600',
       borderColor: 'border-purple-200',
       popular: true,
+      caktoLink: 'https://pay.cakto.com.br/kesq5cb',
       features: [
-        'Tudo do plano Free',
+        'Tudo do plano Basic',
         'Jobs ilimitados',
         'Relatórios avançados com gráficos',
         'Geração de PDF com logo personalizável',
@@ -68,6 +92,7 @@ const SubscriptionPlans = () => {
       icon: Building2,
       color: 'from-green-600 to-blue-600',
       borderColor: 'border-green-200',
+      caktoLink: 'https://pay.cakto.com.br/34p727v',
       features: [
         'Tudo do plano Premium',
         'Gestão de equipe completa',
@@ -79,28 +104,72 @@ const SubscriptionPlans = () => {
         'Suporte dedicado',
         'Treinamento da equipe'
       ]
+    },
+    {
+      id: 'enterprise-annual',
+      name: 'Enterprise Anual',
+      price: 'R$ 1.970',
+      period: '/ano',
+      description: 'Para empresas com desconto anual',
+      icon: Building2,
+      color: 'from-green-600 to-blue-600',
+      borderColor: 'border-green-200',
+      caktoLink: 'https://pay.cakto.com.br/uoxtt9o',
+      features: [
+        'Tudo do plano Premium',
+        'Gestão de equipe completa',
+        'Kanban de projetos',
+        'Convites para colaboradores',
+        'Painéis por empresa',
+        'Exportação de dados avançada',
+        'API para integrações',
+        'Suporte dedicado',
+        'Treinamento da equipe',
+        '2 meses grátis'
+      ]
     }
   ];
 
   const handleSubscribe = async (planId: string) => {
+    const plan = plans.find(p => p.id === planId);
+    
+    if (!plan || !plan.caktoLink) {
+      if (planId === 'free') {
+        alert('Você já está no plano gratuito!');
+        return;
+      }
+      alert('Link de pagamento não encontrado');
+      return;
+    }
+
     setIsLoading(planId);
     
     try {
-      // Aqui será implementada a integração com Stripe
-      console.log('Iniciando checkout para o plano:', planId);
+      console.log('Redirecionando para Cakto:', planId, plan.caktoLink);
+      console.log('User ID:', user?.id);
+      console.log('User Email:', user?.email);
       
-      // Simular processo de checkout
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Redirecionar para Stripe Checkout ou abrir modal de pagamento
-      alert(`Redirecionando para checkout do plano ${planId}`);
+      // Abrir o link da Cakto em uma nova aba
+      window.open(plan.caktoLink, '_blank');
       
     } catch (error) {
       console.error('Erro ao processar pagamento:', error);
     } finally {
-      setIsLoading(null);
+      // Remover loading após um tempo para permitir que o usuário tente novamente
+      setTimeout(() => setIsLoading(null), 3000);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Carregando informações da assinatura...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-20 md:pb-6">
@@ -114,19 +183,37 @@ const SubscriptionPlans = () => {
         </p>
       </div>
 
+      {/* Debug Info - Remover em produção */}
+      {user && (
+        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700">
+          <CardContent className="p-4">
+            <h3 className="font-semibold mb-2">Debug Info (remover em produção):</h3>
+            <div className="text-sm space-y-1">
+              <p><strong>User ID:</strong> {user.id}</p>
+              <p><strong>Email:</strong> {user.email}</p>
+              <p><strong>Plano Atual:</strong> {subscription.plan}</p>
+              <p><strong>Status:</strong> {subscription.status}</p>
+              <p><strong>Ativado em:</strong> {subscription.activated_at || 'N/A'}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Mostrar plano atual se não for free */}
-      {currentPlan !== 'free' && (
+      {subscription.plan !== 'free' && (
         <Card className={`bg-gradient-to-r ${currentTheme.secondary} border-${currentTheme.accent}/20`}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold">Plano Atual</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Você está no plano {plans.find(p => p.id === currentPlan)?.name}
+                  Você está no plano {plans.find(p => p.id === subscription.plan)?.name}
                 </p>
               </div>
               <div className="flex gap-2">
-                <Badge className={`bg-${currentTheme.accent} text-white`}>Ativo</Badge>
+                <Badge className={`bg-${currentTheme.accent} text-white`}>
+                  {subscription.status === 'active' ? 'Ativo' : subscription.status}
+                </Badge>
                 <Button variant="outline" size="sm">
                   Gerenciar Assinatura
                 </Button>
@@ -136,7 +223,7 @@ const SubscriptionPlans = () => {
         </Card>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-5 gap-6">
         {plans.map((plan) => (
           <Card 
             key={plan.id}
@@ -196,18 +283,18 @@ const SubscriptionPlans = () => {
 
               <Button 
                 className={`w-full ${
-                  currentPlan === plan.id 
+                  subscription.plan === plan.id 
                     ? 'bg-gray-400 cursor-not-allowed' 
                     : plan.popular 
                       ? `bg-gradient-to-r ${plan.color} hover:opacity-90` 
                       : ''
                 }`}
-                disabled={currentPlan === plan.id || isLoading === plan.id}
+                disabled={subscription.plan === plan.id || isLoading === plan.id}
                 onClick={() => handleSubscribe(plan.id)}
               >
                 {isLoading === plan.id ? (
-                  'Processando...'
-                ) : currentPlan === plan.id ? (
+                  'Abrindo Pagamento...'
+                ) : subscription.plan === plan.id ? (
                   'Plano Atual'
                 ) : plan.id === 'free' ? (
                   'Plano Gratuito'
@@ -235,6 +322,7 @@ const SubscriptionPlans = () => {
           <p>• Todos os planos incluem 14 dias de teste gratuito</p>
           <p>• Cancele a qualquer momento</p>
           <p>• Suporte em português</p>
+          <p>• Pagamentos processados pela Cakto</p>
         </div>
       </div>
     </div>
