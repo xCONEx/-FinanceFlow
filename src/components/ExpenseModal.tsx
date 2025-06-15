@@ -1,28 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Save } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CurrencyInput } from '@/components/ui/currency-input';
-import { useAppContext } from '../contexts/AppContext';
+import { useApp } from '../contexts/AppContext';
 import { toast } from '@/hooks/use-toast';
-
-const EXPENSE_CATEGORIES = [
-  'Moradia',
-  'Alimentação',
-  'Transporte',
-  'Saúde',
-  'Lazer',
-  'Outros'
-];
 
 interface ExpenseModalProps {
   open: boolean;
@@ -31,146 +15,151 @@ interface ExpenseModalProps {
 }
 
 const ExpenseModal = ({ open, onOpenChange, editingCost }: ExpenseModalProps) => {
-  const { addMonthlyCost, updateMonthlyCost } = useAppContext();
+  const { addMonthlyCost, updateMonthlyCost } = useApp();
   const [formData, setFormData] = useState({
     description: '',
     category: '',
     value: 0,
-    month: new Date().toISOString().slice(0, 7)
+    month: new Date().toISOString().slice(0, 7) // YYYY-MM
   });
+  const [submitting, setSubmitting] = useState(false);
 
-  // Resetar e popular formulário quando abrir modal
   useEffect(() => {
-    if (open) {
-      if (editingCost) {
-        setFormData({
-          description: editingCost.description || '',
-          category: editingCost.category || '',
-          value: editingCost.value || 0,
-          month: editingCost.month || new Date().toISOString().slice(0, 7)
-        });
-      } else {
-        setFormData({
-          description: '',
-          category: '',
-          value: 0,
-          month: new Date().toISOString().slice(0, 7)
-        });
-      }
-    }
-  }, [open, editingCost]);
-
-  const handleSave = async () => {
-    if (!formData.description || !formData.category || formData.value <= 0) {
-      toast({
-        title: "Erro",
-        description: "Preencha todos os campos obrigatórios.",
-        variant: "destructive"
+    if (editingCost) {
+      setFormData({
+        description: editingCost.description || '',
+        category: editingCost.category || '',
+        value: editingCost.value || 0,
+        month: editingCost.month || new Date().toISOString().slice(0, 7)
       });
-      return;
-    }
-
-    try {
-      if (editingCost) {
-        await updateMonthlyCost(editingCost.id, formData);
-        toast({
-          title: "Despesa Atualizada",
-          description: "A despesa foi atualizada com sucesso.",
-        });
-      } else {
-        await addMonthlyCost(formData);
-        toast({
-          title: "Despesa Adicionada",
-          description: "A despesa foi adicionada com sucesso.",
-        });
-      }
-
+    } else {
       setFormData({
         description: '',
         category: '',
         value: 0,
         month: new Date().toISOString().slice(0, 7)
       });
+    }
+  }, [editingCost, open]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.description || !formData.category) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos obrigatórios",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      if (editingCost) {
+        await updateMonthlyCost(editingCost.id, formData);
+        toast({
+          title: "Custo Atualizado",
+          description: "O custo foi atualizado com sucesso.",
+        });
+      } else {
+        await addMonthlyCost(formData);
+        toast({
+          title: "Custo Adicionado",
+          description: "O custo foi adicionado com sucesso.",
+        });
+      }
       onOpenChange(false);
     } catch (error) {
       toast({
         title: "Erro",
-        description: editingCost ? "Erro ao atualizar despesa." : "Erro ao adicionar despesa.",
+        description: "Erro ao salvar custo.",
         variant: "destructive"
       });
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-md mx-auto max-h-[90vh] overflow-y-auto">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5" />
-            {editingCost ? 'Editar Despesa' : 'Nova Despesa'}
+          <DialogTitle>
+            {editingCost ? 'Editar Custo' : 'Adicionar Custo Mensal'}
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="expense-description">Descrição *</Label>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="description">Descrição *</Label>
             <Input
-              id="expense-description"
+              id="description"
               value={formData.description}
               onChange={(e) => setFormData({...formData, description: e.target.value})}
-              placeholder="Ex: Energia elétrica"
+              placeholder="Ex: Aluguel do estúdio"
+              required
             />
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="expense-category">Categoria *</Label>
+
+          <div>
+            <Label htmlFor="category">Categoria *</Label>
             <Select
               value={formData.category}
               onValueChange={(value) => setFormData({...formData, category: value})}
             >
-              <SelectTrigger className="bg-white">
+              <SelectTrigger>
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
-              <SelectContent className="bg-white border shadow-lg z-50">
-                {EXPENSE_CATEGORIES.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
+              <SelectContent>
+                <SelectItem value="Aluguel">Aluguel</SelectItem>
+                <SelectItem value="Energia">Energia</SelectItem>
+                <SelectItem value="Internet">Internet</SelectItem>
+                <SelectItem value="Telefone">Telefone</SelectItem>
+                <SelectItem value="Software">Software</SelectItem>
+                <SelectItem value="Marketing">Marketing</SelectItem>
+                <SelectItem value="Transporte">Transporte</SelectItem>
+                <SelectItem value="Alimentação">Alimentação</SelectItem>
+                <SelectItem value="Materiais">Materiais</SelectItem>
+                <SelectItem value="Outros">Outros</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="expense-value">Valor (R$) *</Label>
-              <CurrencyInput
-                id="expense-value"
-                value={formData.value}
-                onChange={(value) => setFormData({...formData, value})}
-                placeholder="0,00"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="expense-month">Mês *</Label>
-              <Input
-                id="expense-month"
-                type="month"
-                value={formData.month}
-                onChange={(e) => setFormData({...formData, month: e.target.value})}
-              />
-            </div>
+          <div>
+            <Label htmlFor="value">Valor (R$) *</Label>
+            <Input
+              id="value"
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.value}
+              onChange={(e) => setFormData({...formData, value: parseFloat(e.target.value) || 0})}
+              placeholder="0,00"
+              required
+            />
           </div>
 
-          <div className="flex flex-col md:flex-row gap-2 pt-4">
-            <Button onClick={handleSave} className="flex-1 order-1">
-              <Save className="h-4 w-4 mr-2" />
-              {editingCost ? 'Atualizar' : 'Salvar'}
+          <div>
+            <Label htmlFor="month">Mês/Ano *</Label>
+            <Input
+              id="month"
+              type="month"
+              value={formData.month}
+              onChange={(e) => setFormData({...formData, month: e.target.value})}
+              required
+            />
+          </div>
+
+          <div className="flex gap-2 pt-4">
+            <Button type="submit" disabled={submitting} className="flex-1">
+              {submitting ? 'Salvando...' : editingCost ? 'Atualizar' : 'Adicionar'}
             </Button>
-            <Button variant="outline" onClick={() => onOpenChange(false)} className="order-2 md:order-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
           </div>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

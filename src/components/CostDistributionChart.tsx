@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { useAppContext } from '../contexts/AppContext';
+import { useApp } from '../contexts/AppContext';
 import { usePrivacy } from '../contexts/PrivacyContext';
 
 const CostDistributionChart = () => {
-  const { monthlyCosts } = useAppContext();
+  const { monthlyCosts } = useApp();
   const { formatValue } = usePrivacy();
 
   const costsByCategory = monthlyCosts.reduce((acc, cost) => {

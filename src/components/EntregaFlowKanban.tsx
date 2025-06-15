@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useTheme } from '../contexts/ThemeContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -23,7 +23,7 @@ import {
   Eye
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '../contexts/AuthContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { kanbanService, KanbanProject } from '../services/kanbanService';
 
 interface Column {
@@ -38,7 +38,6 @@ const EntregaFlowKanban = () => {
   const [projects, setProjects] = useState<KanbanProject[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const { isDark, currentTheme, toggleDarkMode, changeTheme } = useTheme();
   const [selectedProject, setSelectedProject] = useState<KanbanProject | null>(null);
   const [loading, setLoading] = useState(true);
   const [newProject, setNewProject] = useState<Partial<KanbanProject>>({
@@ -52,7 +51,7 @@ const EntregaFlowKanban = () => {
   });
   const [newLink, setNewLink] = useState('');
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
 
   const columns: Column[] = [
     {
@@ -170,31 +169,31 @@ const EntregaFlowKanban = () => {
     }
   };
 
-// Estado adicional
-const [editData, setEditData] = useState<Partial<KanbanProject> | null>(null);
+  // Estado adicional
+  const [editData, setEditData] = useState<Partial<KanbanProject> | null>(null);
 
-useEffect(() => {
-  if (selectedProject) {
-    setEditData({ ...selectedProject });
-  }
-}, [selectedProject]);
+  useEffect(() => {
+    if (selectedProject) {
+      setEditData({ ...selectedProject });
+    }
+  }, [selectedProject]);
 
-const handleEditSave = async () => {
-  if (!selectedProject || !editData) return;
+  const handleEditSave = async () => {
+    if (!selectedProject || !editData) return;
 
-  const updatedProjects = projects.map(p =>
-    p.id === selectedProject.id ? { ...selectedProject, ...editData, updatedAt: new Date().toISOString() } : p
-  );
+    const updatedProjects = projects.map(p =>
+      p.id === selectedProject.id ? { ...selectedProject, ...editData, updatedAt: new Date().toISOString() } : p
+    );
 
-  setProjects(updatedProjects);
-  await saveProjects(updatedProjects);
-  toast({
-    title: "Projeto Atualizado",
-    description: `"${editData.title}" foi salvo com sucesso`
-  });
+    setProjects(updatedProjects);
+    await saveProjects(updatedProjects);
+    toast({
+      title: "Projeto Atualizado",
+      description: `"${editData.title}" foi salvo com sucesso`
+    });
 
-  setShowEditModal(false);
-};
+    setShowEditModal(false);
+  };
 
   const handleAddProject = async () => {
     if (!newProject.title || !newProject.client) {
@@ -241,19 +240,19 @@ const handleEditSave = async () => {
   };
 
   const priorityLabels: Record<string, string> = {
-  alta: "Alta",
-  media: "Média",
-  baixa: "Baixa",
-};
+    alta: "Alta",
+    media: "Média",
+    baixa: "Baixa",
+  };
 
-const priorityStyles: Record<
-  string,
-  { label: string; bgColor: string; textColor?: string }
-> = {
-  alta: { label: "Alta", bgColor: "bg-red-500", textColor: "text-white" },
-  media: { label: "Média", bgColor: "bg-yellow-400", textColor: "text-black" },
-  baixa: { label: "Baixa", bgColor: "bg-green-500", textColor: "text-white" },
-};
+  const priorityStyles: Record<
+    string,
+    { label: string; bgColor: string; textColor?: string }
+  > = {
+    alta: { label: "Alta", bgColor: "bg-red-500", textColor: "text-white" },
+    media: { label: "Média", bgColor: "bg-yellow-400", textColor: "text-black" },
+    baixa: { label: "Baixa", bgColor: "bg-green-500", textColor: "text-white" },
+  };
 
   const handleDeleteProject = async (projectId: string) => {
     const projectToDelete = projects.find(p => p.id === projectId);
@@ -333,7 +332,7 @@ const priorityStyles: Record<
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className={`w-10 h-10 bg-gradient-to-r ${currentTheme.primary} rounded-lg flex items-center justify-center`}>
+            <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg flex items-center justify-center">
               <Video className="text-white font-bold text-2xl"/>
             </div>
             <div>
@@ -347,7 +346,7 @@ const priorityStyles: Record<
 
         <Button 
           onClick={() => setShowAddModal(true)}
-          className={`bg-gradient-to-r ${currentTheme.primary} hover:opacity-90 transition-all duration-300 hover:scale-105`}
+          className="bg-gradient-to-r from-purple-600 to-purple-800 hover:opacity-90 transition-all duration-300 hover:scale-105"
         >
           <Plus className="h-4 w-4 mr-2" />
           Novo Projeto
@@ -471,18 +470,18 @@ const priorityStyles: Record<
                                     <div className="space-y-3">
                                       {/* Priority Badge */}
                                       {project.priority && (
-  <Badge
-    className={`text-white text-xs ${
-      project.priority === 'alta'
-        ? 'bg-red-500'
-        : project.priority === 'media'
-        ? 'bg-yellow-500'
-        : 'bg-green-500'
-    }`}
-  >
-    {priorityLabels[project.priority] || project.priority}
-  </Badge>
-)}
+                                        <Badge
+                                          className={`text-white text-xs ${
+                                            project.priority === 'alta'
+                                              ? 'bg-red-500'
+                                              : project.priority === 'media'
+                                              ? 'bg-yellow-500'
+                                              : 'bg-green-500'
+                                          }`}
+                                        >
+                                          {priorityLabels[project.priority] || project.priority}
+                                        </Badge>
+                                      )}
 
                                       {/* Project Title */}
                                       <h4 className="font-semibold text-sm line-clamp-2">
@@ -563,7 +562,6 @@ const priorityStyles: Record<
       {/* Add Project Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent className="max-w-sm sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden px-4">
-
           <DialogHeader>
             <DialogTitle>Novo Projeto</DialogTitle>
           </DialogHeader>
@@ -622,11 +620,6 @@ const priorityStyles: Record<
                 rows={3}
               />
             </div>
-
-            <div>
-  
-</div>
-
           </div>
 
           <div className="flex gap-2 pt-4">
@@ -649,114 +642,112 @@ const priorityStyles: Record<
 
       {/* Edit Project Modal */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-   <DialogContent className="max-w-sm sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden px-4">
+        <DialogContent className="max-w-sm sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden px-4">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2">
+                Editar Projeto
+                {selectedProject?.priority && (
+                  <Badge
+                    className={`${priorityStyles[selectedProject.priority]?.bgColor} ${
+                      priorityStyles[selectedProject.priority]?.textColor || "text-white"
+                    }`}
+                  >
+                    {priorityStyles[selectedProject.priority]?.label || selectedProject.priority}
+                  </Badge>
+                )}
+                <Badge variant="outline">{selectedProject?.status}</Badge>
+              </DialogTitle>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => selectedProject && handleDeleteProject(selectedProject.id)}
+                className='mt-4'>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
 
-    <DialogHeader>
-      <div className="flex items-center justify-between">
-        <DialogTitle className="flex items-center gap-2">
-  Editar Projeto
-  {selectedProject?.priority && (
-    <Badge
-      className={`${priorityStyles[selectedProject.priority]?.bgColor} ${
-        priorityStyles[selectedProject.priority]?.textColor || "text-white"
-      }`}
-    >
-      {priorityStyles[selectedProject.priority]?.label || selectedProject.priority}
-    </Badge>
-  )}
-  <Badge variant="outline">{selectedProject?.status}</Badge>
-</DialogTitle>
-        <Button
-          size="sm"
-          variant="destructive"
-          onClick={() => selectedProject && handleDeleteProject(selectedProject.id)}
-        className='mt-4'>
-          <Trash2 className="h-4 w-4 " />
-        </Button>
-      </div>
-    </DialogHeader>
+          {editData && (
+            <div className="space-y-6 p-4 md:p-6 max-w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Título</label>
+                  <Input
+                    className="w-full"
+                    value={editData.title || ''}
+                    onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Cliente</label>
+                  <Input
+                    className="w-full"
+                    value={editData.client || ''}
+                    onChange={(e) => setEditData({ ...editData, client: e.target.value })}
+                  />
+                </div>
+              </div>
 
-  {editData && (
-  <div className="space-y-6 p-4 md:p-6 max-w-full">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label className="text-sm font-medium text-gray-700">Título</label>
-        <Input
-          className="w-full"
-          value={editData.title || ''}
-          onChange={(e) => setEditData({ ...editData, title: e.target.value })}
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-gray-700">Cliente</label>
-        <Input
-          className="w-full"
-          value={editData.client || ''}
-          onChange={(e) => setEditData({ ...editData, client: e.target.value })}
-        />
-      </div>
-    </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Data de Entrega</label>
+                  <Input
+                    type="date"
+                    className="w-full"
+                    value={editData.dueDate || ''}
+                    onChange={(e) => setEditData({ ...editData, dueDate: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Prioridade</label>
+                  <Select
+                    value={editData.priority || 'media'}
+                    onValueChange={(value: 'alta' | 'media' | 'baixa') =>
+                      setEditData({ ...editData, priority: value })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione a prioridade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="alta">Alta</SelectItem>
+                      <SelectItem value="media">Média</SelectItem>
+                      <SelectItem value="baixa">Baixa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label className="text-sm font-medium text-gray-700">Data de Entrega</label>
-        <Input
-          type="date"
-          className="w-full"
-          value={editData.dueDate || ''}
-          onChange={(e) => setEditData({ ...editData, dueDate: e.target.value })}
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium text-gray-700">Prioridade</label>
-        <Select
-          value={editData.priority || 'media'}
-          onValueChange={(value: 'alta' | 'media' | 'baixa') =>
-            setEditData({ ...editData, priority: value })
-          }
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Selecione a prioridade" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="alta">Alta</SelectItem>
-            <SelectItem value="media">Média</SelectItem>
-            <SelectItem value="baixa">Baixa</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Descrição</label>
+                <Textarea
+                  rows={3}
+                  className="w-full"
+                  value={editData.description || ''}
+                  onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                />
+              </div>
 
-    <div>
-      <label className="text-sm font-medium text-gray-700">Descrição</label>
-      <Textarea
-        rows={3}
-        className="w-full"
-        value={editData.description || ''}
-        onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-      />
-    </div>
-
-    <div className="flex flex-col sm:flex-row gap-2 pt-4">
-      <Button
-        onClick={() => setShowEditModal(false)}
-        variant="outline"
-        className="flex-1 w-full sm:w-auto"
-      >
-        Fechar
-      </Button>
-      <Button
-        onClick={handleEditSave}
-        className="flex-1 w-full sm:w-auto bg-black text-white hover:bg-gray-800"
-      >
-        Salvar Alterações
-      </Button>
-    </div>
-  </div>
-)}
-
-  </DialogContent>
-</Dialog>
+              <div className="flex flex-col sm:flex-row gap-2 pt-4">
+                <Button
+                  onClick={() => setShowEditModal(false)}
+                  variant="outline"
+                  className="flex-1 w-full sm:w-auto"
+                >
+                  Fechar
+                </Button>
+                <Button
+                  onClick={handleEditSave}
+                  className="flex-1 w-full sm:w-auto bg-black text-white hover:bg-gray-800"
+                >
+                  Salvar Alterações
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -13,25 +13,25 @@ import {
   DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useAppContext } from '../contexts/AppContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useApp } from '../contexts/AppContext';
+import { useSupabaseAuth } from '../contexts/SupabaseAuthContext';
 import { usePrivacy } from '../contexts/PrivacyContext';
 import JobEditor from './JobEditor';
 import { toast } from '@/hooks/use-toast';
 import { generateJobPDF } from '../utils/pdfGenerator';
 
 const RecentJobs = () => {
-  const { jobs, deleteJob } = useAppContext();
-  const { userData, user } = useAuth();
+  const { jobs, deleteJob } = useApp();
+  const { user, profile } = useSupabaseAuth();
   const { formatValue } = usePrivacy();
   const [editingJob, setEditingJob] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
-    const { currentTheme } = useTheme();
+  const { currentTheme } = useTheme();
 
   console.log('🔍 RecentJobs - Debug inicial:', {
     jobsCount: jobs.length,
     userId: user?.id,
-    userData: userData ? 'presente' : 'ausente'
+    userData: profile ? 'presente' : 'ausente'
   });
 
   const recentJobs = jobs.slice(0, 3);
@@ -85,7 +85,7 @@ const RecentJobs = () => {
         return;
       }
 
-      await generateJobPDF(job, userData);
+      await generateJobPDF(job, profile);
       toast({
         title: "PDF Gerado",
         description: "O PDF do orçamento foi gerado com sucesso.",
